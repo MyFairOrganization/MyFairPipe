@@ -26,7 +26,10 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${{ secrets.DEPLOY_HOST }} << 'EOF'
             set -e
-            cd /mepipe || git clone git@github.com:MyFairOrganization/MyFairPipe.git /mepipe
+            if [ ! -d /mepipe/.git ]; then
+              rm -rf /mepipe
+              git clone git@github.com:MyFairOrganization/MyFairPipe.git /mepipe
+            fi
             cd /mepipe
             git pull
             docker compose up -d
