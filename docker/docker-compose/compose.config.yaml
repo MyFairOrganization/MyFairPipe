@@ -1,0 +1,15 @@
+volumes:
+  rabbitmq_data:
+  minio_data:
+  postgres_data:
+  redis_data:
+  elastic_data:
+
+networks:
+  external-network:
+    name: external-network
+    driver: bridge
+
+  internal-network:
+    name: internal-network
+    internal: true
