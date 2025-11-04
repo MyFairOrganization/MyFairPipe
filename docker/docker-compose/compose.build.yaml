@@ -1,0 +1,43 @@
+services:
+  python-base-image:
+    profiles: ["builder"]
+    build:
+      context: ../..
+      dockerfile: ../dockerfiles/python-base.Dockerfile
+    image: mepipe.tail0e128.ts.net:5000/python-base:latest
+
+  transcription-worker-image:
+    profiles: ["builder"]
+    build:
+      context: ../..
+      dockerfile: ../dockerfiles/worker.Dockerfile
+      args:
+        REQUIREMENTS: dockerfiles/requirements/transcription-requirements.txt
+        WORKER: Pipes/Subtitles/worker/worker.py
+    depends_on:
+      python-base-image:
+        condition: service_completed_successfully
+    image: mepipe.tail0e128.ts.net:5000/transcription-worker:latest
+
+  resolution-worker-image:
+    profiles: ["builder"]
+    build:
+      context: ../..
+      dockerfile: ../dockerfiles/worker.Dockerfile
+      args:
+        REQUIREMENTS: dockerfiles/requirements/resolution-requirements.txt
+        WORKER: Pipes/Resolution/worker/worker.py
+    depends_on:
+      python-base-image:
+        condition: service_completed_successfully
+    image: mepipe.tail0e128.ts.net:5000/resolution-worker:latest
+
+  pipe-manager-image:
+    profiles: ["builder"]
+    build:
+      context: ../..
+      dockerfile: ../dockerfiles/manager.Dockerfile
+    depends_on:
+      python-base-image:
+        condition: service_completed_successfully
+    image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
