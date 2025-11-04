@@ -8,11 +8,17 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "16.0.1"
+    "@prisma/client": "^6.18.0",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.2",
+    "next": "16.0.1",
+    "prisma": "^6.18.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
-    "@types/react": "^19"
+    "@types/react": "^19",
+    "typescript": "^5"
   }
 }
