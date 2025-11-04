@@ -29,5 +29,5 @@ jobs:
             cd /mepipe || git clone git@github.com:MyFairOrganization/MyFairPipe.git /mepipe
             cd /mepipe
             git pull
-            docker compose up -d
+            docker compose --profiles prod up --build -d
           EOF
