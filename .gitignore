@@ -48,3 +48,5 @@ dist-ssr
 # ==========================================
 # Deployment artifacts
 /deploy/*.log
+/backend/package-lock.json
+/frontend/package-lock.json
