@@ -2,15 +2,98 @@ include:
   - docker/docker-compose/compose.build.yaml
   - docker/docker-compose/compose.config.yaml
   - docker/docker-compose/compose.services.yaml
+
 services:
+  # === PROD PROFILE ===
+  nginx:
+    build:
+      context: ./configuration/nginx
+      target: prod
+    container_name: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - vuejs
+      - nextjs
+    profiles: [ "prod" ]
+    networks:
+      - external-network
 
-  # Frontend
+  vuejs:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: prod
+    container_name: vuejs_app
+    ports:
+      - "8080:80"
+    restart: always
+    profiles: [ "prod" ]
 
-  # Backend
+  nextjs:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: prod
+    container_name: nextjs_app
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+    restart: always
+    profiles: [ "prod" ]
 
-  # CDN
+  # === DEV PROFILE ===
 
-  # Pipes
+  nginx-dev:
+    build:
+      context: ./configuration/nginx
+      target: dev
+    container_name: nginx_dev
+    ports:
+      - "80:80"
+    depends_on:
+      - vuejs-dev
+      - nextjs-dev
+    profiles: [ "dev" ]
+    networks:
+      - external-network
+
+  vuejs-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: vuejs_dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    profiles: [ "dev" ]
+    networks:
+      - external-network
+
+  nextjs-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: nextjs_dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    profiles: [ "dev" ]
+    networks:
+      - external-network
+
+  # === PIPE SERVICES ===
   transcription-manager:
     image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
     container_name: transcription-manager
@@ -28,13 +111,10 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    networks:
-      - internal-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./Pipes/Subtitles/manager.py:/app/manager.py:ro
     working_dir: /app
-
 
   resolution-manager:
     image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
@@ -53,8 +133,6 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-    networks:
-      - internal-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./Pipes/Resolution/manager.py:/app/manager.py:ro
