@@ -1,0 +1,24 @@
+name: Notify Discord
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send PR notification to Discord
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          embed-title: "📌 Pull Request on main"
+          embed-url: "${{ github.event.pull_request.html_url }}"
+          embed-description: "${{ github.event.pull_request.title }}"
+          embed-author-name: "${{ github.event.pull_request.user.login }}"
+          embed-author-url: "https://github.com/${{ github.event.pull_request.user.login }}"
+          embed-author-icon-url: "${{ github.event.pull_request.user.avatar_url }}"
+          embed-footer-text: "PR #${{ github.event.pull_request.number }} • ${ { github.event.action } }"
+          embed-timestamp: "${{ github.event.pull_request.created_at }}"

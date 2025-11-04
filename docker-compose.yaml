@@ -1,0 +1,61 @@
+include:
+  - docker/docker-compose/compose.build.yaml
+  - docker/docker-compose/compose.config.yaml
+  - docker/docker-compose/compose.services.yaml
+services:
+
+  # Frontend
+
+  # Backend
+
+  # CDN
+
+  # Pipes
+  transcription-manager:
+    image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
+    container_name: transcription-manager
+    environment:
+      RABBIT_HOST: ${RABBIT_HOST}
+      RABBIT_PORT: ${RABBIT_PORT}
+      RABBIT_USER: ${RABBIT_USER}
+      RABBIT_PASS: ${RABBIT_PASS}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_USER}
+      MINIO_SECRET_KEY: ${MINIO_PASSWORD}
+      DOCKER_HOST: unix:///var/run/docker.sock
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - internal-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./Pipes/Subtitles/manager.py:/app/manager.py:ro
+    working_dir: /app
+
+
+  resolution-manager:
+    image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
+    container_name: resolution-manager
+    environment:
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_USER: admin
+      RABBIT_PASS: admin
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      DOCKER_HOST: unix:///var/run/docker.sock
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - internal-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./Pipes/Resolution/manager.py:/app/manager.py:ro
+    working_dir: /app
