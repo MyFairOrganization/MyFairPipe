@@ -1,4 +1,4 @@
-name: Notify Discord on PR to main
+name: Notify Discord
 
 on:
   pull_request:
