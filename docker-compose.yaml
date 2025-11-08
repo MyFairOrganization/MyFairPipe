@@ -55,6 +55,8 @@ services:
     depends_on:
       - vuejs-dev
       - nextjs-dev
+    volumes:
+      - ./configuration/nginx/default.dev.conf:/etc/nginx/conf.d/default.conf
     profiles: [ "dev" ]
     networks:
       - external-network
@@ -89,13 +91,22 @@ services:
       - /app/node_modules
     environment:
       NODE_ENV: development
+      NEXT_WATCH_MODE: poll
+      NEXT_WATCH_POLL_INTERVAL: 1000
+      RABBIT_HOST: ${RABBIT_HOST}
+      RABBIT_PORT: ${RABBIT_PORT}
+      RABBIT_USER: ${RABBIT_USER}
+      RABBIT_PASS: ${RABBIT_PASS}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_USER}
+      MINIO_SECRET_KEY: ${MINIO_PASSWORD}
     profiles: [ "dev" ]
     networks:
       - external-network
 
   # === PIPE SERVICES ===
   transcription-manager:
-    image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
+    image: pipe-manager:latest
     container_name: transcription-manager
     environment:
       RABBIT_HOST: ${RABBIT_HOST}
@@ -106,6 +117,7 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_USER}
       MINIO_SECRET_KEY: ${MINIO_PASSWORD}
       DOCKER_HOST: unix:///var/run/docker.sock
+      WORKER_SCRIPT_HOST_PATH: F:\MyFairPipe\Pipes\Subtitles\worker\worker.py
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -115,9 +127,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./Pipes/Subtitles/manager.py:/app/manager.py:ro
     working_dir: /app
+    networks:
+      - internal-network
 
   resolution-manager:
-    image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
+    image: pipe-manager:latest
     container_name: resolution-manager
     environment:
       RABBIT_HOST: rabbitmq
@@ -128,6 +142,7 @@ services:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
       DOCKER_HOST: unix:///var/run/docker.sock
+      WORKER_SCRIPT_HOST_PATH: F:\MyFairPipe\Pipes\Resolution\worker\worker.py
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -137,3 +152,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./Pipes/Resolution/manager.py:/app/manager.py:ro
     working_dir: /app
+    networks:
+      - internal-network

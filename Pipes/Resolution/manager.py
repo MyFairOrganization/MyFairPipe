@@ -5,15 +5,17 @@ import signal
 import sys
 import time
 
-import docker
 import pika
 from pika.exceptions import AMQPConnectionError
+
+import docker
 
 # --- Configuration ---
 RABBIT_HOST = os.getenv("RABBIT_HOST", "rabbitmq")
 RABBIT_PORT = int(os.getenv("RABBIT_PORT", 5672))
 RABBIT_USER = os.getenv("RABBIT_USER", "guest")
 RABBIT_PASS = os.getenv("RABBIT_PASS", "guest")
+WORKER_SCRIPT_HOST_PATH = os.getenv("WORKER_SCRIPT_HOST_PATH")
 QUEUE = "resolution_jobs"
 
 # --- Logging setup ---
@@ -52,6 +54,9 @@ def wait_for_rabbitmq(max_retries: int = 60, delay: int = 5):
 
 def start_resolution(job_id: str, object_key: str):
 	"""Start a worker container for resolution job."""
+	if not WORKER_SCRIPT_HOST_PATH:
+		raise ValueError("WORKER_SCRIPT_HOST_PATH environment variable must be set")
+
 	env = {
 		"JOB_ID": job_id,
 		"OBJECT_KEY": object_key,
@@ -66,10 +71,17 @@ def start_resolution(job_id: str, object_key: str):
 
 	try:
 		container = docker_client.containers.run(
-			image="mepipe.tail0e128.ts.net:5000/resolution-worker:latest",
+			image="resolution-worker:latest",
 			environment=env,
 			network="internal-network",
 			name=container_name,
+			volumes={
+				WORKER_SCRIPT_HOST_PATH: {
+					"bind": "/app/worker.py",
+					"mode": "ro",
+				}
+			},
+			command=["python", "/app/worker.py"],
 			detach=True,
 			remove=True,
 		)
