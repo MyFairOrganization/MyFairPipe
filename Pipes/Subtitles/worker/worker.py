@@ -136,8 +136,18 @@ def main():
 			f.write("#EXT-X-ENDLIST\n")
 
 		subs_prefix = f"{JOB_ID}/subtitles"
-		minio.fput_object(result_bucket, f"{subs_prefix}/subs_en.vtt", local_vtt)
-		minio.fput_object(result_bucket, f"{subs_prefix}/subs_en.m3u8", local_subs_m3u8)
+		minio.fput_object(
+			result_bucket,
+			f"{subs_prefix}/{os.path.basename(local_vtt)}",
+			local_vtt,
+			content_type="text/vtt"
+		)
+		minio.fput_object(
+			result_bucket,
+			f"{subs_prefix}/subs_en.m3u8",
+			local_subs_m3u8,
+			content_type="application/vnd.apple.mpegurl"
+		)
 		logging.info("Uploaded VTT and subtitles playlist to MinIO")
 
 		master_local = os.path.join(tmp_dir, "master.m3u8")
@@ -153,7 +163,7 @@ def main():
 		subtitle_entry = (
 			'#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="English",'
 			'DEFAULT=YES,AUTOSELECT=YES,LANGUAGE="en",'
-			f'URI="{subs_prefix}/subs_en.m3u8"\n'
+			f'URI="subtitles/subs_en.m3u8"\n'
 		)
 
 		with open(master_local, "r+", encoding="utf-8") as f:
@@ -169,7 +179,12 @@ def main():
 				f.truncate()
 				logging.info("Added subtitles entry to master.m3u8")
 
-		minio.fput_object(result_bucket, master_key, master_local)
+		minio.fput_object(
+			result_bucket,
+			master_key,
+			master_local,
+			content_type="application/vnd.apple.mpegurl"
+		)
 		logging.info(f"Uploaded updated master.m3u8 to {result_bucket}/{master_key}")
 
 	except Exception:
