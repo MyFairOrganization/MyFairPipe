@@ -5,25 +5,26 @@ import { createIMG, createVID } from './Content.vue'
 
 <template>
   <div class="home">
-    <h1>Home Page</h1>
     <div id="videos">
-      <component v-for="i in 6" :key="i" :is="createIMG('https://static.vecteezy.com/ti/gratis-vektor/p1/7160087-video-symbol-video-symbol-play-video-zeichen-kostenlos-vektor.jpg', 'testVideo')" />
+      <component
+        v-for="i in 6"
+        :key="i"
+        :is="
+          createIMG(
+            'https://static.vecteezy.com/ti/gratis-vektor/p1/7160087-video-symbol-video-symbol-play-video-zeichen-kostenlos-vektor.jpg',
+            'testVideo' + i,
+          )
+        "
+      />
     </div>
   </div>
 </template>
 
 <style>
-@media (min-width: 1024px) {
-  .home {
-    min-height: 100vh;
-    display: block;
-    align-items: center;
-  }
-}
-
 .thumbnail {
   width: 320px;
   height: 180px;
+  border-radius: 15px;
 }
 
 .video-block p {
@@ -31,11 +32,10 @@ import { createIMG, createVID } from './Content.vue'
 }
 
 #videos {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 items per row */
+  gap: 40px; /* space between items */
   width: 100%;
-  gap: 20px;
-  align-items: flex-start;
+  align-items: start; /* align items to the top */
 }
 </style>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { createVID } from "./Content.vue";
+import { createVID } from './Content.vue'
 
 const route = useRoute()
 const props = { id: route.query.id as string, desc: route.query.desc as string }
@@ -13,5 +13,7 @@ const props = { id: route.query.id as string, desc: route.query.desc as string }
 </template>
 
 <style scoped>
-
+video {
+  border-radius: 20px;
+}
 </style>

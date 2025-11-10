@@ -4,34 +4,32 @@ import { RouterLink, RouterView } from 'vue-router'
 
 <template>
   <div>
-    <nav>
-      <RouterLink to="/home">Home</RouterLink>
-      <RouterLink to="/player">Videoplayer</RouterLink>
+    <nav class="header">
+      <div class="row">
+        <p>MyFairPipe</p>
+        <RouterLink to="/home">Home</RouterLink>
+      </div>
     </nav>
 
-    <RouterView />
+    <main class="content">
+      <RouterView />
+    </main>
   </div>
 </template>
 
 <style scoped>
 header {
   line-height: 1.5;
-  max-height: 100vh;
 }
 
 nav {
   width: 100%;
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
-  margin-top: 2rem;
 }
 
 nav a.router-link-exact-active {
   color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
 }
 
 nav a {
@@ -44,24 +42,23 @@ nav a:first-of-type {
   border: 0;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  color: black;
+  padding: 2.5rem 2rem;
+}
 
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
 
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.content {
+  margin-top: 100px;
 }
 </style>
