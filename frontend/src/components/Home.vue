@@ -1,30 +1,6 @@
 <script setup lang="ts">
 import { h } from 'vue'
-
-function createIMG(path, desc) {
-  return h('div', { class: 'video-block' }, [
-    h('img', {
-      src: path,
-      width: '320',
-      height: '180',
-      class: 'thumbnail'
-    }),
-    h('p', { class: 'description' }, desc),
-  ])
-}
-
-function createVID(path, desc) {
-  return h('div', { class: 'video-block' }, [
-    h('video', {
-      src: path,
-      width: '320',
-      height: '180',
-      class: 'video',
-      controls: true
-    }),
-    h('p', { class: 'description' }, desc),
-  ])
-}
+import { createIMG, createVID } from './Content.vue'
 </script>
 
 <template>
