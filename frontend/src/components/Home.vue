@@ -7,7 +7,7 @@ import { createIMG, createVID } from './Content.vue'
   <div class="home">
     <div id="videos">
       <component
-        v-for="i in 6"
+        v-for="i in 24"
         :key="i"
         :is="
           createIMG(
@@ -27,7 +27,11 @@ import { createIMG, createVID } from './Content.vue'
   border-radius: 15px;
 }
 
-.video-block p {
+.image-block:hover {
+  color: #98C1D9;
+}
+
+.video-block,image-block p {
   text-align: left;
 }
 

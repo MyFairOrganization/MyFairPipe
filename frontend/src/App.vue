@@ -6,7 +6,7 @@ import { RouterLink, RouterView } from 'vue-router'
   <div>
     <nav class="header">
       <div class="row">
-        <p>MyFairPipe</p>
+        <RouterLink to="/home">MyFairPipe</RouterLink>
         <RouterLink to="/home">Home</RouterLink>
       </div>
     </nav>
@@ -14,6 +14,10 @@ import { RouterLink, RouterView } from 'vue-router'
     <main class="content">
       <RouterView />
     </main>
+
+    <nav class="footer">
+      <h2>MyFairPipe</h2>
+    </nav>
   </div>
 </template>
 
@@ -59,6 +63,15 @@ nav a:first-of-type {
 }
 
 .content {
-  margin-top: 100px;
+  margin-top: 120px;
+}
+
+.footer {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  color: black;
+  padding: 2.5rem 2rem;
 }
 </style>

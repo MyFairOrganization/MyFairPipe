@@ -10,18 +10,24 @@ const imagePath =
 export function createIMG(id, desc) {
   const router = useRouter()
 
-  return h('div', { class: 'video-block' }, [
-    h('img', {
-      src: imagePath.replace('%ID', id),
-      width: '320',
-      height: '180',
-      class: 'thumbnail',
+  return h(
+    'div',
+    {
+      class: 'image-block',
       onClick(event) {
         router.push({ name: 'player', query: { desc: desc, id: id } })
-      },
-    }),
-    h('p', { class: 'description' }, desc),
-  ])
+      }
+    },
+    [
+      h('img', {
+        src: imagePath.replace('%ID', id),
+        width: '320',
+        height: '180',
+        class: 'thumbnail',
+      }),
+      h('p', { class: 'description' }, desc),
+    ],
+  )
 }
 
 export function createVID(id, desc) {
