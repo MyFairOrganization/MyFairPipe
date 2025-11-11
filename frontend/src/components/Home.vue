@@ -37,9 +37,9 @@ import { createIMG, createVID } from './Content.vue'
 
 #videos {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 items per row */
-  gap: 40px; /* space between items */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
   width: 100%;
-  align-items: start; /* align items to the top */
+  align-items: start;
 }
 </style>

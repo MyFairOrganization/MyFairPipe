@@ -13,6 +13,31 @@ const router = createRouter({
       name: 'player',
       component: () => import('../components/Videoplayer.vue'),
     },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../components/Login.vue'),
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('../components/Register.vue'),
+    },
+    {
+      path: '/upload',
+      name: 'upload',
+      component: () => import('../components/Upload.vue'),
+    },
+    {
+      path: '/user',
+      name: 'user',
+      component: () => import('../components/User.vue'),
+    },
+    {
+      path: '/edituser',
+      name: 'edituser',
+      component: () => import('../components/EditUser.vue'),
+    },
   ],
 })
 
