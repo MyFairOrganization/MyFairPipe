@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { h } from 'vue'
-import { createIMG, createVID } from './Content.vue'
+import { createIMG } from './Content.vue'
 </script>
 
 <template>
   <div class="home">
-    <div id="videos">
+    <div id="thumbnails">
       <component
         v-for="i in 24"
         :key="i"
@@ -24,18 +23,15 @@ import { createIMG, createVID } from './Content.vue'
 .thumbnail {
   width: 320px;
   height: 180px;
+  object-fit: cover;
   border-radius: 15px;
 }
 
 .image-block:hover {
-  color: #98C1D9;
+  color: #98c1d9;
 }
 
-.video-block,image-block p {
-  text-align: left;
-}
-
-#videos {
+#thumbnails {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 40px;
