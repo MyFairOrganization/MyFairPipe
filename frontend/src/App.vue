@@ -29,6 +29,7 @@ router.push('/home')
 <style scoped>
 header {
 	line-height: 1.5;
+	z-index: 10000000000000000000000000;
 }
 
 nav {

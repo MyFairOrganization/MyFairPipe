@@ -10,15 +10,13 @@ const imagePath =
 export function createIMG(id, desc) {
 	const router = useRouter()
 
-	return h(
-		'div',
-		{
+	return h('div', {
 			class: 'image-block',
+			aspectRatio: '16 / 9',
 			onClick(event) {
 				router.push({ name: 'player', query: { desc: desc, id: id } })
 			},
-		},
-		[
+		}, [
 			h('img', {
 				src: imagePath.replace('%ID', id),
 				width: '320',
@@ -32,14 +30,22 @@ export function createIMG(id, desc) {
 
 export function createVID(id, desc) {
 	return h('div', { class: 'video-block' }, [
-		h('video', {
-			src: videoPath,
-			width: '150%',
-			height: 'auto',
-			class: 'video',
-			controls: true,
-		}),
-		h('h1', { class: 'description' }, desc),
+		h(
+			'video', {
+				width: '150%',
+				aspectRatio: '16 / 9',
+				height: 'auto',
+				class: 'video',
+				controls: true,
+			}, [
+				h('source', {
+					src: videoPath,
+					//type: 'application/x-mpegURL',
+					type: 'video/mp4'
+				}),
+			],
+		),
+		h('h2', { class: 'description' }, desc),
 	])
 }
 </script>
