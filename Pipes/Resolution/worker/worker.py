@@ -85,17 +85,17 @@ def get_video_info(src: str) -> Dict:
 
 
 def filter_renditions_by_source(
-		source_height: int, renditions: Dict
+		source_width: int, renditions: Dict
 ) -> Dict[str, Dict]:
 	"""Only include renditions that are equal to or smaller than source."""
 	filtered = {}
 	for label, cfg in renditions.items():
 		target_height = int(cfg["size"].split(":")[1])
-		if target_height <= source_height:
+		if target_height <= source_width:
 			filtered[label] = cfg
 		else:
 			logging.info(
-				f"Skipping {label} (source is {source_height}p, target is {target_height}p)"
+				f"Skipping {label} (source is {source_width}p, target is {target_height}p)"
 			)
 	return filtered
 
@@ -175,7 +175,7 @@ def create_master_playlist(
 				f'#EXT-X-STREAM-INF:BANDWIDTH={bitrate_num},'
 				f'RESOLUTION={width}x{height}\n'
 			)
-			f.write(f"{label}.m3u8\n")
+			f.write(f"{label}/{label}.m3u8\n")
 
 	logging.info(f"Created master playlist: {master_file}")
 	return master_file
@@ -190,7 +190,12 @@ def upload_hls_files(
 	if os.path.exists(master_file):
 		object_path = os.path.join(base_name, "master.m3u8")
 		logging.info(f"Uploading master playlist -> {result_bucket}/{object_path}")
-		minio.fput_object(result_bucket, object_path, master_file)
+		minio.fput_object(
+			result_bucket,
+			object_path,
+			master_file,
+			content_type="application/vnd.apple.mpegurl"
+		)
 
 	# Upload each rendition's files to its own folder
 	for label in renditions.keys():
@@ -200,20 +205,29 @@ def upload_hls_files(
 		if os.path.exists(playlist_file):
 			object_path = os.path.join(base_name, label, f"{label}.m3u8")
 			logging.info(f"Uploading {label} playlist -> {result_bucket}/{object_path}")
-			minio.fput_object(result_bucket, object_path, playlist_file)
+			minio.fput_object(
+				result_bucket,
+				object_path,
+				playlist_file,
+				content_type="application/vnd.apple.mpegurl"
+			)
 
 		# Upload all TS segments for this rendition
 		for root, _, files in os.walk(output_dir):
 			for file in files:
 				if file.startswith(f"{label}_") and file.endswith(".ts"):
 					local_path = os.path.join(root, file)
-					# Rename segment to match pattern: 1080p-000.ts
 					segment_num = file.replace(f"{label}_", "").replace(".ts", "")
-					new_filename = f"{label}-{segment_num}.ts"
+					new_filename = f"{label}_{segment_num}.ts"
 					object_path = os.path.join(base_name, label, new_filename)
 
 					logging.info(f"Uploading segment -> {result_bucket}/{object_path}")
-					minio.fput_object(result_bucket, object_path, local_path)
+					minio.fput_object(
+						result_bucket,
+						object_path,
+						local_path,
+						content_type="video/mp2t"
+					)
 
 
 def main():
@@ -251,7 +265,7 @@ def main():
 			f"duration: {video_info['duration']}s"
 		)
 
-		renditions = filter_renditions_by_source(video_info["height"], renditions)
+		renditions = filter_renditions_by_source(video_info["width"], renditions)
 
 		if not renditions:
 			logging.warning("No suitable renditions after filtering by source resolution")
@@ -274,7 +288,12 @@ def main():
 			object_name = f"{label}.mp4"
 			object_path = os.path.join(base_name, label, object_name)
 			logging.info(f"Uploading {label} MP4 -> {upload_bucket}/{object_path}")
-			minio.fput_object(result_bucket, object_path, local_path)
+			minio.fput_object(
+				result_bucket,
+				object_path,
+				local_path,
+				content_type="video/mp4"
+			)
 			logging.info(f"{label} MP4 uploaded.")
 
 		# Generate HLS renditions if enabled
@@ -303,7 +322,7 @@ def main():
 	finally:
 		if os.path.exists(tmp_root):
 			shutil.rmtree(tmp_root)
-			logging.info("Cleaned up temporary files")
+		logging.info("Cleaned up temporary files")
 
 
 if __name__ == "__main__":

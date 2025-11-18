@@ -1,5 +1,3 @@
--- PostgreSQL Database Schema for Media Platform
-
 -- Enable UUID extension (optional, if you want to use UUIDs)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -51,7 +49,6 @@ CREATE TABLE Metadata (
 CREATE TABLE Video (
     video_id SERIAL PRIMARY KEY,
     path VARCHAR(500) NOT NULL,
-    minio_path VARCHAR(500),
     duration INTEGER, -- in seconds
     title VARCHAR(255) NOT NULL,
     description TEXT,
