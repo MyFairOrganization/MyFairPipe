@@ -106,6 +106,7 @@ services:
     profiles: [ "dev" ]
     networks:
       - external-network
+      - internal-network
 
   # === PIPE SERVICES ===
   transcription-manager:

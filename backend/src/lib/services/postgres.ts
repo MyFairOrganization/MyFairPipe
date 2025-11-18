@@ -1,7 +1,5 @@
 import {Pool} from 'pg';
 
-require('dotenv').config();
-
 const user = process.env.POSTGRES_USER;
 const host = "postgres";
 const port = 5432;
