@@ -42,9 +42,16 @@ dist-ssr
 # Ignore backend build and dependencies
 /backend/node_modules
 /backend/.next
+/backend/.next-internal
 
 # ==========================================
 # Miscellaneous
 # ==========================================
 # Deployment artifacts
 /deploy/*.log
+/backend/package-lock.json
+/frontend/package-lock.json
+/backend/src/app/api-docs/
+/backend/The Man Who Revolutionized Computer Science With Math - Quanta Magazine (1080p, h264, youtube).mp4
+/backend/I Ran a Chess Programming Tournament, Here's How it Went! - Sebastian Lague (1080p, h264, youtube).mp4
+/test-vids/
