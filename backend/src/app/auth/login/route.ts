@@ -1,26 +1,50 @@
-import { NextRequest, NextResponse } from "next/server";
-import prisma from "../../lib/prisma";
-import { verifyPassword, generateToken } from "../auth.utils";
+import {NextResponse} from "next/server";
+import {connectionPool} from "@/lib/services/postgres";
+import bcrypt from "bcrypt";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
     try {
-        const body = await req.json();
-        const { email, password } = body;
+        const {email, password} = await req.json();
 
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) {
-            return NextResponse.json({ error: "User nicht gefunden" }, { status: 404 });
+        if (!email || !password) {
+            return NextResponse.json({error: "Missing email or password"}, {status: 400});
         }
 
-        const isValid = await verifyPassword(password, user.password);
-        if (!isValid) {
-            return NextResponse.json({ error: "Ungültiges Passwort" }, { status: 401 });
+        // === Fetch user ===
+        const result = await connectionPool.query(
+            `SELECT user_id,
+                    user_email,
+                    hashed_password
+             FROM "User"
+             WHERE user_email = $1`,
+            [email]
+        );
+
+        if (result.rowCount === 0) {
+            return NextResponse.json({error: "User not found"}, {status: 404});
         }
 
-        const token = generateToken(user.id.toString());
-        return NextResponse.json({ token });
+        const user = result.rows[0];
+
+        // === Verify password ===
+        const valid = await bcrypt.compare(password, user.hashed_password);
+
+        if (!valid) {
+            return NextResponse.json({error: "Invalid password"}, {status: 401});
+        }
+
+        // Remove the hashed password for safety
+        delete user.hashed_password;
+
+        return NextResponse.json(
+            {
+                message: "Login successful",
+                user,
+            },
+            {status: 200}
+        );
     } catch (err) {
         console.error(err);
-        return NextResponse.json({ error: "Fehler beim Login" }, { status: 500 });
+        return NextResponse.json({error: "Server error"}, {status: 500});
     }
 }
