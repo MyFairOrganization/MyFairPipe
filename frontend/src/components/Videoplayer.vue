@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { createVID } from './Content.vue'
+import { createVID, videoPath } from './Content.vue'
 
 const route = useRoute()
 const props = { id: route.query.id as string, desc: route.query.desc as string }
@@ -12,6 +12,13 @@ function like() {
 function dislike() {
 	console.log(props.id + ' disliked!')
 }
+
+function share() {
+	console.log(props.id + ' shared!')
+}
+function download(){
+	console.log(props.id + ' downloaded!')
+}
 </script>
 
 <template>
@@ -21,6 +28,8 @@ function dislike() {
 	<div class="interactivePanel">
 		<input class="interactive" id="like" type="image" src="/like.svg" v-on:click="like()" />
 		<input class="interactive" id="dislike" type="image" src="/dislike.svg" v-on:click="dislike()" />
+		<input class="interactive" id="share" type="image" src="/share.svg" v-on:click="share()" />
+		<input class="interactive" id="download" type="image" src="/download.svg" v-on:click="download()" />
 	</div>
 </template>
 
