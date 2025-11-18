@@ -4,26 +4,27 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-router.push('/home')
+router.push('/home');
 </script>
 
 <template>
-	<div>
-		<nav class="header">
-			<div class="row">
-				<RouterLink to="/home">MyFairPipe</RouterLink>
-				<RouterLink to="/home">Home</RouterLink>
-			</div>
-		</nav>
+  <div>
+    <nav class="header">
+      <div class="row">
+        <RouterLink to="/home">MyFairPipe</RouterLink>
+        <RouterLink to="/home">Home</RouterLink>
+        <RouterLink to="/login">Login</RouterLink>
+      </div>
+    </nav>
 
-		<main class="content">
-			<RouterView />
-		</main>
+    <main class="content">
+      <RouterView />
+    </main>
 
-		<nav class="footer">
-			<h2>MyFairPipe</h2>
-		</nav>
-	</div>
+    <nav class="footer">
+      <h2>MyFairPipe</h2>
+    </nav>
+  </div>
 </template>
 
 <style scoped>
@@ -53,31 +54,31 @@ nav a:first-of-type {
 }
 
 .header {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	background: white;
-	color: black;
-	padding: 2.5rem 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  color: black;
+  padding: 2.5rem 2rem;
 }
 
 .row {
-	display: flex;
-	flex-direction: row;
-	gap: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
 }
 
 .content {
-	margin-top: 120px;
+  margin-top: 120px;
 }
 
 .footer {
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	background: white;
-	color: black;
-	padding: 2.5rem 2rem;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  color: black;
+  padding: 2.5rem 2rem;
 }
 </style>
