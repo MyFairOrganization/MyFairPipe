@@ -19,7 +19,7 @@ services:
   resolution-worker-image:
     build:
       context: ../..
-      dockerfile: docker/dockerfiles/transcriber.Dockerfile
+      dockerfile: docker/dockerfiles/resolution.Dockerfile
       args:
         WORKER: Pipes/Resolution/worker/worker.py
     depends_on:

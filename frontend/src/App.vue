@@ -29,27 +29,28 @@ router.push('/home');
 
 <style scoped>
 header {
-  line-height: 1.5;
+	line-height: 1.5;
+	z-index: 10000000000000000000000000;
 }
 
 nav {
-  width: 100%;
-  font-size: 14px;
-  text-align: center;
+	width: 100%;
+	font-size: 14px;
+	text-align: center;
 }
 
 nav a.router-link-exact-active {
-  color: var(--color-text);
+	color: var(--color-text);
 }
 
 nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+	display: inline-block;
+	padding: 0 1rem;
+	border-left: 1px solid var(--color-border);
 }
 
 nav a:first-of-type {
-  border: 0;
+	border: 0;
 }
 
 .header {
