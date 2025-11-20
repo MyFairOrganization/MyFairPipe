@@ -1,29 +1,40 @@
 import {NextResponse} from "next/server";
-import {minioClient, uploadBucket as bucket} from "@/lib/services/minio";
+import {createBucketIfNeeded, uploadBucket as bucket, uploadFileToMinio} from "@/lib/services/minio";
 import {randomUUID} from "crypto";
 import {sendMessage} from "@/lib/services/rabbitmq";
+import {connectionPool} from "@/lib/services/postgres";
+import * as MP4Box from "mp4box";
 
-// Ensure the MinIO bucket exists
-async function createBucketIfNeeded() {
-	const exists = await minioClient.bucketExists(bucket);
-	if (!exists) {
-		await minioClient.makeBucket(bucket, "us-east-1");
-	}
-}
+function getMp4Duration(buffer: Buffer): Promise<number> {
+	return new Promise((resolve, reject) => {
+		const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 
-// Upload file to MinIO
-async function uploadFileToMinio(filename: string, fileBuffer: Buffer, contentType: string) {
-	await minioClient.putObject(bucket, filename, fileBuffer, fileBuffer.length, {
-		"Content-Type": contentType,
+		const mp4boxFile = MP4Box.createFile();
+		mp4boxFile.onError = (e) => reject(e);
+
+		mp4boxFile.onReady = (info) => {
+			const seconds = info.duration / info.timescale;
+			resolve(Math.floor(seconds));
+		};
+
+		const ab = arrayBuffer as any;
+		ab.fileStart = 0;
+
+		mp4boxFile.appendBuffer(ab);
+		mp4boxFile.flush();
 	});
 }
 
-// Handle the file upload and message queuing
+
 export async function POST(req: Request) {
 	try {
 		const formData = await req.formData();
 
 		const file = formData.get("file") as File;
+
+		const title = formData.get("title") as string;
+		const description = formData.get("description") as string;
+		const age_restricted = formData.get("age_restricted") === "true";
 
 		if (!file) {
 			return NextResponse.json({error: "No file uploaded"}, {status: 400});
@@ -41,27 +52,56 @@ export async function POST(req: Request) {
 		const extension = file.name.split('.').pop() || 'mp4';
 		const filename = `${id}.${extension}`;
 
-		await createBucketIfNeeded();
-		await uploadFileToMinio(filename, buffer, file.type);
+		let duration: number | null = null;
+
+		if (file.type === "video/mp4" || file.name.endsWith(".mp4") || file.name.endsWith(".mov")) {
+			duration = await getMp4Duration(buffer);
+		}
+
+		await createBucketIfNeeded(bucket);
+		await uploadFileToMinio(filename, bucket, buffer, file.type);
 
 		const msg = {
-			job_id: id,
-			object_key: filename,
+			job_id: id, object_key: filename,
 		};
 
 		try {
-			await Promise.all([
-				sendMessage("resolution_jobs", JSON.stringify(msg)),
-				sendMessage("transcribe_jobs", JSON.stringify(msg)),
-			]);
+			await Promise.all([sendMessage("resolution_jobs", JSON.stringify(msg)), sendMessage("transcribe_jobs", JSON.stringify(msg)),]);
 		} catch (rabbitError) {
 			console.error("Error sending message to RabbitMQ:", rabbitError);
 			return NextResponse.json({error: "Failed to send message to RabbitMQ"}, {status: 500});
 		}
 
+		let metadata_id = randomUUID();
+
+		try {
+			await connectionPool.query(`
+            INSERT INTO metadata
+            VALUES ($1)
+		`, [metadata_id]);
+
+			await connectionPool.query(`
+                    INSERT INTO video(video_id, path, duration, title, description, is_age_restricted, tested, views, uploader, metadata_id)
+                    VALUES ($1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, $7, $8)`,
+				[
+					id,
+					"/video/" + id + "/master.m3u8",
+					duration,
+					title,
+					description,
+					age_restricted,
+					null, // Uploader ID
+					metadata_id
+				]
+			);
+		} catch (err) {
+			console.error("Error sending message to RabbitMQ:", err);
+			return NextResponse.json({error: err});
+		}
+
+
 		return NextResponse.json({
-			message: "Upload successful",
-			filename: filename
+			message: "Upload successful", filename: filename
 		});
 
 	} catch (error: any) {
