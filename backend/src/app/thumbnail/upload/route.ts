@@ -70,12 +70,12 @@ export async function POST(req: Request) {
 
 			await client.query(`
                 INSERT INTO photo (photo_id, path)
-                VALUES ($1, $2)`, [`${id}`, `${videoId}/thumbnails/${filename}`]);
+                VALUES ($1, $2)`, [id, `${videoId}/thumbnails/${filename}`]);
 			await client.query(`
                 INSERT INTO Thumbnail (thumbnail_id, photo_id, video_id, is_active)
-                VALUES ($1, $2, $3, $4)`, [`${id}`, `${id}`, `${videoId}`, false]);
+                VALUES ($1, $2, $3, $4)`, [id, id, videoId, false]);
 			await client.query("COMMIT");
-			return NextResponse.json({success: true});
+			return NextResponse.json({id: id, success: true}, {status: 200});
 		} catch (err) {
 			await client.query("ROLLBACK");
 			console.error("Database error:", err);

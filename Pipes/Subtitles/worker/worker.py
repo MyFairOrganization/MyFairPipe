@@ -111,7 +111,7 @@ def main():
 	tmp_dir = tempfile.mkdtemp()
 	local_in = os.path.join(tmp_dir, os.path.basename(OBJECT_KEY))
 	local_srt = os.path.join(tmp_dir, f"{JOB_ID}.srt")
-	local_vtt = os.path.join(tmp_dir, f"{JOB_ID}.vtt")
+	local_vtt = os.path.join(tmp_dir, f"subs_en.vtt")
 
 	try:
 		logging.info(f"Downloading {OBJECT_KEY} from bucket {upload_bucket}...")

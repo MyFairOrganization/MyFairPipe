@@ -85,8 +85,7 @@ export async function POST(req: Request) {
 				metadataId]);
 
 			await client.query("COMMIT");
-			return NextResponse.json({success: true});
-
+			return NextResponse.json({id: id, success: true}, {status: 200});
 		} catch (err) {
 			await client.query("ROLLBACK");
 			console.error("Database error:", err);

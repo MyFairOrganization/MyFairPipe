@@ -39,54 +39,38 @@ export async function objectExists(bucket: string, key: string): Promise<boolean
 	}
 }
 
-export async function countFilesInFolder(
-	bucket: string,
-	folder: string
-): Promise<number> {
-	return new Promise((resolve, reject) => {
-		let count = 0;
+export async function countFilesInFolder(bucket: string, folder: string): Promise<number> {
+	let count: number = 0;
+	for await (const obj of minioClient.listObjectsV2(bucket, folder, true)) {
+		if (obj.name) count++;
+	}
+	return count;
+}
 
-		const stream = minioClient.listObjects(bucket, folder, true);
-
-		stream.on("data", () => {
-			count++;
-		});
-
-		stream.on("error", (err) => {
-			reject(err);
-		});
-
-		stream.on("end", () => {
-			resolve(count);
-		});
-	});
+export async function listFilesInFolder(bucket: string, folder: string): Promise<string[]> {
+	const files: string[] = [];
+	for await (const obj of minioClient.listObjectsV2(bucket, folder, true)) {
+		if (obj.name) files.push(obj.name);
+	}
+	return files;
 }
 
 export async function deleteFolder(bucket: string, folder: string) {
+	const objectsToDelete: string[] = [];
+	for await (const obj of minioClient.listObjectsV2(bucket, folder, true)) {
+		if (obj.name) objectsToDelete.push(obj.name);
+	}
+
+	await Promise.all(objectsToDelete.map(name => minioClient.removeObject(bucket, name)));
+}
+
+// @ts-ignore
+export async function streamToString(stream): Promise<string> {
 	return new Promise((resolve, reject) => {
-		const objectsToDelete: string[] = [];
-		const stream = minioClient.listObjects(bucket, folder, true);
-
-		stream.on("data", (item) => {
-			if (item.name != null) {
-				objectsToDelete.push(item.name);
-			}
-		});
-
-		stream.on("error", (err) => {
-			reject(err);
-		});
-
-		stream.on("end", async () => {
-			try {
-				const deletePromises = objectsToDelete.map(name =>
-					minioClient.removeObject(bucket, name)
-				);
-				await Promise.all(deletePromises);
-				resolve(objectsToDelete.length);
-			} catch (err) {
-				reject(err);
-			}
-		});
+		let data = "";
+		// @ts-ignore
+		stream.on("data", chunk => (data += chunk.toString()));
+		stream.on("end", () => resolve(data));
+		stream.on("error", reject);
 	});
 }
