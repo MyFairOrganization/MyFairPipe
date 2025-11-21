@@ -3,29 +3,31 @@ services:
     build:
       context: ../..
       dockerfile: docker/dockerfiles/python-base.Dockerfile
-    image: python-base:latest
+    image: mepipe.tail0e128.ts.net:5000/python-base:latest
 
   transcription-worker-image:
     build:
       context: ../..
-      dockerfile: docker/dockerfiles/transcriber.Dockerfile
+      dockerfile: docker/dockerfiles/worker.Dockerfile
       args:
+        REQUIREMENTS: docker/dockerfiles/requirements/transcription-requirements.txt
         WORKER: Pipes/Subtitles/worker/worker.py
     depends_on:
       python-base-image:
         condition: service_completed_successfully
-    image: transcription-worker:latest
+    image: mepipe.tail0e128.ts.net:5000/transcription-worker:latest
 
   resolution-worker-image:
     build:
       context: ../..
-      dockerfile: docker/dockerfiles/resolution.Dockerfile
+      dockerfile: docker/dockerfiles/worker.Dockerfile
       args:
+        REQUIREMENTS: docker/dockerfiles/requirements/resolution-requirements.txt
         WORKER: Pipes/Resolution/worker/worker.py
     depends_on:
       python-base-image:
         condition: service_completed_successfully
-    image: resolution-worker:latest
+    image: mepipe.tail0e128.ts.net:5000/resolution-worker:latest
 
   pipe-manager-image:
     build:
@@ -34,5 +36,5 @@ services:
     depends_on:
       python-base-image:
         condition: service_completed_successfully
-    image: pipe-manager:latest
+    image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
 
