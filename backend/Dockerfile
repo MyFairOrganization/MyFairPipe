@@ -35,4 +35,5 @@ WORKDIR /app
 COPY . .
 ENV NODE_ENV=development
 EXPOSE 3000
+RUN npm install
 CMD ["npm", "run", "dev"]

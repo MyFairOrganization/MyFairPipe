@@ -5,15 +5,17 @@ import signal
 import sys
 import time
 
-import docker
 import pika
 from pika.exceptions import AMQPConnectionError
+
+import docker
 
 # --- Configuration ---
 RABBIT_HOST = os.getenv("RABBIT_HOST", "rabbitmq")
 RABBIT_PORT = int(os.getenv("RABBIT_PORT", 5672))
 RABBIT_USER = os.getenv("RABBIT_USER", "guest")
 RABBIT_PASS = os.getenv("RABBIT_PASS", "guest")
+WORKER_SCRIPT_HOST_PATH = os.getenv("WORKER_SCRIPT_HOST_PATH")
 QUEUE = "transcribe_jobs"
 
 # --- Logging setup ---
@@ -66,10 +68,17 @@ def start_transcriber(job_id: str, object_key: str):
 
 	try:
 		container = docker_client.containers.run(
-			image="mepipe.tail0e128.ts.net:5000/transcription-worker:latest",
+			image="transcription-worker",
 			environment=env,
 			network="internal-network",
 			name=container_name,
+			volumes={
+				WORKER_SCRIPT_HOST_PATH: {
+					"bind": "/app/worker.py",
+					"mode": "ro",
+				}
+			},
+			command=["python", "/app/worker.py"],
 			detach=True,
 			remove=True,
 		)
