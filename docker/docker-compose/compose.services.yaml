@@ -19,7 +19,6 @@ services:
       retries: 5
     networks:
       - internal-network
-      - external-network
 
   minio:
     image: minio/minio:latest
@@ -99,6 +98,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - external-network
+      - internal-network
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
