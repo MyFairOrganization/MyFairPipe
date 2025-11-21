@@ -1,49 +1,71 @@
 import {NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
-import {minioClient, uploadBucket as bucket} from "@/lib/services/minio";
+import {minioClient, videoBucket} from "@/lib/services/minio";
+import {checkUUID} from "@/lib/utils/util";
+import NextError, {HttpError} from "@/lib/utils/error";
 
 export async function DELETE(req: Request) {
+	let client;
+
 	try {
 		const {searchParams} = new URL(req.url);
+
 		const thumbnail_id = searchParams.get("id");
 
+		// -------------------------------
+		// Request validation
+		// -------------------------------
 		if (!thumbnail_id) {
-			return NextResponse.json({error: "Missing id"}, {status: 400});
+			return NextError.error("Missing id", HttpError.BadRequest);
 		}
 
-		// 1. Fetch thumbnail + photo info
-		const result = await connectionPool.query(`
-            SELECT t.thumbnail_id, p.photo_id, p.path
-            FROM Thumbnail t
-                     JOIN Photo p ON p.photo_id = t.photo_id
-            WHERE t.thumbnail_id = $1
-		`, [thumbnail_id]);
-
-		if (result.rowCount === 0) {
-			return NextResponse.json({error: "Thumbnail not found"}, {status: 404});
+		if (!checkUUID(thumbnail_id)) {
+			return NextError.error("Invalid video id format", HttpError.BadRequest);
 		}
 
-		const {path} = result.rows[0];
-
-		// 2. Remove file from MinIO
+		// -------------------------------
+		// Database Transaction
+		// -------------------------------
+		client = await connectionPool.connect();
 		try {
-			await minioClient.removeObject(bucket, path);
-		} catch (err) {
-			console.error("MinIO delete failed:", err);
-			return NextResponse.json({error: "Could not delete file from storage"}, {status: 500});
+			await client.query("BEGIN");
+
+			const result = await client.query(`
+                SELECT t.thumbnail_id, p.photo_id, p.path
+                FROM Thumbnail t
+                         JOIN Photo p ON p.photo_id = t.photo_id
+                WHERE t.thumbnail_id = $1`, [thumbnail_id]);
+
+			if (result.rowCount === 0) {
+				return NextError.error("Thumbnail not found", HttpError.NotFound);
+			}
+
+			let {path} = result.rows[0];
+
+			try {
+				await minioClient.removeObject(videoBucket, path);
+			} catch (err) {
+				console.error("MinIO delete failed:", err);
+				return NextError.error("Could not delete file from storage", HttpError.InternalServerError);
+			}
+
+			await client.query(`
+                DELETE
+                FROM Thumbnail
+                WHERE thumbnail_id = $1`, [thumbnail_id]);
+
+			await client.query("COMMIT");
+		} catch (dbErr) {
+			await client.query("ROLLBACK");
+			console.error("Database transaction error:", dbErr);
+			return NextError.error("Database write failed", HttpError.InternalServerError);
+		} finally {
+			client.release();
 		}
 
-		// 3. Remove database record
-		await connectionPool.query(`DELETE
-                                    FROM Thumbnail
-                                    WHERE thumbnail_id = $1`, [thumbnail_id]);
-
-		return NextResponse.json({
-			message: "Thumbnail deleted successfully", deleted_thumbnail_id: thumbnail_id, deleted_file: path
-		}, {status: 200});
-
+		return NextResponse.json({success: true});
 	} catch (err) {
 		console.error(err);
-		return NextResponse.json({error: "Database error"}, {status: 500});
+		return NextError.error("Database error", HttpError.InternalServerError);
 	}
 }

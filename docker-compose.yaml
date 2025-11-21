@@ -85,7 +85,7 @@ services:
       target: dev
     container_name: nextjs_dev
     ports:
-      - "3000:3000"
+      - "8080:3000"
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -100,6 +100,7 @@ services:
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_USER}
       MINIO_SECRET_KEY: ${MINIO_PASSWORD}
+      POSTGRES_HOST: postgres
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASS}
       POSTGRES_DB: ${POSTGRES_DB:-appdb}

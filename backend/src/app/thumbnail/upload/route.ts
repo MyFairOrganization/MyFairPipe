@@ -2,59 +2,90 @@ import {NextResponse} from "next/server";
 import {countFilesInFolder, objectExists, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
 import {randomUUID} from "crypto";
 import {connectionPool} from "@/lib/services/postgres";
+import NextError, {HttpError} from "@/lib/utils/error";
+import {checkUUID} from "@/lib/utils/util";
 
 export async function POST(req: Request) {
+	let client;
+
 	try {
 		const formData = await req.formData();
 
-		const video_id = formData.get("id");
+		const videoId = formData.get("id") as string;
 		const file = formData.get("file") as File;
 
-		if (!video_id) {
-			return NextResponse.json({error: "No file given"}, {status: 400});
+		// -------------------------------
+		// Request validation
+		// -------------------------------
+		if (!videoId) {
+			return NextError.error("No video given", HttpError.BadRequest);
+		}
+
+		if (!checkUUID(videoId)) {
+			return NextError.error("Invalid video id format", HttpError.BadRequest);
 		}
 
 		if (!file) {
-			return NextResponse.json({error: "No file uploaded"}, {status: 400});
+			return NextError.error("No file uploaded", HttpError.BadRequest);
 		}
 
 		if (!file.type.startsWith("image/")) {
-			return NextResponse.json({error: "Only image files are allowed"}, {status: 400});
+			return NextError.error("Only image files are allowed", HttpError.BadRequest);
 		}
 
-		const exists = await objectExists(videoBucket, `${video_id}/master.m3u8`);
+		// -------------------------------
+		// Minio validation
+		// -------------------------------
+		const exists = await objectExists(videoBucket, `${videoId}/master.m3u8`);
 
 		if (!exists) {
-			return NextResponse.json({error: "Video isn't uploaded yet."}, {status: 400});
+			return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
 		}
 
-		const thumbnails_existing = await countFilesInFolder(videoBucket, `${video_id}/thumbnails`);
+		const thumbnails_existing = await countFilesInFolder(videoBucket, `${videoId}/thumbnails`);
 
 		if (thumbnails_existing === 5) {
-			return NextResponse.json({error: "Only 5 thumbnails are allowed at the same time"}, {status: 400});
+			return NextError.error("Only 5 thumbnails are allowed at the same time", HttpError.BadRequest);
 		}
 
-		const bytes = await file.arrayBuffer();
-		const buffer = Buffer.from(bytes);
-
+		// -------------------------------
+		// Prepare file
+		// -------------------------------
+		const buffer = Buffer.from(await file.arrayBuffer());
 		const id = randomUUID();
 		const extension = file.name.split(".").pop() || "png";
 		const filename = `${id}.${extension}`;
 
-		await uploadFileToMinio(`${video_id}/thumbnails/${filename}`, videoBucket, buffer, file.type);
+		// -------------------------------
+		// Upload file to MinIO
+		// -------------------------------
+		await uploadFileToMinio(`${videoId}/thumbnails/${filename}`, videoBucket, buffer, file.type);
 
-		await connectionPool.query(`
-            INSERT INTO photo (photo_id, path)
-            VALUES ($1, $2)`, [`${id}`, `${video_id}/thumbnails/${filename}`]);
-		await connectionPool.query(`
-            INSERT INTO Thumbnail (thumbnail_id, photo_id, video_id, is_active)
-            VALUES ($1, $2, $3, $4)`, [`${id}`, `${id}`, `${video_id}`, false]);
+		// -------------------------------
+		// Database Transaction
+		// -------------------------------
+		client = await connectionPool.connect();
+		try {
+			await client.query("BEGIN");
 
-		return NextResponse.json({
-			message: "Thumbnail upload successful", filename: filename,
-		});
-	} catch (error: any) {
-		console.error("Error during thumbnail upload:", error);
-		return NextResponse.json({error: error.message || "Upload failed"}, {status: 500});
+			await client.query(`
+                INSERT INTO photo (photo_id, path)
+                VALUES ($1, $2)`, [`${id}`, `${videoId}/thumbnails/${filename}`]);
+			await client.query(`
+                INSERT INTO Thumbnail (thumbnail_id, photo_id, video_id, is_active)
+                VALUES ($1, $2, $3, $4)`, [`${id}`, `${id}`, `${videoId}`, false]);
+			await client.query("COMMIT");
+			return NextResponse.json({success: true});
+		} catch (err) {
+			await client.query("ROLLBACK");
+			console.error("Database error:", err);
+			return NextError.error("Database write failed.", HttpError.InternalServerError);
+
+		} finally {
+			client.release();
+		}
+	} catch (err: any) {
+		console.error("Upload processing error:", err);
+		return NextError.error(err || "Server error.", HttpError.InternalServerError);
 	}
 }

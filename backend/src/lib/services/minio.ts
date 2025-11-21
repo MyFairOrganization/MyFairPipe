@@ -61,3 +61,32 @@ export async function countFilesInFolder(
 		});
 	});
 }
+
+export async function deleteFolder(bucket: string, folder: string) {
+	return new Promise((resolve, reject) => {
+		const objectsToDelete: string[] = [];
+		const stream = minioClient.listObjects(bucket, folder, true);
+
+		stream.on("data", (item) => {
+			if (item.name != null) {
+				objectsToDelete.push(item.name);
+			}
+		});
+
+		stream.on("error", (err) => {
+			reject(err);
+		});
+
+		stream.on("end", async () => {
+			try {
+				const deletePromises = objectsToDelete.map(name =>
+					minioClient.removeObject(bucket, name)
+				);
+				await Promise.all(deletePromises);
+				resolve(objectsToDelete.length);
+			} catch (err) {
+				reject(err);
+			}
+		});
+	});
+}

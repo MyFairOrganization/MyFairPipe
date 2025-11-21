@@ -1,16 +1,32 @@
 import {NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
+import NextError, {HttpError} from "@/lib/utils/error";
+import {checkUUID} from "@/lib/utils/util";
 
 export async function GET(req: Request) {
+	let client;
+
 	try {
 		const {searchParams} = new URL(req.url);
-		const thumbnail_id = searchParams.get("id");
 
+		const thumbnail_id = searchParams.get("id") as string;
+
+		// -------------------------------
+		// Request validation
+		// -------------------------------
 		if (!thumbnail_id) {
-			return NextResponse.json({error: "Missing id"}, {status: 400});
+			return NextError.error("Missing id", HttpError.BadRequest);
 		}
 
-		const result = await connectionPool.query(`
+		if (!checkUUID(thumbnail_id)) {
+			return NextError.error("Invalid video id format", HttpError.BadRequest);
+		}
+
+		// -------------------------------
+		// Database Transaction
+		// -------------------------------
+		client = await connectionPool.connect();
+		const result = await client.query(`
             SELECT t.thumbnail_id, p.photo_id, p.path
             FROM Thumbnail t
                      JOIN Photo p ON p.photo_id = t.photo_id
@@ -18,12 +34,14 @@ export async function GET(req: Request) {
 		`, [thumbnail_id]);
 
 		if (result.rowCount === 0) {
-			return NextResponse.json({error: "No Thumbnail found not found"}, {status: 404});
+			return NextError.error("No Thumbnail found", HttpError.NotFound);
 		}
 
 		return NextResponse.json(result.rows[0], {status: 200});
-	} catch (err) {
-		console.error(err);
-		return NextResponse.json({error: "Database error"}, {status: 500});
+	} catch (err: any) {
+		console.error("Database error: ", err);
+		return NextError.error(err || "Server error.", HttpError.InternalServerError);
+	} finally {
+		if (client) client.release();
 	}
 }
