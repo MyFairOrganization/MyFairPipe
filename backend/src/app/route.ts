@@ -1,6 +1,6 @@
 import { connectionPool } from "@/lib/services/postgres";
 import { NextRequest, NextResponse } from "next/server";
-async function like(videoID, username) {
+async function like(videoID: number, username: string) {
 	await connectionPool.connect();
 
 	const query = `
