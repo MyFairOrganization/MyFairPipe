@@ -1,5 +1,6 @@
 import { connectionPool } from "@/lib/services/postgres";
 import { NextRequest, NextResponse } from "next/server";
+import NextError, { HttpError } from "@/lib/utils/error";
 
 async function like(videoID: number, username: string) {
   const client = await connectionPool.connect();
@@ -24,10 +25,14 @@ async function like(videoID: number, username: string) {
       is_like = null;
     }
 
-    // Check if User already liked videos => returns if true
-    if (result.rows.length > 0 && is_like) {
-      return username + " already liked!";
-    }
+    // SELECTs Metadata_id for next step (Update likes/dislikes)
+    const selectMID = `
+      SELECT metadata_id
+      FROM video
+      WHERE video_id = $1
+    `;
+
+    const metadata_id = (await client.query(selectMID, [videoID])).rows[0].metadata_id;
 
     // SELECT UserID for future queries
     const selectUID = `
@@ -38,6 +43,31 @@ async function like(videoID: number, username: string) {
 
     // UserID from SELECT
     const userID = (await client.query(selectUID, [username])).rows[0].user_id;
+
+    // Check if User already liked videos => returns if true
+    if (result.rows.length > 0 && is_like) {
+      // Updates LikeCount in Metadata
+      const updateCount = `
+        UPDATE Metadata
+        SET likes = likes + $1
+        WHERE metadata_id = $2;
+      `;
+
+      var updateLikes = -1;
+
+      await client.query(updateCount, [updateLikes, metadata_id]);
+
+      // SQL query for deleting like from video
+      const deleteLV = `
+      DELETE FROM like_video
+      WHERE user_id = $1 AND video_id = $2
+    `;
+
+      // Insert gets executed
+      await client.query(deleteLV, [userID, videoID]);
+
+      return "removed like from " + username;
+    }
 
 		// Check if like-entry has to be created in DB
     if (is_like === null) { // Entry has to be created
@@ -61,15 +91,6 @@ async function like(videoID: number, username: string) {
       await client.query(updateLV, [userID, videoID]);
     }
 
-		// SELECTs Metadata_id for next step (Update likes/dislikes)
-		const selectMID = `
-      SELECT metadata_id
-      FROM video
-      WHERE video_id = $1
-    `;
-
-		const metadata_id = (await client.query(selectMID, [videoID])).rows[0].metadata_id;
-
 		// Updates LikeCount in Metadata
     const updateCount = `
         UPDATE Metadata
@@ -78,13 +99,19 @@ async function like(videoID: number, username: string) {
       `;
 
 		// value that likes are increased by
-    var updateLikes = 1;
+    updateLikes = 1;
 		// -1 if false, 0 if null
     var updateDislikes :number = is_like === null ? 0 : -1;
 
     await client.query(updateCount, [updateLikes, updateDislikes, metadata_id]);
 
     return username + " liked!";
+  } catch (err) {
+    if (err.message.includes("user")) {
+      throw new Error("'user_id does not point to existing User'");
+    } else if (err.message.includes("metadata")) {
+      throw new Error("'video_id does not point to existing Video'");
+    }
   } finally {
     client.release();
   }
@@ -97,9 +124,9 @@ export async function GET(req: NextRequest) {
     const username = searchParams.get('username');
 
     const result = await like(videoID, username);
-    return NextResponse.json({ result });
+    return NextResponse.json({ result }, {status: 200});
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Fehler beim Like"}, { status: 500 });
+    return NextError.error(err + "", HttpError.BadRequest);
   }
 }
