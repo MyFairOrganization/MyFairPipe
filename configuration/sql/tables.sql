@@ -191,3 +191,5 @@ COMMENT ON TABLE Watch_History IS 'Tracks which users watched which videos and f
 COMMENT ON TABLE Like_Video IS 'Tracks user likes/dislikes on videos';
 COMMENT ON TABLE Like_Comment IS 'Tracks user likes/dislikes on comments';
 COMMENT ON TABLE Subscriber IS 'User subscription relationships';
+
+SELECT is_like FROM Like_Video WHERE user_id = 1;

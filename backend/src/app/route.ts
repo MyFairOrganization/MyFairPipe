@@ -1,11 +1,29 @@
-import {NextResponse} from "next/server";
+import { connectionPool } from "@/lib/services/postgres";
+import { NextRequest, NextResponse } from "next/server";
+async function like(videoID, username) {
+	await connectionPool.connect();
 
-/**
- * Get user information
- * @description Fetches detailed user information by ID
- * @response NextResponse
- * @openapi
- */
-export async function GET() {
-	return NextResponse.json({message: "Hello world!"});
+	const query = `
+    SELECT lv.is_like, m.metadata_id
+    FROM like_video lv
+    JOIN "User" u ON u.user_id = lv.user_id
+    JOIN video v ON v.video_id = lv.video_id
+    JOIN metadata m ON v.metadata_id = m.metadata_id
+    WHERE u.username = $1 AND v.path = $2
+  `;
+
+	const result = await connectionPool.query(query, [username, videoID]);
+	const is_like: boolean = result.rows[0].is_like;
+
+	return result;
+}
+
+export async function POST(req: NextRequest) {
+	try {
+		const result = like(0, 'test');
+		return NextResponse.json({ result });
+	} catch (err) {
+		console.error(err);
+		return NextResponse.json({ error: "Fehler beim Like" }, { status: 500 });
+	}
 }
