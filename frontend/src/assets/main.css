@@ -1,33 +1,39 @@
-@import './base.css';
+@import "tailwindcss";
 
-#app {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 2rem;
-    font-weight: normal;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme {
+  --color-primary: #3D5A80;
+  --color-secondary: #98C1D9;
+  --color-accent: #EE6C4D;
+  --color-background: #E0FBFC;
+  --color-hover: #c9eef0;
+  --color-text: #2C3E50FF;
+  --color-border: #3C3C3C1E;
 }
 
-a,
-.green {
-    text-decoration: none;
-    color: #3D5A80;
-    transition: 0.4s;
-    padding: 3px;
+a {
+  @apply decoration-0 text-primary transition-colors duration-400 p-1;
 }
+
+nav a.router-link-exact-active {
+  @apply text-text;
+}
+
+nav a {
+  @apply inline-block px-4 border-l-2 border-l-border;
+}
+
+nav a:first-of-type {
+  @apply border-none
+}
+
 
 @media (hover: hover) {
-    a:hover {
-        background-color: #98C1D9;
-    }
+  a:hover {
+    @apply bg-secondary;
+  }
 }
 
-body {
-    display: flex;
-    place-items: center;
-}
-
-#app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-}
