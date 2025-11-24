@@ -1,6 +1,9 @@
 import {NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET!;
 
 export async function POST(req: Request) {
     try {
@@ -10,11 +13,8 @@ export async function POST(req: Request) {
             return NextResponse.json({error: "Missing email or password"}, {status: 400});
         }
 
-        // === Fetch user ===
         const result = await connectionPool.query(
-            `SELECT user_id,
-                    user_email,
-                    hashed_password
+            `SELECT user_id, user_email, hashed_password
              FROM "User"
              WHERE user_email = $1`,
             [email]
@@ -25,21 +25,27 @@ export async function POST(req: Request) {
         }
 
         const user = result.rows[0];
-
-        // === Verify password ===
         const valid = await bcrypt.compare(password, user.hashed_password);
 
         if (!valid) {
             return NextResponse.json({error: "Invalid password"}, {status: 401});
         }
 
-        // Remove the hashed password for safety
-        delete user.hashed_password;
+        // === JWT erstellen ===
+        const token = jwt.sign(
+            {user_id: user.user_id, email: user.user_email},
+            JWT_SECRET,
+            {expiresIn: "7d"}
+        );
 
         return NextResponse.json(
             {
                 message: "Login successful",
-                user,
+                token,
+                user: {
+                    user_id: user.user_id,
+                    email: user.user_email,
+                },
             },
             {status: 200}
         );
