@@ -86,25 +86,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    container_name: elasticsearch
-    environment:
-      - ES_JAVA_OPTS=-Xms4g -Xmx4g
-      - cluster.name=docker-cluster
-      - node.name=b183f5ccea35
-      - network.host=0.0.0.0
-      - discovery.seed_hosts=127.0.0.1
-      - cluster.initial_master_nodes=b183f5ccea35
-      - xpack.security.enabled=false
-    volumes:
-      - elastic_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -s http://localhost:9200/_cluster/health || exit 1" ]
-      interval: 10s
-      timeout: 10s
-      retries: 20
+    networks:
+      - internal-network
+      - external-network

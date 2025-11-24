@@ -89,13 +89,27 @@ services:
       - /app/node_modules
     environment:
       NODE_ENV: development
+      NEXT_WATCH_MODE: poll
+      NEXT_WATCH_POLL_INTERVAL: 1000
+      RABBIT_HOST: ${RABBIT_HOST}
+      RABBIT_PORT: ${RABBIT_PORT}
+      RABBIT_USER: ${RABBIT_USER}
+      RABBIT_PASS: ${RABBIT_PASS}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_USER}
+      MINIO_SECRET_KEY: ${MINIO_PASSWORD}
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
     profiles: [ "dev" ]
     networks:
       - external-network
+      - internal-network
 
   # === PIPE SERVICES ===
   transcription-manager:
-    image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
+    image: pipe-manager:latest
     container_name: transcription-manager
     environment:
       RABBIT_HOST: ${RABBIT_HOST}
@@ -117,7 +131,7 @@ services:
     working_dir: /app
 
   resolution-manager:
-    image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
+    image: pipe-manager:latest
     container_name: resolution-manager
     environment:
       RABBIT_HOST: rabbitmq

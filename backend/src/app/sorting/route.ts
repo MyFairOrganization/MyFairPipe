@@ -44,16 +44,16 @@ async function getCachedVideos(): Promise<Video[] | null> {
 }
 
 async function main() {
-  console.log("📥 Loading videos from Postgres...");
+  console.log("Loading videos from Postgres...");
   const videos = await loadVideosFromPostgres(5, 0);
 
-  console.log("🔄 Caching videos in Redis...");
+  console.log("Caching videos in Redis...");
   await cacheVideos(videos);
 
-  console.log("📤 Reading videos from Redis...");
+  console.log("Reading videos from Redis...");
   const cachedVideos = await getCachedVideos();
 
-  console.log("📦 Cached videos:");
+  console.log("Cached videos:");
   console.log(cachedVideos);
 
   // Close connections gracefully

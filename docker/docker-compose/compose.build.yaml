@@ -3,7 +3,7 @@ services:
     build:
       context: ../..
       dockerfile: docker/dockerfiles/python-base.Dockerfile
-    image: mepipe.tail0e128.ts.net:5000/python-base:latest
+    image: python-base:latest
 
   transcription-worker-image:
     build:
@@ -15,7 +15,7 @@ services:
     depends_on:
       python-base-image:
         condition: service_completed_successfully
-    image: mepipe.tail0e128.ts.net:5000/transcription-worker:latest
+    image: transcription-worker:latest
 
   resolution-worker-image:
     build:
@@ -27,7 +27,7 @@ services:
     depends_on:
       python-base-image:
         condition: service_completed_successfully
-    image: mepipe.tail0e128.ts.net:5000/resolution-worker:latest
+    image: resolution-worker:latest
 
   pipe-manager-image:
     build:
@@ -36,5 +36,4 @@ services:
     depends_on:
       python-base-image:
         condition: service_completed_successfully
-    image: mepipe.tail0e128.ts.net:5000/pipe-manager:latest
-
+    image: pipe-manager:latest

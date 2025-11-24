@@ -66,7 +66,7 @@ def start_resolution(job_id: str, object_key: str):
 
 	try:
 		container = docker_client.containers.run(
-			image="mepipe.tail0e128.ts.net:5000/resolution-worker:latest",
+			image="resolution-worker:latest",
 			environment=env,
 			network="internal-network",
 			name=container_name,
