@@ -5,6 +5,13 @@ import NextError, { HttpError } from "@/lib/utils/error";
 async function like(videoID: number, username: string) {
   const client = await connectionPool.connect();
 
+  const test = `
+    SELECT * FROM video;
+  `;
+
+  const result = await client.query(test);
+  console.log(result);
+
   // SQL query to check if user already liked video
   const query = `
     SELECT lv.is_like
@@ -25,15 +32,6 @@ async function like(videoID: number, username: string) {
       is_like = null;
     }
 
-    // SELECTs Metadata_id for next step (Update likes/dislikes)
-    const selectMID = `
-      SELECT metadata_id
-      FROM video
-      WHERE video_id = $1
-    `;
-
-    const metadata_id = (await client.query(selectMID, [videoID])).rows[0].metadata_id;
-
     // SELECT UserID for future queries
     const selectUID = `
       SELECT user_id
@@ -48,14 +46,14 @@ async function like(videoID: number, username: string) {
     if (result.rows.length > 0 && is_like) {
       // Updates LikeCount in Metadata
       const updateCount = `
-        UPDATE Metadata
+        UPDATE video
         SET likes = likes + $1
-        WHERE metadata_id = $2;
+        WHERE video_id = $2;
       `;
 
       var updateLikes = -1;
 
-      await client.query(updateCount, [updateLikes, metadata_id]);
+      await client.query(updateCount, [updateLikes, videoID]);
 
       // SQL query for deleting like from video
       const deleteLV = `
@@ -93,9 +91,9 @@ async function like(videoID: number, username: string) {
 
 		// Updates LikeCount in Metadata
     const updateCount = `
-        UPDATE Metadata
+        UPDATE Video
         SET likes = likes + $1, dislikes = dislikes + $2
-        WHERE metadata_id = $3;
+        WHERE video_id = $3;
       `;
 
 		// value that likes are increased by
@@ -103,13 +101,13 @@ async function like(videoID: number, username: string) {
 		// -1 if false, 0 if null
     var updateDislikes :number = is_like === null ? 0 : -1;
 
-    await client.query(updateCount, [updateLikes, updateDislikes, metadata_id]);
+    await client.query(updateCount, [updateLikes, updateDislikes, videoID]);
 
     return username + " liked!";
   } catch (err) {
     if (err.message.includes("user")) {
       throw new Error("'user_id does not point to existing User'");
-    } else if (err.message.includes("metadata")) {
+    } else if (err.message.includes("video")) {
       throw new Error("'video_id does not point to existing Video'");
     }
   } finally {

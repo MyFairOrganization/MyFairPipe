@@ -25,15 +25,6 @@ async function dislike(videoID: number, username: string) {
       is_like = null;
     }
 
-    // SELECTs Metadata_id for next step (Update likes/dislikes)
-    const selectMID = `
-      SELECT metadata_id
-      FROM video
-      WHERE video_id = $1
-    `;
-
-    const metadata_id = (await client.query(selectMID, [videoID])).rows[0].metadata_id;
-
     // SELECT UserID for future queries
     const selectUID = `
       SELECT user_id
@@ -48,14 +39,14 @@ async function dislike(videoID: number, username: string) {
     if (result.rows.length > 0 && !is_like) {
       // Updates LikeCount in Metadata
       const updateCount = `
-        UPDATE Metadata
+        UPDATE video
         SET dislikes = dislikes + $1
-        WHERE metadata_id = $2;
+        WHERE video_id = $2;
       `;
 
       var updateDislikes = -1;
 
-      await client.query(updateCount, [updateDislikes, metadata_id]);
+      await client.query(updateCount, [updateDislikes, videoID]);
 
       // SQL query for User to dislike Video
       const deleteLV = `
@@ -93,21 +84,21 @@ async function dislike(videoID: number, username: string) {
 
     // Updates LikeCount in Metadata
     const updateCount = `
-        UPDATE Metadata
+        UPDATE video
         SET likes = likes + $1, dislikes = dislikes + $2
-        WHERE metadata_id = $3;
+        WHERE video_id = $3;
       `;
 
     var updateLikes = is_like === null ? 0 : -1;
     updateDislikes = 1;
 
-    await client.query(updateCount, [updateLikes, updateDislikes, metadata_id]);
+    await client.query(updateCount, [updateLikes, updateDislikes, videoID]);
 
     return username + " disliked!";
   } catch (err) {
     if (err.message.includes("user")) {
       throw new Error("'user_id does not point to existing User'");
-    } else if (err.message.includes("metadata")) {
+    } else if (err.message.includes("video")) {
       throw new Error("'video_id does not point to existing Video'");
     }
   } finally {
