@@ -8,8 +8,9 @@ services:
   transcription-worker-image:
     build:
       context: ../..
-      dockerfile: docker/dockerfiles/transcriber.Dockerfile
+      dockerfile: docker/dockerfiles/worker.Dockerfile
       args:
+        REQUIREMENTS: docker/dockerfiles/requirements/transcription-requirements.txt
         WORKER: Pipes/Subtitles/worker/worker.py
     depends_on:
       python-base-image:
@@ -19,8 +20,9 @@ services:
   resolution-worker-image:
     build:
       context: ../..
-      dockerfile: docker/dockerfiles/resolution.Dockerfile
+      dockerfile: docker/dockerfiles/worker.Dockerfile
       args:
+        REQUIREMENTS: docker/dockerfiles/requirements/resolution-requirements.txt
         WORKER: Pipes/Resolution/worker/worker.py
     depends_on:
       python-base-image:
@@ -35,4 +37,3 @@ services:
       python-base-image:
         condition: service_completed_successfully
     image: pipe-manager:latest
-

@@ -1,24 +1,58 @@
 import {NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
+import NextError, {HttpError} from "@/lib/utils/error";
+import {checkUUID} from "@/lib/utils/util";
 
 export async function GET(req: Request) {
+	let client;
+
 	try {
 		const {searchParams} = new URL(req.url);
-		const video_id = searchParams.get("id");
 
-		if (!video_id) {
-			return NextResponse.json({error: "Missing id"}, {status: 400});
+		const videoId = searchParams.get("id");
+
+		// -------------------------------
+		// Request validation
+		// -------------------------------
+		if (!videoId) {
+			return NextError.error("Missing id", 400);
 		}
 
-		const result = await connectionPool.query("SELECT * FROM video WHERE video_id = $1", [video_id]);
+		if (!checkUUID(videoId)) {
+			return NextError.error("Invalid video id format", 400);
+		}
+
+		// -------------------------------
+		// Database Transaction
+		// -------------------------------
+		client = await connectionPool.connect();
+		const result = await client.query(`
+            SELECT v.video_id,
+                   v.title,
+                   v.description,
+                   v.path,
+                   v.duration,
+                   v.views,
+                   p.path    AS thumbnail_path,
+                   u.user_id AS uploader_id
+            FROM video v
+                     LEFT JOIN thumbnail t
+                               ON t.video_id = v.video_id AND t.is_active = true
+                     LEFT JOIN photo p
+                               ON p.photo_id = t.photo_id
+                     LEFT JOIN "User" u ON u.user_id = v.uploader
+            WHERE v.video_id = $1`, [videoId]);
 
 		if (result.rowCount === 0) {
-			return NextResponse.json({error: "Video not found"}, {status: 404});
+			return NextError.error("Video not found", 404);
 		}
 
 		return NextResponse.json(result.rows[0], {status: 200});
-	} catch (err) {
-		console.error(err);
-		return NextResponse.json({error: "Database error"}, {status: 500});
+
+	} catch (err: any) {
+		console.error("Database error: ", err);
+		return NextError.error(err || "Server error.", HttpError.InternalServerError);
+	} finally {
+		if (client) client.release();
 	}
 }

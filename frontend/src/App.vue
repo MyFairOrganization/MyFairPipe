@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import { useRouter } from 'vue-router'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
 
 const router = useRouter()
 
@@ -8,76 +7,25 @@ router.push('/home')
 </script>
 
 <template>
-	<div>
-		<nav class="header">
-			<div class="row">
-				<RouterLink to="/home">MyFairPipe</RouterLink>
-				<RouterLink to="/home">Home</RouterLink>
-			</div>
-		</nav>
+  <nav
+    class="fixed top-0 left-0 w-full bg-white text-black py-10 px-8 text-lg z-[9999] text-center"
+  >
+    <div class="flex flex-row gap-[20px]">
+      <RouterLink to="/home">MyFairPipe</RouterLink>
+      <RouterLink to="/home">Home</RouterLink>
+      <RouterLink to="/login">Login</RouterLink>
+    </div>
+  </nav>
 
-		<main class="content">
-			<RouterView />
-		</main>
+  <div class="flex flex-col h-screen min-h-screen">
+    <div class="w-full py-12"></div>
 
-		<nav class="footer">
-			<h2>MyFairPipe</h2>
-		</nav>
-	</div>
+    <main class="max-w-[1280px] mx-auto my-0 p-8 font-normal grow">
+      <RouterView />
+    </main>
+
+    <footer class="w-full bg-white text-black py-10 text-lg">
+      <h2 class="pl-8">MyFairPipe</h2>
+    </footer>
+  </div>
 </template>
-
-<style scoped>
-header {
-	line-height: 1.5;
-	z-index: 10000000000000000000000000;
-}
-
-nav {
-	width: 100%;
-	font-size: 14px;
-	text-align: center;
-}
-
-nav a.router-link-exact-active {
-	color: var(--color-text);
-}
-
-nav a {
-	display: inline-block;
-	padding: 0 1rem;
-	border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-	border: 0;
-}
-
-.header {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	background: white;
-	color: black;
-	padding: 2.5rem 2rem;
-}
-
-.row {
-	display: flex;
-	flex-direction: row;
-	gap: 20px;
-}
-
-.content {
-	margin-top: 120px;
-}
-
-.footer {
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	background: white;
-	color: black;
-	padding: 2.5rem 2rem;
-}
-</style>

@@ -6,55 +6,34 @@ const route = useRoute()
 const props = { id: route.query.id as string, desc: route.query.desc as string }
 
 function like() {
-	console.log(props.id + ' liked!')
+  console.log(props.id + ' liked!')
 }
 
 function dislike() {
-	console.log(props.id + ' disliked!')
+  console.log(props.id + ' disliked!')
 }
 </script>
 
 <template>
-	<div class="player">
-		<component :is="createVID(props.id, props.desc)" />
-	</div>
-	<div class="interactivePanel">
-		<input class="interactive" id="like" type="image" src="/like.svg" v-on:click="like()" />
-		<input class="interactive" id="dislike" type="image" src="/dislike.svg" v-on:click="dislike()" />
-	</div>
+  <div class="player">
+    <component :is="createVID(props.id, props.desc)" />
+  </div>
+  <div class="flex flex-row gap-1 p-3 mr-0 ml-auto w-fit content-end">
+    <input
+      class="bg-transparent border-transparent w-[38px] h-[38px] p-[3px] hover:bg-[#c9eef0] hover:rounded-[5px] active:shadow-[0_0_5px_5px_#ee6c4d]"
+      id="like"
+      type="image"
+      src="/like.svg"
+      v-on:click="like()"
+      alt="Like"
+    />
+    <input
+      class="bg-transparent border-transparent w-[38px] h-[38px] p-[3px] hover:bg-[#c9eef0] hover:rounded-[5px] active:shadow-[0_0_5px_5px_#ee6c4d]"
+      id="dislike"
+      type="image"
+      src="/dislike.svg"
+      v-on:click="dislike()"
+      alt="Dislike"
+    />
+  </div>
 </template>
-
-<style scoped>
-video {
-	border-radius: 20px;
-	z-index: -100000000;
-}
-
-.interactive {
-	background-color: transparent;
-	border: transparent;
-	width: 38px;
-	height: 38px;
-	padding: 3px;
-}
-
-.interactive:hover {
-	background-color: #C9EEF0;
-	border-radius: 5px;
-}
-
-.interactive:active {
-	box-shadow: #EE6C4D 0 0 5px 5px;
-}
-
-.interactivePanel {
-	display: flex;
-	flex-direction: row;
-	gap: 5px;
-	padding: 10px;
-	margin-right: 0;
-	margin-left: auto;
-	width: fit-content;
-	align-content: end;
-}
-</style>
