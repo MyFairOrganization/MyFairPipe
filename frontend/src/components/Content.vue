@@ -45,7 +45,6 @@ export function createVID(id, desc) {
 				}),
 			],
 		),
-		h('h2', { class: 'description' }, desc),
 	])
 }
 </script>
