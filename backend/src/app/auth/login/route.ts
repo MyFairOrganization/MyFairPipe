@@ -3,7 +3,10 @@ import {connectionPool} from "@/lib/services/postgres";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is not set. Please set it before starting the application.');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function POST(req: Request) {
     try {
@@ -21,17 +24,17 @@ export async function POST(req: Request) {
         );
 
         if (result.rowCount === 0) {
-            return NextResponse.json({error: "User not found"}, {status: 404});
+            return NextResponse.json({error: "Invalid email or password"}, {status: 401});
         }
 
         const user = result.rows[0];
         const valid = await bcrypt.compare(password, user.hashed_password);
 
         if (!valid) {
-            return NextResponse.json({error: "Invalid password"}, {status: 401});
+            return NextResponse.json({error: "Invalid email or password"}, {status: 401});
         }
 
-        // === JWT erstellen ===
+        // === Create JWT ===
         const token = jwt.sign(
             {user_id: user.user_id, email: user.user_email},
             JWT_SECRET,
