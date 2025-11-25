@@ -1,19 +1,31 @@
 <script setup lang="ts">
-import { createIMG } from './Content.vue'
+    import { createIMG } from './Content.vue'
+    import { ref } from 'vue'
+    import { useRouter } from 'vue-router'
 
+    const router = useRouter();
+
+    function upload(){
+        router.push('/upload');
+    }
+    function edit(){
+        router.push('/edituser');
+    }
 </script>
 
 <template>
     <div class="container">
         <img class="pfp" src="/pfpExample.png"></img>
             <div class="user">
-                <h1>User Name</h1>
-                <p id="descr">This is a brief user description.</p>
-                <button id="b1">Channel information</button>
-                <div class="buttons">
-                    <button class="btn">Upload Video</button>
-                    <button class="btn">Start Livestream</button>
-                    <button class="btn">Edit Account</button>
+                <div class="left">
+                    <h1>User Name</h1>
+                    <p id="descr">This is a brief user description.</p>
+                    <button id="b1">Channel information</button>
+                </div>
+                
+                <div class="right">
+                    <button class="btn" @click="upload">Upload Video</button>
+                    <button class="btn" @click="edit">Edit Account</button>
                 </div>
             </div>
     </div>
@@ -34,95 +46,88 @@ import { createIMG } from './Content.vue'
 </template>
 
 <style scoped>
-    .pfp {
-        width: 250px;
-        height: 250px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-    .user {
-        width: 900px;
-        height: 250px;
-        background-color: #98C1D9;
-        padding: 20px;
-        padding-left: 30px;
-        border-radius: 10px;
-    }
-    .container {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        margin-bottom: 50px;
-    }
-    #b1 {
-        margin-top: 5px;
-        padding: 10px 20px;
-        background-color: transparent;
-        color: #293241;
-        border: 1px solid #293241;
-        border-radius: 20px;
-        cursor: pointer;
-    }
-    h1 {
-        font-weight: bold;
-        font-size: 4em;
-    }
-    #descr {
-        font-size: 1.5em;
-        margin-bottom: 10px;
-    }
-    .line {
-        border: none;
-        border-top: 1px solid #939393;
-        width: 100%;
-        margin-bottom: 50px;
-    }
-    .user {
-        display: flex;
-        justify-content: space-between; /* Text links, Buttons rechts */
-        align-items: center; /* vertikal zentriert */
-        width: 900px;
-        height: 250px;
-        background-color: #98C1D9;
-        padding: 20px 30px;
-        border-radius: 10px;
-        gap: 20px;
-    }
+.pfp {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    object-fit: cover;
+}
 
-    .user-info h1 {
-        font-weight: bold;
-        font-size: 4em;
-        margin: 0;
-    }
+.container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 50px;
+    margin-left: 7em;
+}
 
-    #descr {
-        font-size: 1.5em;
-        margin: 10px 0;
-    }
+.user {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 900px;
+    height: 250px;
+    background-color: #98C1D9;
+    padding: 20px 30px;
+    border-radius: 10px;
+    gap: 20px;
+}
 
-    #b1 {
-        margin-top: 5px;
-        padding: 10px 20px;
-        background-color: transparent;
-        color: #293241;
-        border: 1px solid #293241;
-        border-radius: 20px;
-        cursor: pointer;
-    }
+.left h1 {
+    font-weight: bold;
+    font-size: 4em;
+    margin: 0;
+}
 
-    /* Buttons rechts nebeneinander */
-    .buttons {
-        display: flex;
-        flex-direction: column; /* vertikal anordnen */
-        gap: 10px; /* Abstand zwischen Buttons */
-    }
+#descr {
+    font-size: 1.5em;
+    margin: 10px 0;
+}
 
-    .btn {
-        padding: 10px 20px;
-        background-color: #293241;
-        color: white;
-        border: none;
-        border-radius: 20px;
-        cursor: pointer;
-    }
+#b1 {
+    margin-top: 5px;
+    padding: 10px 20px;
+    background-color: transparent;
+    color: #293241;
+    border: 1px solid #293241;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.right {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn {
+    padding: 10px 20px;
+    background-color: #3D5A80;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 5px 0;
+}
+
+.line {
+    border: none;
+    border-top: 1px solid #939393;
+    width: 100%;
+    margin-bottom: 50px;
+}
+
+#thumbnails {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.thumbnail img {
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
 </style>
