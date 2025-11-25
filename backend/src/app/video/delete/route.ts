@@ -1,76 +1,92 @@
 import {NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import {deleteFolder, objectExists, videoBucket} from "@/lib/services/minio";
-import NextError from "@/lib/utils/error";
+import NextError, {HttpError} from "@/lib/utils/error";
 import {checkUUID} from "@/lib/utils/util";
+import {getUser, User} from "@/lib/auth/getUser";
+import {QueryResult} from "pg";
 
 export async function DELETE(req: Request) {
-	let client;
+    let client;
 
-	try {
-		const formData = await req.formData();
+    try {
+        const userResult = await getUser(req);
 
-		const videoId = formData.get("id") as string;
+        if (userResult instanceof NextError || userResult instanceof NextResponse) {
+            return userResult;
+        }
 
-		// -------------------------------
-		// Request validation
-		// -------------------------------
-		if (!videoId) {
-			return NextError.error("Missing id", 400);
-		}
+        const user: User = userResult;
 
-		if (!checkUUID(videoId)) {
-			return NextError.error("Invalid video id format", 400);
-		}
+        const formData = await req.formData();
 
-		// -------------------------------
-		// Database Transaction
-		// -------------------------------
-		client = await connectionPool.connect();
+        const videoId = formData.get("id") as string;
 
-		try {
-			await client.query("BEGIN");
+        // -------------------------------
+        // Request validation
+        // -------------------------------
+        if (!videoId) {
+            return NextError.error("Missing id", HttpError.BadRequest);
+        }
 
-			const result = await client.query(`
-                SELECT video_id, path
-                FROM video
-                WHERE video_id = $1`, [videoId]);
+        if (!checkUUID(videoId)) {
+            return NextError.error("Invalid video id format", HttpError.BadRequest);
+        }
 
-			if (result.rowCount === 0) {
-				await client.query("ROLLBACK");
-				return NextError.error("Video not found", 404);
-			}
+        // -------------------------------
+        // Database Transaction
+        // -------------------------------
+        client = await connectionPool.connect();
 
-			let {path} = result.rows[0];
-			path = path.split("/").slice(2).join("/");
-			if (!await objectExists(videoBucket, path)) {
-				return NextError.error("Video not found or not fully uploaded yet!", 404);
-			}
+        try {
+            await client.query("BEGIN");
 
-			await client.query(`
-                DELETE
-                FROM video
-                WHERE video_id = $1`, [videoId]);
+            // Check if user owns the video
+            const ownershipResult: QueryResult = await client.query(`
+                SELECT v.video_id, v.path
+                FROM video v
+                WHERE v.video_id = $1 AND v.uploader = $2
+            `, [videoId, user.id]);
 
-			await client.query("COMMIT");
+            if (ownershipResult.rowCount === 0) {
+                await client.query("ROLLBACK");
+                return NextError.error("Video not found or you don't have permission to delete it", HttpError.NotFound);
+            }
 
-			try {
-				await deleteFolder(videoBucket, videoId);
-			} catch (err) {
-				console.error("MinIO delete failed:", err);
-			}
+            let {path} = ownershipResult.rows[0];
+            path = path.split("/").slice(2).join("/");
 
-			return NextResponse.json({success: true});
-		} catch (dbErr) {
-			await client.query("ROLLBACK");
-			console.error("Database transaction error:", dbErr);
-			return NextError.error("Database write failed", 500);
-		} finally {
-			client.release();
-		}
+            if (!await objectExists(videoBucket, path)) {
+                await client.query("ROLLBACK");
+                return NextError.error("Video not found or not fully uploaded yet!", HttpError.NotFound);
+            }
 
-	} catch (err) {
-		console.error("Request handling error:", err);
-		return NextError.error("Server error", 500);
-	}
+            await client.query(`
+                DELETE FROM video
+                WHERE video_id = $1 AND uploader = $2
+            `, [videoId, user.id]);
+
+            await client.query("COMMIT");
+
+            try {
+                await deleteFolder(videoBucket, videoId);
+            } catch (err) {
+                console.error("MinIO delete failed:", err);
+            }
+
+            return NextResponse.json({success: true}, {status: 200});
+
+        } catch (dbErr) {
+            await client.query("ROLLBACK");
+            console.error("Database transaction error:", dbErr);
+            return NextError.error("Database write failed", HttpError.InternalServerError);
+        } finally {
+            client.release();
+        }
+
+    } catch (err) {
+        console.error("Request handling error:", err);
+        const message = err instanceof Error ? err.message : "Server error";
+        return NextError.error(message, HttpError.InternalServerError);
+    }
 }
