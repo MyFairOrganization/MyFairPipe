@@ -41,17 +41,20 @@ export async function POST(req: Request) {
             {expiresIn: "7d"}
         );
 
-        return NextResponse.json(
-            {
-                message: "Login successful",
-                token,
-                user: {
-                    user_id: user.user_id,
-                    email: user.user_email,
-                },
-            },
-            {status: 200}
+        const response = NextResponse.json(
+            { message: "Login successful", user: { user_id: user.user_id, email: user.user_email } },
+            { status: 200 }
         );
+
+        response.cookies.set("session", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            path: "/",
+            maxAge: 60 * 60 * 24 * 7, // 7 Tage
+        });
+
+        return response;
     } catch (err) {
         console.error(err);
         return NextResponse.json({error: "Server error"}, {status: 500});

@@ -1,28 +1,28 @@
-import {NextResponse} from "next/server";
+import {NextResponse, NextRequest} from "next/server";
 import {createBucketIfNeeded, uploadBucket, uploadFileToMinio} from "@/lib/services/minio";
 import {randomUUID} from "crypto";
 import {sendMessage} from "@/lib/services/rabbitmq";
 import {connectionPool} from "@/lib/services/postgres";
 import {getMp4Duration} from "@/lib/utils/video";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser, User} from "@/lib/auth/getUser";
+import {getUser} from "@/lib/auth/getUser";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     let client;
+
     try {
-        const userResult = await getUser(req);
+        // ====== getUser using new cookie-based getUser.ts ======
+        const user = getUser(req);
 
-        if (userResult instanceof NextError || userResult instanceof NextResponse) {
-            return userResult;
+        if (!user) {
+            return NextResponse.json({error: "Not authenticated"}, {status: 401});
         }
-
-        const user: User = userResult;
 
         const formData = await req.formData();
 
-        const file = formData.get("file") as File;
-        const title = formData.get("title") as string;
-        const description = formData.get("description") as string;
+        const file = formData.get("file") as File | null;
+        const title = formData.get("title") as string | null;
+        const description = formData.get("description") as string | null;
         const ageRestricted = formData.get("age_restricted") === "true";
 
         // -------------------------------
@@ -63,11 +63,15 @@ export async function POST(req: Request) {
         // Send RabbitMQ Jobs
         // -------------------------------
         const jobMessage = JSON.stringify({
-            job_id: id, object_key: filename
+            job_id: id,
+            object_key: filename,
         });
 
         try {
-            await Promise.all([sendMessage("resolution_jobs", jobMessage), sendMessage("transcribe_jobs", jobMessage)]);
+            await Promise.all([
+                sendMessage("resolution_jobs", jobMessage),
+                sendMessage("transcribe_jobs", jobMessage),
+            ]);
         } catch (err) {
             console.error("RabbitMQ send error:", err);
             return NextError.error("Failed to send RabbitMQ jobs.", HttpError.InternalServerError);
@@ -82,25 +86,35 @@ export async function POST(req: Request) {
         try {
             await client.query("BEGIN");
 
-            await client.query(`
-                INSERT INTO metadata (metadata_id)
-                VALUES ($1)
-            `, [metadataId]);
+            await client.query(
+                `INSERT INTO metadata (metadata_id)
+                 VALUES ($1)`,
+                [metadataId]
+            );
 
-            await client.query(`
-                INSERT INTO video (video_id, path, duration, title, description,
-                                   is_age_restricted, tested, views, uploader, metadata_id)
-                VALUES ($1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, $7, $8)
-            `, [id, `/video/${id}/master.m3u8`, duration, title, description, ageRestricted, user.id, metadataId]);
+            await client.query(
+                `INSERT INTO video
+                 (video_id, path, duration, title, description,
+                  is_age_restricted, tested, views, uploader, metadata_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, $7, $8)`,
+                [
+                    id,
+                    `/video/${id}/master.m3u8`,
+                    duration,
+                    title,
+                    description,
+                    ageRestricted,
+                    user.user_id, // <- neuer getUser user_id
+                    metadataId,
+                ]
+            );
 
             await client.query("COMMIT");
             return NextResponse.json({id: id, success: true}, {status: 200});
-
         } catch (err) {
             await client.query("ROLLBACK");
             console.error("Database error:", err);
             return NextError.error("Database write failed.", HttpError.InternalServerError);
-
         } finally {
             client.release();
         }
