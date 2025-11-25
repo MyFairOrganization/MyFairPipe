@@ -1,12 +1,11 @@
 In jeder API-Route:
 
 ```js
-const authHeader = req.headers.get("authorization");
-const token = authHeader?.split(" ")[1];
+const userResult = await getUser(req);
 
-const user = verifyToken(token);
-
-if (!user) {
-return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+if (userResult instanceof NextError || userResult instanceof NextResponse) {
+    return userResult;
 }
+
+const user: User = userResult;
 ```
