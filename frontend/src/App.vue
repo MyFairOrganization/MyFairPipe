@@ -14,10 +14,10 @@ router.push('/home');
         <RouterLink to="/home">MyFairPipe</RouterLink>
         <div class="searchbar">
           <input type="text" placeholder="Search...">
-            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 
-            9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016
+            9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5
             4.99L20.49 19l-4.99-5zM10 15a5 5 0 110-10 5 5 0 010 10z"/></svg>
-  </div>
+      </div>
         <RouterLink to="/home">Home</RouterLink>
         <RouterLink to="/login">Login</RouterLink>
         <RouterLink to="/user">User</RouterLink>
