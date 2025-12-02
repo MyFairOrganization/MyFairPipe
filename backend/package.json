@@ -11,6 +11,7 @@
     "amqplib": "^0.10.9",
     "bcryptjs": "^3.0.3",
     "formidable": "^3.5.4",
+    "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "minio": "^8.0.6",
     "mp4box": "^2.2.0",
