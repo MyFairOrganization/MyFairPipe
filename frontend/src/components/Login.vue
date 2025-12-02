@@ -5,6 +5,17 @@
 
     const email = ref<string>('')
     const password = ref<string>('')
+    const errorMessage = ref('')
+
+    const login = () => {
+      if (!email.value || !password.value) {
+        errorMessage.value = 'Bitte alle Felder ausfüllen'
+        return;
+      }
+      console.log('Register:', { email: email.value, password: password.value })
+      errorMessage.value = ''
+      router.push('/home')
+    }
 
     function register(){
         router.push({name: 'register'});
@@ -14,13 +25,13 @@
     }
 
 </script>
-    
+
 <template>
     <div class="page">
     <div class="card">
       <h1 class="title">Sign in</h1>
 
-      <form class="form" method="POST" @submit.prevent>
+      <form class="form" method="POST" @submit.prevent="login">
         <label class="label" for="email">E-Mail:</label>
         <input
           id="email"
@@ -42,7 +53,8 @@
         />
 
         <p v-on:click="register">Don't have an Account?</p>
-        <button class="btn" type="button" @click="home" >Sign in</button>
+        <div v-if="errorMessage" style="color: red">{{ errorMessage }}</div>
+        <button class="btn" type="submit" >Sign in</button>
       </form>
     </div>
   </div>
