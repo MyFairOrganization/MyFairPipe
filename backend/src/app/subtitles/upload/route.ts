@@ -1,117 +1,149 @@
 import {NextResponse} from "next/server";
 import {
-	listFilesInFolder,
-	minioClient,
-	objectExists,
-	streamToString,
-	uploadFileToMinio,
-	videoBucket
+    listFilesInFolder,
+    minioClient,
+    objectExists,
+    streamToString,
+    uploadFileToMinio,
+    videoBucket
 } from "@/lib/services/minio";
 import {randomUUID} from "crypto";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {checkUUID} from "@/lib/utils/util";
+import {getUser, User} from "@/lib/auth/getUser";
+import {connectionPool} from "@/lib/services/postgres";
+import {QueryResult} from "pg";
 
 export async function POST(req: Request) {
-	try {
-		const formData = await req.formData();
+    try {
+        const userResult = await getUser(req);
 
-		const videoId = formData.get("id") as string;
-		const file = formData.get("file") as File;
-		const language = formData.get("language") as string;
-		const language_short = formData.get("language_short") as string;
+        if (userResult instanceof NextError || userResult instanceof NextResponse) {
+            return userResult;
+        }
 
-		// -------------------------------
-		// Validation
-		// -------------------------------
-		if (!videoId || !checkUUID(videoId)) {
-			return NextError.error("Invalid video id", HttpError.BadRequest);
-		}
+        const user: User = userResult;
 
-		if (!file) {
-			return NextError.error("No file uploaded", HttpError.BadRequest);
-		}
+        const formData = await req.formData();
 
-		if (!file.name.endsWith(".vtt") && file.type !== "text/vtt") {
-			return NextError.error("Only VTT subtitle files are allowed", HttpError.BadRequest);
-		}
+        const videoId = formData.get("id") as string;
+        const file = formData.get("file") as File;
+        const language = formData.get("language") as string;
+        const language_short = formData.get("language_short") as string;
 
-		if (!language || !language_short || !language.match(/^[a-zA-Z]+(-[a-zA-Z]+)?$/)) {
-			return NextError.error("Invalid language", HttpError.BadRequest);
-		}
+        // -------------------------------
+        // Validation
+        // -------------------------------
+        if (!videoId || !checkUUID(videoId)) {
+            return NextError.error("Invalid video id", HttpError.BadRequest);
+        }
 
-		// -------------------------------
-		// Check if video exists
-		// -------------------------------
-		const videoExists = await objectExists(videoBucket, `${videoId}/master.m3u8`);
-		if (!videoExists) {
-			return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
-		}
+        if (!file) {
+            return NextError.error("No file uploaded", HttpError.BadRequest);
+        }
 
-		// -------------------------------
-		// List existing subtitles for this video
-		// -------------------------------
-		const subtitleFiles = await listFilesInFolder(videoBucket, `${videoId}/subtitles`);
+        if (!file.name.endsWith(".vtt") && file.type !== "text/vtt") {
+            return NextError.error("Only VTT subtitle files are allowed", HttpError.BadRequest);
+        }
 
-		const existingSubtitle = subtitleFiles.find(f => f.includes(`_${language_short}.vtt`));
+        if (!language || !language_short || !language.match(/^[a-zA-Z]+(-[a-zA-Z]+)?$/)) {
+            return NextError.error("Invalid language", HttpError.BadRequest);
+        }
 
-		const buffer = Buffer.from(await file.arrayBuffer());
-		let subtitleId: string;
-		let filename: string;
+        // -------------------------------
+        // Check ownership
+        // -------------------------------
+        const client = await connectionPool.connect();
+        try {
+            const ownershipResult: QueryResult = await client.query(`
+                SELECT v.video_id
+                FROM video v
+                WHERE v.video_id = $1 AND v.uploader = $2
+            `, [videoId, user.id]);
 
-		if (existingSubtitle) {
-			filename = existingSubtitle.split('/').pop()!;
-			subtitleId = filename.replace(".vtt", "");
-		} else {
-			subtitleId = randomUUID();
-			filename = `subs_${language_short}.vtt`;
-		}
-		// Upload VTT
-		await uploadFileToMinio(`${videoId}/subtitles/${filename}`, videoBucket, buffer, "text/vtt");
+            if (ownershipResult.rowCount === 0) {
+                return NextError.error("Video not found or you don't have permission to add subtitles", HttpError.NotFound);
+            }
+        } finally {
+            client.release();
+        }
 
-		// Upload subtitle playlist
-		const content = `#EXTM3U
+        // -------------------------------
+        // Check if video exists
+        // -------------------------------
+        const videoExists = await objectExists(videoBucket, `${videoId}/master.m3u8`);
+        if (!videoExists) {
+            return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
+        }
+
+        // -------------------------------
+        // List existing subtitles for this video
+        // -------------------------------
+        const subtitleFiles = await listFilesInFolder(videoBucket, `${videoId}/subtitles`);
+
+        const existingSubtitle = subtitleFiles.find(f => f.includes(`_${language_short}.vtt`));
+
+        const buffer = Buffer.from(await file.arrayBuffer());
+        let subtitleId: string;
+        let filename: string;
+
+        if (existingSubtitle) {
+            filename = existingSubtitle.split('/').pop()!;
+            subtitleId = filename.replace(".vtt", "").replace("subs_", "");
+        } else {
+            subtitleId = randomUUID();
+            filename = `subs_${language_short}.vtt`;
+        }
+
+        // Upload VTT
+        await uploadFileToMinio(`${videoId}/subtitles/${filename}`, videoBucket, buffer, "text/vtt");
+
+        // Upload subtitle playlist
+        const content = `#EXTM3U
 #EXT-X-VERSION:3
 #EXTINF:9999999,
 ${filename}
 #EXT-X-ENDLIST`;
 
-		const sub_playlist_path = `${videoId}/subtitles/${filename.replace(".vtt", ".m3u8")}`;
-		await uploadFileToMinio(sub_playlist_path, videoBucket, Buffer.from(content), "application/vnd.apple.mpegurl");
+        const sub_playlist_path = `${videoId}/subtitles/${filename.replace(".vtt", ".m3u8")}`;
+        await uploadFileToMinio(sub_playlist_path, videoBucket, Buffer.from(content), "application/vnd.apple.mpegurl");
 
-		// Update master playlist
-		const masterPlaylistPath = `${videoId}/master.m3u8`;
-		const stream = await minioClient.getObject(videoBucket, masterPlaylistPath);
-		const masterContent = await streamToString(stream);
+        // Update master playlist
+        const masterPlaylistPath = `${videoId}/master.m3u8`;
+        const stream = await minioClient.getObject(videoBucket, masterPlaylistPath);
+        const masterContent = await streamToString(stream);
 
-		if (!masterContent.trim()) {
-			return NextError.error("Master playlist is empty", HttpError.InternalServerError);
-		}
+        if (!masterContent.trim()) {
+            return NextError.error("Master playlist is empty", HttpError.InternalServerError);
+        }
 
-		const lines = masterContent.split(/\r?\n/);
+        const lines = masterContent.split(/\r?\n/);
 
-		const subtitleLine = `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="${language}",DEFAULT="NO",AUTOSELECT="NO",LANGUAGE="${language_short}",URI="subtitles/subs_${language_short}.m3u8"`;
+        const subtitleLine = `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="${language}",DEFAULT="NO",AUTOSELECT="NO",LANGUAGE="${language_short}",URI="subtitles/subs_${language_short}.m3u8"`;
 
-		let found = false;
-		const updatedLines = lines.map(line => {
-			if (line.startsWith('#EXT-X-MEDIA:TYPE=SUBTITLES') && line.includes(`LANGUAGE="${language_short}"`)) {
-				found = true;
-				return subtitleLine;
-			}
-			return line;
-		});
+        let found = false;
+        const updatedLines = lines.map(line => {
+            if (line.startsWith('#EXT-X-MEDIA:TYPE=SUBTITLES') && line.includes(`LANGUAGE="${language_short}"`)) {
+                found = true;
+                return subtitleLine;
+            }
+            return line;
+        });
 
-		if (!found) {
-			const index = updatedLines.findIndex(l => l.startsWith("#EXT-X-STREAM-INF"));
-			updatedLines.splice(index !== -1 ? index : updatedLines.length, 0, subtitleLine);
-		}
+        if (!found) {
+            const index = updatedLines.findIndex(l => l.startsWith("#EXT-X-STREAM-INF"));
+            updatedLines.splice(index !== -1 ? index : updatedLines.length, 0, subtitleLine);
+        }
 
-		const newContent = updatedLines.join("\n");
+        const newContent = updatedLines.join("\n");
 
-		await uploadFileToMinio(masterPlaylistPath, videoBucket, Buffer.from(newContent, "utf-8"), "application/vnd.apple.mpegurl");
+        await uploadFileToMinio(masterPlaylistPath, videoBucket, Buffer.from(newContent, "utf-8"), "application/vnd.apple.mpegurl");
 
-		return NextResponse.json({success: true, subtitle_id: subtitleId, filename});
-	} catch (err: any) {
-		console.error("Upload/update subtitle error:", err);
-		return NextError.error(err || "Server error.", HttpError.InternalServerError);
-	}
+        return NextResponse.json({success: true, subtitle_id: subtitleId, filename}, {status: 200});
+
+    } catch (err: any) {
+        console.error("Upload/update subtitle error:", err);
+        const message = err instanceof Error ? err.message : "Server error.";
+        return NextError.error(message, HttpError.InternalServerError);
+    }
 }

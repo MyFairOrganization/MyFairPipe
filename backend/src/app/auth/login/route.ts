@@ -10,9 +10,9 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function POST(req: Request) {
     try {
-        const {email, password} = await req.json();
+        const {user_email, password} = await req.json();
 
-        if (!email || !password) {
+        if (!user_email || !password) {
             return NextResponse.json({error: "Missing email or password"}, {status: 400});
         }
 
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
             `SELECT user_id, user_email, hashed_password
              FROM "User"
              WHERE user_email = $1`,
-            [email]
+            [user_email]
         );
 
         if (result.rowCount === 0) {
@@ -41,17 +41,20 @@ export async function POST(req: Request) {
             {expiresIn: "7d"}
         );
 
-        return NextResponse.json(
-            {
-                message: "Login successful",
-                token,
-                user: {
-                    user_id: user.user_id,
-                    email: user.user_email,
-                },
-            },
+        const response = NextResponse.json(
+            {message: "Login successful", user: {user_id: user.user_id, email: user.user_email}},
             {status: 200}
         );
+
+        response.cookies.set("session", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            path: "/",
+            maxAge: 60 * 60 * 24 * 7, // 7 Tage
+        });
+
+        return response;
     } catch (err) {
         console.error(err);
         return NextResponse.json({error: "Server error"}, {status: 500});

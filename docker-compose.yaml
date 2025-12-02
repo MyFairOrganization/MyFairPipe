@@ -102,6 +102,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASS}
       POSTGRES_DB: ${POSTGRES_DB:-appdb}
+      JWT_SECRET: ${JWT_SECRET}
     profiles: [ "dev" ]
     networks:
       - external-network
