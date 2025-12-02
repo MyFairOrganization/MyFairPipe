@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 import os
 import shutil
@@ -17,8 +15,7 @@ ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
 SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
 JOB_ID = os.getenv("JOB_ID")
 OBJECT_KEY = os.getenv("OBJECT_KEY")
-upload_bucket = "upload"
-result_bucket = "video"
+BUCKET = "videos"
 
 ENABLED_RENDITIONS = os.getenv("RENDITIONS", "360p,480p,720p,1080p").split(",")
 
@@ -63,7 +60,6 @@ def wait_for_minio(max_retries: int = 30, delay: int = 2) -> Minio | None:
 				raise RuntimeError(
 					f"MinIO not available after {max_retries} attempts: {e}"
 				)
-	return None
 
 
 def get_video_info(src: str) -> Dict:
@@ -189,8 +185,8 @@ def upload_hls_files(
 	master_file = os.path.join(output_dir, f"{base_name}_master.m3u8")
 	if os.path.exists(master_file):
 		object_path = os.path.join(base_name, "master.m3u8")
-		logging.info(f"Uploading master playlist -> {result_bucket}/{object_path}")
-		minio.fput_object(result_bucket, object_path, master_file)
+		logging.info(f"Uploading master playlist -> {BUCKET}/{object_path}")
+		minio.fput_object(BUCKET, object_path, master_file)
 
 	# Upload each rendition's files to its own folder
 	for label in renditions.keys():
@@ -199,8 +195,8 @@ def upload_hls_files(
 		# Upload playlist
 		if os.path.exists(playlist_file):
 			object_path = os.path.join(base_name, label, f"{label}.m3u8")
-			logging.info(f"Uploading {label} playlist -> {result_bucket}/{object_path}")
-			minio.fput_object(result_bucket, object_path, playlist_file)
+			logging.info(f"Uploading {label} playlist -> {BUCKET}/{object_path}")
+			minio.fput_object(BUCKET, object_path, playlist_file)
 
 		# Upload all TS segments for this rendition
 		for root, _, files in os.walk(output_dir):
@@ -212,8 +208,8 @@ def upload_hls_files(
 					new_filename = f"{label}-{segment_num}.ts"
 					object_path = os.path.join(base_name, label, new_filename)
 
-					logging.info(f"Uploading segment -> {result_bucket}/{object_path}")
-					minio.fput_object(result_bucket, object_path, local_path)
+					logging.info(f"Uploading segment -> {BUCKET}/{object_path}")
+					minio.fput_object(BUCKET, object_path, local_path)
 
 
 def main():
@@ -240,8 +236,8 @@ def main():
 
 	try:
 		# Download original file
-		logging.info(f"Downloading {OBJECT_KEY} from bucket {upload_bucket}...")
-		minio.fget_object(upload_bucket, OBJECT_KEY, original_file)
+		logging.info(f"Downloading {OBJECT_KEY} from bucket {BUCKET}...")
+		minio.fget_object(BUCKET, OBJECT_KEY, original_file)
 		logging.info("Download complete")
 
 		# Get video info and filter renditions
@@ -273,8 +269,8 @@ def main():
 		for label, local_path in mp4_paths:
 			object_name = f"{label}.mp4"
 			object_path = os.path.join(base_name, label, object_name)
-			logging.info(f"Uploading {label} MP4 -> {upload_bucket}/{object_path}")
-			minio.fput_object(result_bucket, object_path, local_path)
+			logging.info(f"Uploading {label} MP4 -> {BUCKET}/{object_path}")
+			minio.fput_object(BUCKET, object_path, local_path)
 			logging.info(f"{label} MP4 uploaded.")
 
 		# Generate HLS renditions if enabled

@@ -1,71 +1,126 @@
-import {NextResponse} from "next/server";
-import {minioClient, uploadBucket as bucket} from "@/lib/services/minio";
+import {NextResponse, NextRequest} from "next/server";
+import {createBucketIfNeeded, uploadBucket, uploadFileToMinio} from "@/lib/services/minio";
 import {randomUUID} from "crypto";
 import {sendMessage} from "@/lib/services/rabbitmq";
+import {connectionPool} from "@/lib/services/postgres";
+import {getMp4Duration} from "@/lib/utils/video";
+import NextError, {HttpError} from "@/lib/utils/error";
+import {getUser} from "@/lib/auth/getUser";
 
-// Ensure the MinIO bucket exists
-async function createBucketIfNeeded() {
-	const exists = await minioClient.bucketExists(bucket);
-	if (!exists) {
-		await minioClient.makeBucket(bucket, "us-east-1");
-	}
-}
+export async function POST(req: NextRequest) {
+    let client;
 
-// Upload file to MinIO
-async function uploadFileToMinio(filename: string, fileBuffer: Buffer, contentType: string) {
-	await minioClient.putObject(bucket, filename, fileBuffer, fileBuffer.length, {
-		"Content-Type": contentType,
-	});
-}
+    try {
+        // ====== getUser using new cookie-based getUser.ts ======
+        const user = getUser(req);
 
-// Handle the file upload and message queuing
-export async function POST(req: Request) {
-	try {
-		const formData = await req.formData();
+        if (!user) {
+            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+        }
 
-		const file = formData.get("file") as File;
+        const formData = await req.formData();
 
-		if (!file) {
-			return NextResponse.json({error: "No file uploaded"}, {status: 400});
-		}
+        const file = formData.get("file") as File | null;
+        const title = formData.get("title") as string | null;
+        const description = formData.get("description") as string | null;
+        const ageRestricted = formData.get("age_restricted") === "true";
 
-		if (!file.type.startsWith("video/")) {
-			return NextResponse.json({error: "Only video files are allowed"}, {status: 400});
-		}
+        // -------------------------------
+        // Request validation
+        // -------------------------------
+        if (!file) {
+            return NextError.error("No files uploaded.", HttpError.BadRequest);
+        }
 
-		const bytes = await file.arrayBuffer();
-		const buffer = Buffer.from(bytes);
+        if (!title || !description) {
+            return NextError.error("Title and description are required.", HttpError.BadRequest);
+        }
 
-		const id = randomUUID();
+        if (!file.type.startsWith("video/")) {
+            return NextError.error("Wrong file type. Only video files are allowed.", HttpError.BadRequest);
+        }
 
-		const extension = file.name.split('.').pop() || 'mp4';
-		const filename = `${id}.${extension}`;
+        // -------------------------------
+        // Prepare file
+        // -------------------------------
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const id = randomUUID();
+        const extension = file.name.split(".").pop() || "mp4";
+        const filename = `${id}.${extension}`;
 
-		await createBucketIfNeeded();
-		await uploadFileToMinio(filename, buffer, file.type);
+        let duration: number | null = null;
+        if (file.type === "video/mp4" || file.name.endsWith(".mp4") || file.name.endsWith(".mov")) {
+            duration = await getMp4Duration(buffer);
+        }
 
-		const msg = {
-			job_id: id,
-			object_key: filename,
-		};
+        // -------------------------------
+        // Upload file to MinIO
+        // -------------------------------
+        await createBucketIfNeeded(uploadBucket);
+        await uploadFileToMinio(filename, uploadBucket, buffer, file.type);
 
-		try {
-			await Promise.all([
-				sendMessage("resolution_jobs", JSON.stringify(msg)),
-				sendMessage("transcribe_jobs", JSON.stringify(msg)),
-			]);
-		} catch (rabbitError) {
-			console.error("Error sending message to RabbitMQ:", rabbitError);
-			return NextResponse.json({error: "Failed to send message to RabbitMQ"}, {status: 500});
-		}
+        // -------------------------------
+        // Send RabbitMQ Jobs
+        // -------------------------------
+        const jobMessage = JSON.stringify({
+            job_id: id,
+            object_key: filename,
+        });
 
-		return NextResponse.json({
-			message: "Upload successful",
-			filename: filename
-		});
+        try {
+            await Promise.all([
+                sendMessage("resolution_jobs", jobMessage),
+                sendMessage("transcribe_jobs", jobMessage),
+            ]);
+        } catch (err) {
+            console.error("RabbitMQ send error:", err);
+            return NextError.error("Failed to send RabbitMQ jobs.", HttpError.InternalServerError);
+        }
 
-	} catch (error: any) {
-		console.error("Error during file upload:", error);
-		return NextResponse.json({error: error.message || "Upload failed"}, {status: 500});
-	}
+        // -------------------------------
+        // Database Transaction
+        // -------------------------------
+        const metadataId = randomUUID();
+        client = await connectionPool.connect();
+
+        try {
+            await client.query("BEGIN");
+
+            await client.query(
+                `INSERT INTO metadata (metadata_id)
+                 VALUES ($1)`,
+                [metadataId]
+            );
+
+            await client.query(
+                `INSERT INTO video
+                 (video_id, path, duration, title, description,
+                  is_age_restricted, tested, views, uploader, metadata_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, $7, $8)`,
+                [
+                    id,
+                    `/video/${id}/master.m3u8`,
+                    duration,
+                    title,
+                    description,
+                    ageRestricted,
+                    user.user_id, // <- neuer getUser user_id
+                    metadataId,
+                ]
+            );
+
+            await client.query("COMMIT");
+            return NextResponse.json({id: id, success: true}, {status: 200});
+        } catch (err) {
+            await client.query("ROLLBACK");
+            console.error("Database error:", err);
+            return NextError.error("Database write failed.", HttpError.InternalServerError);
+        } finally {
+            client.release();
+        }
+    } catch (err: any) {
+        console.error("Upload processing error:", err);
+        const message = err instanceof Error ? err.message : "Server error.";
+        return NextError.error(message, HttpError.InternalServerError);
+    }
 }
