@@ -10,8 +10,6 @@ import {getUser} from "@/lib/auth/getUser";
 export async function POST(req: NextRequest) {
     let client;
 
-    // return NextResponse.json({error: "Test"}, {status: 100});
-
     try {
         // ====== getUser using new cookie-based getUser.ts ======
         const user = getUser(req);
@@ -52,8 +50,7 @@ export async function POST(req: NextRequest) {
 
         let duration: number | null = null;
         if (file.type === "video/mp4" || file.name.endsWith(".mp4") || file.name.endsWith(".mov")) {
-            // Temporär kommentiert, da sonst Fehler geworfen wird.
-            // duration = await getMp4Duration(buffer);
+            duration = await getMp4Duration(buffer);
         }
 
         // -------------------------------
