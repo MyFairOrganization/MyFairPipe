@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-ARG BASE_IMAGE=/python-base:latest
+ARG BASE_IMAGE=python-base:latest
 
 FROM ${BASE_IMAGE}
 WORKDIR /app
