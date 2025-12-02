@@ -14,13 +14,13 @@
     }
 
 </script>
-    
+
 <template>
     <div class="page">
     <div class="card">
       <h1 class="title">Sign in</h1>
 
-      <form class="form" method="POST" @submit.prevent>
+      <form class="form" method="POST" @submit.prevent onsubmit="home()">
         <label class="label" for="email">E-Mail:</label>
         <input
           id="email"

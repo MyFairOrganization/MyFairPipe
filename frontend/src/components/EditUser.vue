@@ -31,7 +31,7 @@ function user() {
   <div class="container">
     <div class="pfp-container">
       <img class="pfp" :src="userImage" alt="Profile Picture" />
-      <input type="file" @change="handleFileUpload" />
+      <input type="file" accept="image/*" @change="handleFileUpload" />
     </div>
 
     <div class="user">

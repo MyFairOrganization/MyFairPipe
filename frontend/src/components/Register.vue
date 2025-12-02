@@ -12,8 +12,10 @@
     if (!email.value || !password.value || !confirmPassword.value) {
         errorMessage.value = 'Bitte alle Felder ausfüllen';
         return;
+    } else {
+      router.push('/home');
     }
-    
+
     if (password.value !== confirmPassword.value) {
         errorMessage.value = 'Passwörter stimmen nicht überein';
         return;
@@ -21,15 +23,11 @@
     console.log('Register:', { email: email.value, password: password.value });
     errorMessage.value = '';
     };
-    
+
     localStorage.setItem('user', JSON.stringify({
         email: email.value,
         password: password.value
     }));
-
-    function home() {
-        router.push('/home');
-    }
 
 </script>
 
@@ -50,7 +48,7 @@
             <input id="confirmPassword" v-model="confirmPassword" type="password" placeholder="Repeat" />
         </div>
         <div v-if="errorMessage" style="color: red">{{ errorMessage }}</div>
-        <button type="submit" v-on:click="home()">Sign in</button>
+        <button type="submit">Sign in</button>
         </form>
     </div>
 </template>
