@@ -2,7 +2,7 @@
 import { h } from 'vue'
 import { useRouter } from 'vue-router'
 
-const videoPath = 'https://calls.ars.electronica.art/2025/u19/asset/1068863'
+export const videoPath = 'https://calls.ars.electronica.art/2025/u19/asset/1068863'
 const imagePath =
   'https://static.vecteezy.com/ti/gratis-vektor/p1/7160087-video-symbol-video-symbol-play-video-zeichen-kostenlos-vektor.jpg'
 
