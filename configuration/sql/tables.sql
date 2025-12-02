@@ -67,7 +67,8 @@ CREATE TABLE Video (
     views INTEGER DEFAULT 0,
     uploader INTEGER REFERENCES "User"(user_id) ON DELETE CASCADE,
     thumbnail_id INTEGER REFERENCES Thumbnail(thumbnail_id) ON DELETE SET NULL,
-    metadata_id INTEGER REFERENCES Metadata(metadata_id) ON DELETE CASCADE
+    likes INTEGER DEFAULT 0,
+    dislikes INTEGER DEFAULT 0
 );
 
 -- Category table
@@ -176,11 +177,10 @@ SELECT
     v.tested,
     u.username AS uploader_username,
     u.displayname AS uploader_displayname,
-    m.likes,
-    m.dislikes
+    v.likes,
+    v.dislikes
 FROM Video v
-LEFT JOIN "User" u ON v.uploader = u.user_id
-LEFT JOIN Metadata m ON v.metadata_id = m.metadata_id;
+LEFT JOIN "User" u ON v.uploader = u.user_id;
 
 -- View for user statistics
 CREATE VIEW User_Statistics AS
@@ -207,3 +207,230 @@ COMMENT ON TABLE Watch_History IS 'Tracks which users watched which videos and f
 COMMENT ON TABLE Like_Video IS 'Tracks user likes/dislikes on videos';
 COMMENT ON TABLE Like_Comment IS 'Tracks user likes/dislikes on comments';
 COMMENT ON TABLE Subscriber IS 'User subscription relationships';
+
+INSERT INTO "User" (user_email, hashed_password, username, displayname)
+VALUES ('testuser@example.com', 'hashedpassword', 'testuser', 'Test User');
+INSERT INTO "User" (user_email, hashed_password, username, displayname)
+VALUES ('otheruser@example.com', 'hashedpassword', 'otheruser', 'Other User');
+
+-- 2. Insert metadata
+INSERT INTO Metadata (likes, dislikes)
+VALUES (0, 0);
+
+SELECT * FROM "User";
+
+-- 3. Insert video referencing user_id = 1 and metadata_id = 1
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video1.mp4', 'Test Video', 'This is a test video', 120, 1);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video2.mp4', 'Test Video 2', 'This is test video 2', 120, 2);
+INSERT INTO Video (path, title, description, duration, uploader)
+VALUES ('/videos/video3.mp4', 'Test Video 3', 'This is test video 3', 120, 1);
+
+SELECT * FROM video;
+
+-- Optional: check the Like_Video table
+SELECT * FROM Like_Video;
+
+SELECT lv.is_like, v.likes, v.dislikes, u.username
+FROM like_video lv
+         JOIN "User" u ON u.user_id = lv.user_id
+         JOIN video v ON v.video_id = lv.video_id
+WHERE u.username = 'testuser' AND v.video_id = 1;
+
+SELECT * FROM Video;
+SELECT * FROM Like_Video;
