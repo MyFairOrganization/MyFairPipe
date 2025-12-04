@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { createVID, createIMG } from './Content.vue'
+import { ref } from "vue";
 const route = useRoute()
 const props = { id: route.query.id as string, desc: route.query.desc as string }
+const liked = ref(false)
+const disliked = ref(false)
 
 function like() {
-	console.log(props.id + ' liked!')
+  liked.value = !liked.value
+  disliked.value = false
+	console.log(liked.value + props.id + ' liked!')
 }
 
 function dislike() {
-	console.log(props.id + ' disliked!')
+  disliked.value = !disliked.value
+  liked.value = false
+	console.log(disliked.value + props.id + ' disliked!')
 }
 
 function share() {
@@ -31,8 +38,8 @@ function postComment(){
         <div id="underVideo">
           <h2>{{props.desc}}</h2>
           <div class="interactivePanel">
-            <input class="interactive" id="like" type="image" src="/like.svg" v-on:click="like()" />
-            <input class="interactive" id="dislike" type="image" src="/dislike.svg" v-on:click="dislike()" />
+            <input class="interactive" id="like" type="image" :src="liked ? '/liked.svg' : '/like.svg'" v-on:click="like()" />
+            <input class="interactive" id="dislike" type="image" :src="disliked ? '/disliked.svg' : '/dislike.svg'" v-on:click="dislike()" />
             <input class="interactive" id="share" type="image" src="/share.svg" v-on:click="share()" />
             <input class="interactive" id="download" type="image" src="/download.svg" v-on:click="download()" />
           </div>
