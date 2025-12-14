@@ -9,10 +9,34 @@ import { createIMG } from './Content.vue'
       :key="i"
       :is="
         createIMG(
-          'https://static.vecteezy.com/ti/gratis-vektor/p1/7160087-video-symbol-video-symbol-play-video-zeichen-kostenlos-vektor.jpg',
+          i,
           'testVideo' + i,
         )
       "
     />
   </div>
 </template>
+
+<style>
+.thumbnail {
+  width: 320px;
+  height: 180px;
+  border-radius: 15px;
+}
+
+.image-block:hover {
+  color: #98C1D9;
+}
+
+.video-block,image-block p {
+  text-align: left;
+}
+
+#videos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  width: 100%;
+  align-items: start;
+}
+</style>

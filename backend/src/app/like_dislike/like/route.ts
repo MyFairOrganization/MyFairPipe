@@ -1,8 +1,16 @@
 import { connectionPool } from "@/lib/services/postgres";
 import { NextRequest, NextResponse } from "next/server";
+import NextError, { HttpError } from "@/lib/utils/error";
 
 async function like(videoID: number, username: string) {
   const client = await connectionPool.connect();
+
+  const test = `
+    SELECT * FROM video;
+  `;
+
+  const result = await client.query(test);
+  console.log(result);
 
   // SQL query to check if user already liked video
   const query = `
@@ -17,16 +25,11 @@ async function like(videoID: number, username: string) {
 
     var is_like :boolean | null;
 
-		// sets is_like to null or is_like from DB if it exists or not
+    // sets is_like to null or is_like from DB if it exists or not
     try {
       is_like = result.rows[0].is_like;
     } catch (e) {
       is_like = null;
-    }
-
-    // Check if User already liked videos => returns if true
-    if (result.rows.length > 0 && is_like) {
-      return username + " already liked!";
     }
 
     // SELECT UserID for future queries
@@ -39,17 +42,42 @@ async function like(videoID: number, username: string) {
     // UserID from SELECT
     const userID = (await client.query(selectUID, [username])).rows[0].user_id;
 
-		// Check if like-entry has to be created in DB
+    // Check if User already liked videos => returns if true
+    if (result.rows.length > 0 && is_like) {
+      // Updates LikeCount in Metadata
+      const updateCount = `
+        UPDATE video
+        SET likes = likes + $1
+        WHERE video_id = $2;
+      `;
+
+      var updateLikes = -1;
+
+      await client.query(updateCount, [updateLikes, videoID]);
+
+      // SQL query for deleting like from video
+      const deleteLV = `
+      DELETE FROM like_video
+      WHERE user_id = $1 AND video_id = $2
+    `;
+
+      // Insert gets executed
+      await client.query(deleteLV, [userID, videoID]);
+
+      return false;
+    }
+
+    // Check if like-entry has to be created in DB
     if (is_like === null) { // Entry has to be created
-			// SQL query for User to like Video
-			const insertLV = `
+      // SQL query for User to like Video
+      const insertLV = `
       INSERT INTO Like_Video (user_id, video_id, is_like)
       VALUES ($1, $2, TRUE)
     `;
 
-			// Insert gets executed
-			await client.query(insertLV, [userID, videoID]);
-		} else if (!is_like) { // Entry has to be updated from dislike to like
+      // Insert gets executed
+      await client.query(insertLV, [userID, videoID]);
+    } else if (!is_like) { // Entry has to be updated from dislike to like
       // LV Entry gets updated
       const updateLV = `
         UPDATE Like_Video
@@ -57,34 +85,31 @@ async function like(videoID: number, username: string) {
         WHERE user_id = $1 AND video_id = $2;
       `;
 
-			// Query gets executed
+      // Query gets executed
       await client.query(updateLV, [userID, videoID]);
     }
 
-		// SELECTs Metadata_id for next step (Update likes/dislikes)
-		const selectMID = `
-      SELECT metadata_id
-      FROM video
-      WHERE video_id = $1
-    `;
-
-		const metadata_id = (await client.query(selectMID, [videoID])).rows[0].metadata_id;
-
-		// Updates LikeCount in Metadata
+    // Updates LikeCount in Metadata
     const updateCount = `
-        UPDATE Metadata
+        UPDATE Video
         SET likes = likes + $1, dislikes = dislikes + $2
-        WHERE metadata_id = $3;
+        WHERE video_id = $3;
       `;
 
-		// value that likes are increased by
-    var updateLikes = 1;
-		// -1 if false, 0 if null
+    // value that likes are increased by
+    updateLikes = 1;
+    // -1 if false, 0 if null
     var updateDislikes :number = is_like === null ? 0 : -1;
 
-    await client.query(updateCount, [updateLikes, updateDislikes, metadata_id]);
+    await client.query(updateCount, [updateLikes, updateDislikes, videoID]);
 
-    return username + " liked!";
+    return true;
+  } catch (err) {
+    if (err.message.includes("user")) {
+      throw new Error("'user_id does not point to existing User'");
+    } else if (err.message.includes("video")) {
+      throw new Error("'video_id does not point to existing Video'");
+    }
   } finally {
     client.release();
   }
@@ -97,9 +122,9 @@ export async function GET(req: NextRequest) {
     const username = searchParams.get('username');
 
     const result = await like(videoID, username);
-    return NextResponse.json({ result });
+    return NextResponse.json({ result }, {status: 200});
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Fehler beim Like"}, { status: 500 });
+    return NextError.error(err + "", HttpError.BadRequest);
   }
 }

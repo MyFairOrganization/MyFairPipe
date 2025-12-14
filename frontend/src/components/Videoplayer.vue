@@ -2,21 +2,52 @@
 import { useRoute } from 'vue-router'
 import { createVID, createIMG } from './Content.vue'
 import { ref } from "vue";
+
 const route = useRoute()
 const props = { id: route.query.id as string, desc: route.query.desc as string }
 const liked = ref(false)
 const disliked = ref(false)
 
-function like() {
-  liked.value = !liked.value
-  disliked.value = false
-	console.log(liked.value + props.id + ' liked!')
+async function like() {
+  const params = new URLSearchParams();
+  params.append("videoID", props.id);
+  params.append("username", "testuser");
+
+  try {
+    const response = await fetch(`http://api.localhost/like_dislike/like?${params}`);
+
+    if (response.ok) {
+      const data = await response.json();
+      liked.value = Boolean(data.result);
+      disliked.value = false;
+      console.log(data.result);
+    } else {
+      console.log(response);
+    }
+  } catch (e) {
+    console.error(e);
+  }
 }
 
-function dislike() {
-  disliked.value = !disliked.value
-  liked.value = false
-	console.log(disliked.value + props.id + ' disliked!')
+async function dislike() {
+  const params = new URLSearchParams();
+  params.append("videoID", props.id);
+  params.append("username", "testuser");
+
+  try {
+    const response = await fetch(`http://api.localhost/like_dislike/dislike?${params}`);
+
+    if (response.ok) {
+      const data = await response.json();
+      disliked.value = Boolean(data.result);
+      liked.value = false;
+      console.log(data.result);
+    } else {
+      console.log(response);
+    }
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 function share() {
@@ -82,9 +113,9 @@ function postComment(){
     gap: 10px;
   }
   .player video{
-    width: 100% !important;
-    height: auto !important;
-    max-width: 100% !important;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
   }
   .interactivePanel {
     width: 100%;
