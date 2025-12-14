@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import { createIMG } from './Content.vue'
+import { onMounted, ref } from "vue";
+import Thumbnail from './Thumbnail.vue'
+import { getIMGs } from "./Content.vue";
+
+const thumbnails = ref([])
+const loading = ref(true);
+
+onMounted(async () => {
+    thumbnails.value = await getIMGs(30, 0);
+    loading.value = false;
+    console.log(thumbnails.value)
+});
 </script>
 
 <template>
-  <div class="grid grid-cols-3 gap-10 w-full items-start">
-    <component
-      v-for="i in 24"
-      :key="i"
-      :is="
-        createIMG(
-          i,
-          'testVideo' + i,
-        )
-      "
-    />
-  </div>
+    <div id="feed">
+        <!-- Show loading indicator if data is not ready -->
+        <div v-if="loading">Loading thumbnails...</div>
+
+        <!-- Render Thumbnail component only when data is ready -->
+        <Thumbnail v-else :thumbnails="thumbnails" />
+    </div>
 </template>
 
 <style>
@@ -33,10 +39,13 @@ import { createIMG } from './Content.vue'
 }
 
 #videos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
-  width: 100%;
-  align-items: start;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    width: 100%;
+}
+
+#feed {
+    justify-content: space-around;
 }
 </style>
