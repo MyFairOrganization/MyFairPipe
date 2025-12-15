@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { createIMG } from './Content.vue'
+    import { getIMGs } from './Content.vue'
     import { ref } from 'vue'
     import { useRouter } from 'vue-router'
 
@@ -22,7 +22,7 @@
                     <p id="descr">This is a brief user description.</p>
                     <button id="b1">Channel information</button>
                 </div>
-                
+
                 <div class="right">
                     <button class="btn" @click="upload">Upload Video</button>
                     <button class="btn" @click="edit">Edit Account</button>

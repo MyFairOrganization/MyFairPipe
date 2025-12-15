@@ -15,10 +15,8 @@ onMounted(async () => {
 
 <template>
     <div id="feed">
-        <!-- Show loading indicator if data is not ready -->
         <div v-if="loading">Loading thumbnails...</div>
 
-        <!-- Render Thumbnail component only when data is ready -->
         <Thumbnail v-else :thumbnails="thumbnails" />
     </div>
 </template>

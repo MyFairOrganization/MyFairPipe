@@ -89,7 +89,6 @@
     .input {
     width: 100%;
     padding: 0.5rem;
-    padding-right: 15rem;
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
