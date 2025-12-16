@@ -1,56 +1,59 @@
-<script setup lang="ts">
-    import { ref } from 'vue';
-    import { useRouter } from 'vue-router'
+<script lang="ts" setup>
+import {ref} from 'vue';
+import {useRouter} from 'vue-router'
 
-    const email = ref('');
-    const username = ref('');
-    const password = ref('');
-    const confirmPassword = ref('');
-    const errorMessage = ref('');
-    const router = useRouter();
+const email = ref('');
+const username = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const errorMessage = ref('');
+const router = useRouter();
 
-    const register = () => {
-    if (!email.value || !password.value || !confirmPassword.value) {
-        errorMessage.value = 'Please fill all fields';
-        return;
-    }
-    if (password.value !== confirmPassword.value) {
-        errorMessage.value = 'Passwords do not match';
-        return;
-    }
-    registerApi(email.value, password.value, username.value);
-    errorMessage.value = '';
+const register = () => {
+  if (!email.value || !password.value || !confirmPassword.value) {
+    errorMessage.value = 'Please fill all fields';
+    return;
+  }
+  if (password.value !== confirmPassword.value) {
+    errorMessage.value = 'Passwords do not match';
+    return;
+  }
+  registerApi(email.value, password.value, username.value);
+  errorMessage.value = '';
 
-    };
-    async function registerApi(email: string, password: string, username: string) {
-      const url = "http://localhost:3000/auth/register";
+  function registerApi(email: string, password: string, username: string) {
+    const url = "http://api.localhost/auth/register";
 
-      try {
-        const response = await fetch(url,
-          {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            method: 'POST',
-            body: JSON.stringify({
-                "user_email": email,
-                "username": username,
-                "password": password
-              }
-            )
-          });
-        if (!response.ok) {
-          errorMessage.value = 'Error: ' + response.status;
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept', 'application/json');
+
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 201) {
+          try {
+            router.push('/login');
+          } catch (e: any) {
+            errorMessage.value = 'Invalid response from server';
+          }
+        } else {
+          errorMessage.value = JSON.parse(xhr.responseText).error;
+          console.error('Request failed with status', xhr.status);
         }
-
-        const result = await response.json();
-        console.log(result);
-        // router.push('/home');
-      } catch (error: any) {
-        console.error(error.message);
       }
-    }
+    };
+
+    const body = JSON.stringify({
+      user_email: email,
+      username: username,
+      password: password
+    });
+
+    xhr.send(body);
+  }
+}
+
 </script>
 
 <template>
