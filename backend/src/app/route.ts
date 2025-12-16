@@ -7,5 +7,5 @@ import {NextResponse} from "next/server";
  * @openapi
  */
 export async function GET() {
-	return NextResponse.json({message: "Hello world!"});
+	return NextResponse.json({message: "API is running"});
 }

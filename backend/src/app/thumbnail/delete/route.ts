@@ -3,69 +3,93 @@ import {connectionPool} from "@/lib/services/postgres";
 import {minioClient, videoBucket} from "@/lib/services/minio";
 import {checkUUID} from "@/lib/utils/util";
 import NextError, {HttpError} from "@/lib/utils/error";
+import {getUser, User} from "@/lib/auth/getUser";
+import {QueryResult} from "pg";
 
 export async function DELETE(req: Request) {
-	let client;
+    let client;
 
-	try {
-		const {searchParams} = new URL(req.url);
+    try {
+        const userResult = await getUser(req);
 
-		const thumbnail_id = searchParams.get("id");
+        if (userResult instanceof NextError || userResult instanceof NextResponse) {
+            return userResult;
+        }
 
-		// -------------------------------
-		// Request validation
-		// -------------------------------
-		if (!thumbnail_id) {
-			return NextError.error("Missing id", HttpError.BadRequest);
-		}
+        const user: User = userResult;
 
-		if (!checkUUID(thumbnail_id)) {
-			return NextError.error("Invalid video id format", HttpError.BadRequest);
-		}
+        const {searchParams} = new URL(req.url);
 
-		// -------------------------------
-		// Database Transaction
-		// -------------------------------
-		client = await connectionPool.connect();
-		try {
-			await client.query("BEGIN");
+        const thumbnail_id = searchParams.get("id");
 
-			const result = await client.query(`
-                SELECT t.thumbnail_id, p.photo_id, p.path
+        // -------------------------------
+        // Request validation
+        // -------------------------------
+        if (!thumbnail_id) {
+            return NextError.error("Missing id", HttpError.BadRequest);
+        }
+
+        if (!checkUUID(thumbnail_id)) {
+            return NextError.error("Invalid thumbnail id format", HttpError.BadRequest);
+        }
+
+        // -------------------------------
+        // Database Transaction
+        // -------------------------------
+        client = await connectionPool.connect();
+        try {
+            await client.query("BEGIN");
+
+            // Check ownership and get thumbnail info
+            const result: QueryResult = await client.query(`
+                SELECT t.thumbnail_id, p.photo_id, p.path, v.uploader
                 FROM Thumbnail t
                          JOIN Photo p ON p.photo_id = t.photo_id
-                WHERE t.thumbnail_id = $1`, [thumbnail_id]);
+                         JOIN video v ON v.video_id = t.video_id
+                WHERE t.thumbnail_id = $1
+            `, [thumbnail_id]);
 
-			if (result.rowCount === 0) {
-				return NextError.error("Thumbnail not found", HttpError.NotFound);
-			}
+            if (result.rowCount === 0) {
+                await client.query("ROLLBACK");
+                return NextError.error("Thumbnail not found", HttpError.NotFound);
+            }
 
-			let {path} = result.rows[0];
+            const {path, uploader} = result.rows[0];
 
-			try {
-				await minioClient.removeObject(videoBucket, path);
-			} catch (err) {
-				console.error("MinIO delete failed:", err);
-				return NextError.error("Could not delete file from storage", HttpError.InternalServerError);
-			}
+            // Check if user owns the video
+            if (uploader !== user.id) {
+                await client.query("ROLLBACK");
+                return NextError.error("You don't have permission to delete this thumbnail", HttpError.Forbidden);
+            }
 
-			await client.query(`
-                DELETE
-                FROM Thumbnail
-                WHERE thumbnail_id = $1`, [thumbnail_id]);
+            try {
+                await minioClient.removeObject(videoBucket, path);
+            } catch (err) {
+                await client.query("ROLLBACK");
+                console.error("MinIO delete failed:", err);
+                return NextError.error("Could not delete file from storage", HttpError.InternalServerError);
+            }
 
-			await client.query("COMMIT");
-		} catch (dbErr) {
-			await client.query("ROLLBACK");
-			console.error("Database transaction error:", dbErr);
-			return NextError.error("Database write failed", HttpError.InternalServerError);
-		} finally {
-			client.release();
-		}
+            await client.query(`
+                DELETE FROM Thumbnail
+                WHERE thumbnail_id = $1
+            `, [thumbnail_id]);
 
-		return NextResponse.json({success: true});
-	} catch (err) {
-		console.error(err);
-		return NextError.error("Database error", HttpError.InternalServerError);
-	}
+            await client.query("COMMIT");
+
+            return NextResponse.json({success: true}, {status: 200});
+
+        } catch (dbErr) {
+            await client.query("ROLLBACK");
+            console.error("Database transaction error:", dbErr);
+            return NextError.error("Database write failed", HttpError.InternalServerError);
+        } finally {
+            client.release();
+        }
+
+    } catch (err) {
+        console.error("Request handling error:", err);
+        const message = err instanceof Error ? err.message : "Server error";
+        return NextError.error(message, HttpError.InternalServerError);
+    }
 }
