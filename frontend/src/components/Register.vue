@@ -36,16 +36,16 @@
         <h1 class="title">Create New Account</h1>
         <form @submit.prevent="register">
         <div>
-            <label for="email" class="label">E-Mail:</label>
-            <input id="email" class="input" v-model="email" type="email" placeholder="E-Mail" />
+            <label for="email">E-Mail:</label>
+            <input id="email" v-model="email" type="email" placeholder="E-Mail" />
         </div>
         <div>
-            <label for="password"  class="label">Password:</label>
-            <input id="password" class="input" v-model="password" type="password" placeholder="Password" />
+            <label for="password">Password:</label>
+            <input id="password" v-model="password" type="password" placeholder="Password" />
         </div>
         <div>
-            <label for="confirmPassword"  class="label">Repeat Password:</label>
-            <input id="confirmPassword" class="input" v-model="confirmPassword" type="password" placeholder="Repeat" />
+            <label for="confirmPassword">Repeat Password:</label>
+            <input id="confirmPassword" v-model="confirmPassword" type="password" placeholder="Repeat" />
         </div>
         <div v-if="errorMessage" style="color: red">{{ errorMessage }}</div>
         <button type="submit">Sign in</button>
@@ -76,6 +76,24 @@
         margin-bottom: 0.5rem;
     }
 
+    .register-container label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .register-container input {
+        width: 100%;
+        padding: 0.5rem;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        font-size: 14px;
+    }
+
     button {
         padding: 0.5rem 1rem;
         background-color: #293241;
@@ -88,23 +106,6 @@
 
     button:hover {
         background-color: #1f2833;
-    }
-    .label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-size: 15px;
-      font-weight: 600;
-      color: #374151;
-    }
-
-    .input {
-      width: 100%;
-      padding: 0.5rem;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      margin-bottom: 1rem;
-      font-size: 14px;
     }
 
     .input::placeholder {
