@@ -25,7 +25,7 @@ async function like(videoID: number, username: string) {
 
     var is_like :boolean | null;
 
-		// sets is_like to null or is_like from DB if it exists or not
+    // sets is_like to null or is_like from DB if it exists or not
     try {
       is_like = result.rows[0].is_like;
     } catch (e) {
@@ -64,20 +64,20 @@ async function like(videoID: number, username: string) {
       // Insert gets executed
       await client.query(deleteLV, [userID, videoID]);
 
-      return "removed like from " + username;
+      return false;
     }
 
-		// Check if like-entry has to be created in DB
+    // Check if like-entry has to be created in DB
     if (is_like === null) { // Entry has to be created
-			// SQL query for User to like Video
-			const insertLV = `
+      // SQL query for User to like Video
+      const insertLV = `
       INSERT INTO Like_Video (user_id, video_id, is_like)
       VALUES ($1, $2, TRUE)
     `;
 
-			// Insert gets executed
-			await client.query(insertLV, [userID, videoID]);
-		} else if (!is_like) { // Entry has to be updated from dislike to like
+      // Insert gets executed
+      await client.query(insertLV, [userID, videoID]);
+    } else if (!is_like) { // Entry has to be updated from dislike to like
       // LV Entry gets updated
       const updateLV = `
         UPDATE Like_Video
@@ -85,25 +85,25 @@ async function like(videoID: number, username: string) {
         WHERE user_id = $1 AND video_id = $2;
       `;
 
-			// Query gets executed
+      // Query gets executed
       await client.query(updateLV, [userID, videoID]);
     }
 
-		// Updates LikeCount in Metadata
+    // Updates LikeCount in Metadata
     const updateCount = `
         UPDATE Video
         SET likes = likes + $1, dislikes = dislikes + $2
         WHERE video_id = $3;
       `;
 
-		// value that likes are increased by
+    // value that likes are increased by
     updateLikes = 1;
-		// -1 if false, 0 if null
+    // -1 if false, 0 if null
     var updateDislikes :number = is_like === null ? 0 : -1;
 
     await client.query(updateCount, [updateLikes, updateDislikes, videoID]);
 
-    return username + " liked!";
+    return true;
   } catch (err) {
     if (err.message.includes("user")) {
       throw new Error("'user_id does not point to existing User'");

@@ -57,7 +57,7 @@ async function dislike(videoID: number, username: string) {
       // Insert gets executed
       await client.query(deleteLV, [userID, videoID]);
 
-      return "removed dislike from " + username;
+      return false;
     }
 
     // Check if dislike-entry has to be created in DB
@@ -94,7 +94,7 @@ async function dislike(videoID: number, username: string) {
 
     await client.query(updateCount, [updateLikes, updateDislikes, videoID]);
 
-    return username + " disliked!";
+    return true;
   } catch (err) {
     if (err.message.includes("user")) {
       throw new Error("'user_id does not point to existing User'");

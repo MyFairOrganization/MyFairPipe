@@ -21,19 +21,17 @@ function handleFileUpload(event: Event) {
   }
 }
 
-function upload() {
-  router.push('/upload')
+function user() {
+  router.push('/user')
 }
-function edit() {
-  router.push('/edituser')
-}
+
 </script>
 
 <template>
   <div class="container">
     <div class="pfp-container">
       <img class="pfp" :src="userImage" alt="Profile Picture" />
-      <input type="file" @change="handleFileUpload" />
+      <input type="file" accept="image/*" @change="handleFileUpload" />
     </div>
 
     <div class="user">
@@ -44,8 +42,7 @@ function edit() {
       </div>
 
       <div class="right">
-        <button class="btn" @click="upload">Upload Video</button>
-        <button class="btn" @click="edit">Edit Account</button>
+        <button class="btn" @click="user">Apply</button>
       </div>
     </div>
   </div>
@@ -92,6 +89,7 @@ function edit() {
   justify-content: space-between;
   align-items: flex-start;
   width: 900px;
+  height: 250px;
   background-color: #98c1d9;
   padding: 20px 30px;
   border-radius: 10px;
