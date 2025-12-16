@@ -223,9 +223,8 @@ COMMENT ON TABLE Like_Comment IS 'Tracks user likes/dislikes on comments';
 COMMENT ON TABLE Subscriber IS 'User subscription relationships';
 
 INSERT INTO "User" (user_email, hashed_password, username, displayname)
-VALUES ('testuser@example.com', 'hashedpassword', 'testuser', 'Test User');
-INSERT INTO "User" (user_email, hashed_password, username, displayname)
-VALUES ('otheruser@example.com', 'hashedpassword', 'otheruser', 'Other User');
+VALUES ('test@example.com', '$2b$10$5Kptlt8AdBeYQfFxRif6KOpTfQKMw4vth3JKwLzel4T4irkvATLri', 'testuser', 'Test User');
+-- PW: 123456
 
 -- 2. Insert metadata
 INSERT INTO Metadata (likes, dislikes)
