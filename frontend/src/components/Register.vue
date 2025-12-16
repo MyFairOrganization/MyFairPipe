@@ -22,10 +22,9 @@ const register = () => {
   errorMessage.value = '';
 
   function registerApi(email: string, password: string, username: string) {
-    const url = "http://api.localhost/auth/register";
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', url, true);
+    xhr.open('POST', 'http://api.localhost/auth/register', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept', 'application/json');
 
