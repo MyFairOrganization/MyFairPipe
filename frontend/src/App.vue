@@ -44,4 +44,5 @@ router.push('/home');
       <h2 class="pl-8">MyFairPipe</h2>
     </footer>
   </div>
+  </div>
 </template>
