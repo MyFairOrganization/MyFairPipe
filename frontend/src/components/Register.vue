@@ -3,6 +3,7 @@
     import { useRouter } from 'vue-router'
 
     const email = ref('');
+    const username = ref('');
     const password = ref('');
     const confirmPassword = ref('');
     const errorMessage = ref('');
@@ -10,31 +11,56 @@
 
     const register = () => {
     if (!email.value || !password.value || !confirmPassword.value) {
-        errorMessage.value = 'Bitte alle Felder ausfüllen';
+        errorMessage.value = 'Please fill all fields';
         return;
-    } else {
-      router.push('/home');
     }
-
     if (password.value !== confirmPassword.value) {
-        errorMessage.value = 'Passwörter stimmen nicht überein';
+        errorMessage.value = 'Passwords do not match';
         return;
     }
-    console.log('Register:', { email: email.value, password: password.value });
+    registerApi(email.value, password.value, username.value);
     errorMessage.value = '';
+
     };
+    async function registerApi(email: string, password: string, username: string) {
+      const url = "http://localhost:3000/auth/register";
 
-    localStorage.setItem('user', JSON.stringify({
-        email: email.value,
-        password: password.value
-    }));
+      try {
+        const response = await fetch(url,
+          {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify({
+                "user_email": email,
+                "username": username,
+                "password": password
+              }
+            )
+          });
+        if (!response.ok) {
+          errorMessage.value = 'Error: ' + response.status;
+        }
 
+        const result = await response.json();
+        console.log(result);
+        // router.push('/home');
+      } catch (error: any) {
+        console.error(error.message);
+      }
+    }
 </script>
 
 <template>
     <div class="register-container">
         <h2>Create New Account</h2>
         <form @submit.prevent="register">
+        <div>
+            <label for="username">Username:</label>
+            <input id="username" v-model="username" type="text" placeholder="Username" />
+        </div>
         <div>
             <label for="email">E-Mail:</label>
             <input id="email" v-model="email" type="email" placeholder="E-Mail" />
