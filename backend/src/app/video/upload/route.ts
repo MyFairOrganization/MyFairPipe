@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
 		const file = formData.get("file") as File | null;
 		const title = formData.get("title") as string | null;
 		const description = formData.get("description") as string | null;
-		const ageRestricted = formData.get("age_restricted") === "true";
 
 		// -------------------------------
 		// Request validation
@@ -100,8 +99,8 @@ export async function POST(req: NextRequest) {
 			await client.query(`INSERT INTO video
                                 (video_id, path, duration, title, description,
                                  is_age_restricted, tested, views, uploader, metadata_id)
-                                VALUES ($1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, $7,
-                                        $8)`, [id, `/video/${id}/master.m3u8`, duration, title, description, ageRestricted, user.user_id, // <- neuer getUser user_id
+                                VALUES ($1, $2, $3, $4, $5, DEFAULT, DEFAULT, DEFAULT, $7,
+                                        $8)`, [id, `/video/${id}/master.m3u8`, duration, title, description, user.user_id, // <- neuer getUser user_id
 				metadataId,]);
 
 			await client.query("COMMIT");
