@@ -1,16 +1,18 @@
 import { connectionPool } from "@/lib/services/postgres";
 import { NextRequest, NextResponse } from "next/server";
 import NextError, { HttpError } from "@/lib/utils/error";
+import { c } from "mp4box/dist/log-DO1-_KSL";
 
 async function like(videoID: number, username: string) {
   const client = await connectionPool.connect();
+
+  await client.query("BEGIN");
 
   const test = `
     SELECT * FROM video;
   `;
 
   const result = await client.query(test);
-  console.log(result);
 
   // SQL query to check if user already liked video
   const query = `
@@ -40,7 +42,11 @@ async function like(videoID: number, username: string) {
     `;
 
     // UserID from SELECT
-    const userID = (await client.query(selectUID, [username])).rows[0].user_id;
+    const uidResult = await client.query(selectUID, [username]);
+    if (uidResult.rows.length < 1) {
+      return NextError.error("Error with UID", HttpError.BadRequest)
+    }
+    const userID = uidResult.rows[0].user_id;
 
     // Check if User already liked videos => returns if true
     if (result.rows.length > 0 && is_like) {
@@ -63,6 +69,8 @@ async function like(videoID: number, username: string) {
 
       // Insert gets executed
       await client.query(deleteLV, [userID, videoID]);
+
+      await client.query("COMMIT")
 
       return false;
     }
@@ -103,13 +111,13 @@ async function like(videoID: number, username: string) {
 
     await client.query(updateCount, [updateLikes, updateDislikes, videoID]);
 
+    const selectCount = `SELECT likes FROM video WHERE video_id = $1;`;
+
+    await client.query("COMMIT");
+
     return true;
   } catch (err) {
-    if (err.message.includes("user")) {
-      throw new Error("'user_id does not point to existing User'");
-    } else if (err.message.includes("video")) {
-      throw new Error("'video_id does not point to existing Video'");
-    }
+    return NextError.error(err, HttpError.BadRequest)
   } finally {
     client.release();
   }
@@ -118,10 +126,23 @@ async function like(videoID: number, username: string) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
-    const videoID:number = Number.parseInt(searchParams.get('videoID'));
-    const username = searchParams.get('username');
+    const videoIDParam = searchParams.get('videoID');
 
-    const result = await like(videoID, username);
+    if (videoIDParam === null) {
+      return NextError.error("No Video ID", HttpError.BadRequest);
+    }
+
+    const videoID = Number.parseInt(videoIDParam, 10);
+    const usernameParam = searchParams.get('username');
+
+    if (usernameParam === null) {
+      return NextError.error("No Username", HttpError.BadRequest);
+    }
+
+    const result = await like(videoID, usernameParam);
+    if (result instanceof NextResponse) {
+      return result
+    }
     return NextResponse.json({ result }, {status: 200});
   } catch (err) {
     console.error(err);

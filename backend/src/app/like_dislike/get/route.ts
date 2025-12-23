@@ -5,11 +5,14 @@ import NextError, { HttpError } from "@/lib/utils/error";
 async function getstatus(videoID: number, username: string) {
 	const client = await connectionPool.connect();
 
+	client.query("BEGIN")
+
 	// SQL query to check if user already disliked video
 	const query = `
-    SELECT lv.is_like
+    SELECT lv.is_like, v.likes, v.dislikes
     FROM Like_Video lv
     JOIN "User" u ON u.user_id = lv.user_id
+    JOIN video v ON lv.video_id = v.video_id
     WHERE u.username = $1 AND lv.video_id = $2
   `;
 
@@ -17,7 +20,9 @@ async function getstatus(videoID: number, username: string) {
 		const result = await client.query(query, [username, videoID])
 
 		var liked: boolean
+		var likes = 0
 		var disliked: boolean
+		var dislikes = 0
 
 		if (result.rows[0] == undefined) {
 			liked = false
@@ -25,12 +30,15 @@ async function getstatus(videoID: number, username: string) {
 		} else {
 			const isLike = result.rows[0].is_like
 			liked = isLike;
+			likes = result.rows[0].likes
 			disliked = !isLike;
+			dislikes = result.rows[0].dislikes
 		}
-		return {liked, disliked}
+		return {liked, disliked, likes, dislikes}
 	} catch (err) {
 
 	} finally {
+		client.query("COMMIT")
 		client.release();
 	}
 }
@@ -38,10 +46,20 @@ async function getstatus(videoID: number, username: string) {
 export async function GET(req: NextRequest) {
 	try {
 		const { searchParams } = req.nextUrl;
-		const videoID:number = Number.parseInt(searchParams.get('videoID'));
-		const username = searchParams.get('username');
+		const videoIDParam = searchParams.get('videoID');
 
-		const result = await getstatus(videoID, username);
+		if (videoIDParam === null) {
+			return NextError.error("No Video ID", HttpError.BadRequest);
+		}
+
+		const videoID = Number.parseInt(videoIDParam, 10);
+		const usernameParam = searchParams.get('username');
+
+		if (usernameParam === null) {
+			return NextError.error("No Username", HttpError.BadRequest);
+		}
+
+		const result = await getstatus(videoID, usernameParam);
 		return NextResponse.json({ result }, {status: 200});
 	} catch (err) {
 		console.error(err);

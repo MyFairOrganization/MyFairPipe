@@ -87,16 +87,10 @@ export async function POST(req: NextRequest) {
             await client.query("BEGIN");
 
             await client.query(
-                `INSERT INTO metadata (metadata_id)
-                 VALUES ($1)`,
-                [metadataId]
-            );
-
-            await client.query(
                 `INSERT INTO video
                  (video_id, path, duration, title, description,
-                  is_age_restricted, tested, views, uploader, metadata_id)
-                 VALUES ($1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, $7, $8)`,
+                  is_age_restricted, tested, views, uploader)
+                 VALUES ($1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, $7)`,
                 [
                     id,
                     `/video/${id}/master.m3u8`,
@@ -105,7 +99,6 @@ export async function POST(req: NextRequest) {
                     description,
                     ageRestricted,
                     user.user_id, // <- neuer getUser user_id
-                    metadataId,
                 ]
             );
 

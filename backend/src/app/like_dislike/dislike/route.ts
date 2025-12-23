@@ -96,11 +96,7 @@ async function dislike(videoID: number, username: string) {
 
     return true;
   } catch (err) {
-    if (err.message.includes("user")) {
-      throw new Error("'user_id does not point to existing User'");
-    } else if (err.message.includes("video")) {
-      throw new Error("'video_id does not point to existing Video'");
-    }
+    return NextError.error(err, HttpError.BadRequest)
   } finally {
     client.release();
   }
@@ -109,10 +105,23 @@ async function dislike(videoID: number, username: string) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
-    const videoID:number = Number.parseInt(searchParams.get('videoID'));
-    const username = searchParams.get('username');
+    const videoIDParam = searchParams.get('videoID');
 
-    const result = await dislike(videoID, username);
+    if (videoIDParam === null) {
+      return NextError.error("No Video ID", HttpError.BadRequest);
+    }
+
+    const videoID = Number.parseInt(videoIDParam, 10);
+    const usernameParam = searchParams.get('username');
+
+    if (usernameParam === null) {
+      return NextError.error("No Username", HttpError.BadRequest);
+    }
+
+    const result = await dislike(videoID, usernameParam);
+    if (result instanceof NextResponse) {
+      return result
+    }
     return NextResponse.json({ result }, {status: 200});
   } catch (err) {
     console.error(err);

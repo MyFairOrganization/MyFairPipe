@@ -1,23 +1,22 @@
-import {NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {countFilesInFolder, objectExists, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
 import {randomUUID} from "crypto";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {checkUUID} from "@/lib/utils/util";
-import {getUser, User} from "@/lib/auth/getUser";
+import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     let client;
 
     try {
-        const userResult = await getUser(req);
+        // ====== getUser using new cookie-based getUser.ts ======
+        const user = getUser(req);
 
-        if (userResult instanceof NextError || userResult instanceof NextResponse) {
-            return userResult;
+        if (!user) {
+            return NextResponse.json({error: "Not authenticated"}, {status: 401});
         }
-
-        const user: User = userResult;
 
         const formData = await req.formData();
 

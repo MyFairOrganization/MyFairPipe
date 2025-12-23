@@ -1,22 +1,21 @@
-import {NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import {minioClient, videoBucket} from "@/lib/services/minio";
 import {checkUUID} from "@/lib/utils/util";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser, User} from "@/lib/auth/getUser";
+import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
     let client;
 
     try {
-        const userResult = await getUser(req);
+        // ====== getUser using new cookie-based getUser.ts ======
+        const user = getUser(req);
 
-        if (userResult instanceof NextError || userResult instanceof NextResponse) {
-            return userResult;
+        if (!user) {
+            return NextResponse.json({error: "Not authenticated"}, {status: 401});
         }
-
-        const user: User = userResult;
 
         const {searchParams} = new URL(req.url);
 

@@ -57,13 +57,23 @@ function handleVideoUpload(event: Event) {
 
   <div class="form-container">
     <label for="title">Title:</label><br>
-    <input id="title" v-model="title" type="text" placeholder="Enter title" />
+    <input id="title" v-model="title" type="text" placeholder="Enter title" required/>
     <br>
     <label for="description">Description:</label><br>
-    <textarea id="description" v-model="description" placeholder="Enter description"></textarea>
+    <textarea id="description" v-model="description" placeholder="Enter description" required></textarea>
     <br>
     <label for="video">Video Upload:</label><br>
-    <input id="video" type="file" accept="video/*" @change="handleVideoUpload" />
+    <input id="video" type="file" accept="video/*" @change="handleVideoUpload" required/>
+    <br>
+    <br>
+    <label for="thumbnail">Thumbnail Upload:</label><br>
+    <input id="thumbnail" type="file" accept="image/*" @change="handleVideoUpload" required/>
+    <br>
+    <br>
+    <label for="subtitle">Subtitle Upload:</label><br>
+    <input id="subtitle" type="file" accept="text/vtt" @change="handleVideoUpload" /><br>
+    <input id="language" placeholder="Language" /><br>
+    <input id="language_short" placeholder="language code" />
     <br>
     <button class="upload" @click="submitForm">Upload</button>
   </div>
