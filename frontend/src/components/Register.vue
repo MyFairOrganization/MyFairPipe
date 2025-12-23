@@ -57,7 +57,7 @@ const register = () => {
 
 <template>
     <div class="register-container">
-        <h2>Create New Account</h2>
+        <h1 class="title">Create New Account</h1>
         <form @submit.prevent="register">
         <div>
             <label for="username">Username:</label>
@@ -83,40 +83,60 @@ const register = () => {
 
 <style scoped>
     .register-container {
-    max-width: 400px;
-    margin: 2rem auto;
-    padding: 2rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: white;
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: white;
+        padding-right: 10rem;
+    }
+
+    .title {
+        font-size: 28px;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        color: #111827;
     }
 
     .register-container div {
-    margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
     }
 
     .register-container label {
-    display: block;
-    margin-bottom: 0.5rem;
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 15px;
+        font-weight: 600;
+        color: #374151;
     }
 
     .register-container input {
-    width: 100%;
-    padding: 0.5rem;
-    box-sizing: border-box;
+        width: 100%;
+        padding: 0.5rem;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        font-size: 14px;
     }
 
     button {
-    padding: 0.5rem 1rem;
-    background-color: #293241;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+        padding: 0.5rem 1rem;
+        background-color: #293241;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
     }
 
     button:hover {
-    background-color: #1f2833;
+        background-color: #1f2833;
+    }
+
+    .input::placeholder {
+      color: #9aa4b2;
     }
 </style>

@@ -9,7 +9,8 @@ const router = useRouter()
   <div>
     <nav class="header">
       <div class="row">
-        <RouterLink to="/home">MyFairPipe</RouterLink>
+        <img src="@/assets/logo.svg" alt="Logo" height="40" />
+        <RouterLink to="/home" class="navtxt">MyFairPipe</RouterLink>
         <div class="searchbar">
           <input type="text" placeholder="Search..." />
           <svg viewBox="0 0 24 24">
@@ -20,9 +21,9 @@ const router = useRouter()
             />
           </svg>
         </div>
-        <RouterLink to="/home">Home</RouterLink>
-        <RouterLink to="/login">Login</RouterLink>
-        <RouterLink to="/user">User</RouterLink>
+        <RouterLink to="/home" class="navtxt">Home</RouterLink>
+        <RouterLink to="/user" class="navtxt">User</RouterLink>
+        <RouterLink to="/login" class="navtxt" id="loginbtn">Login</RouterLink>
       </div>
     </nav>
 
@@ -42,6 +43,12 @@ const router = useRouter()
   z-index: 1000;
 }
 
+.navtxt {
+  font-size: 20px;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
 video {
   z-index: 1;
 }
@@ -59,7 +66,6 @@ nav a.router-link-exact-active {
 nav a {
   display: inline-block;
   padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
   display: flex;
   align-items: center;
 }
@@ -104,7 +110,7 @@ nav a:first-of-type {
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 240px;
+  width: 500px;
 }
 
 .searchbar input {
@@ -118,5 +124,13 @@ nav a:first-of-type {
   width: 18px;
   height: 18px;
   fill: gray;
+}
+
+#loginbtn {
+  border: 1px solid var(--color-text);
+  background-color: black;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 6px;
 }
 </style>
