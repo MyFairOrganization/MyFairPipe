@@ -48,8 +48,9 @@ export async function POST(req: Request) {
 
         response.cookies.set("session", token, {
             httpOnly: true,
-            secure: false,       // lokal
-            sameSite: "lax",
+            secure: false,
+            sameSite: "lax",      // Cross-Site erlaubt
+            domain: ".myfairpipe.com",
             path: "/",
             maxAge: 60 * 60 * 24 * 7,
         });
