@@ -3,7 +3,7 @@ import amqp from 'amqplib';
 const connectRabbitMQ = async () => {
     let username = process.env["RABBIT_USER"] || "admin";
     let password = process.env["RABBIT_PASS"] || "admin";
-    let host = process.env["RABBIT_HOST"] || "localhost";
+    let host = process.env["RABBIT_HOST"] || "myfairpipe.com";
     let port = process.env["RABBIT_PORT"] || "5672";
 
     let url = username + ":" + password + "@" + host + ":" + port

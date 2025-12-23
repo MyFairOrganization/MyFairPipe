@@ -11,11 +11,34 @@ async function getCachedVideos(limit: number, offset: number): Promise<number[]>
 	return ids.map(id => Number(id));
 }
 
+export async function OPTIONS() {
+	return new NextResponse(null, {
+		status: 204, headers: {
+			"Access-Control-Allow-Origin": "http://myfairpipe.com",
+			"Access-Control-Allow-Credentials": "true",
+			"Access-Control-Allow-Methods": "GET, OPTIONS",
+			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+		},
+	});
+}
+
 export async function GET(req: NextRequest) {
 	try {
 		const { searchParams } = req.nextUrl;
-		const limit:number = Number.parseInt(searchParams.get('limit'));
-		const offset = Number.parseInt(searchParams.get('offset'));
+		const limitParam = searchParams.get('limit');
+		const offsetParam = searchParams.get('offset');
+
+		if (limitParam === null) {
+			return NextError.error("No Limit", HttpError.BadRequest);
+		}
+
+		const limit = Number.parseInt(limitParam, 10);
+
+		if (offsetParam === null) {
+			return NextError.error("No Offset", HttpError.BadRequest);
+		}
+
+		const offset = Number.parseInt(offsetParam, 10);
 
 		const cachedVids = await getCachedVideos(limit, offset);
 

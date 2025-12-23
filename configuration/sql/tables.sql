@@ -24,7 +24,10 @@ DROP TABLE Thumbnail CASCADE;
 CREATE TABLE Thumbnail
 (
     thumbnail_id SERIAL PRIMARY KEY,
-    photo_id     INTEGER REFERENCES Photo (photo_id) ON DELETE CASCADE
+    photo_id     INTEGER REFERENCES Photo (photo_id) ON DELETE CASCADE,
+    video_id     INT,
+    is_active    BOOLEAN,
+    FOREIGN KEY (video_id) REFERENCES video(video_id)
 );
 
 -- User table
@@ -223,9 +226,8 @@ COMMENT ON TABLE Like_Comment IS 'Tracks user likes/dislikes on comments';
 COMMENT ON TABLE Subscriber IS 'User subscription relationships';
 
 INSERT INTO "User" (user_email, hashed_password, username, displayname)
-VALUES ('testuser@example.com', 'hashedpassword', 'testuser', 'Test User');
-INSERT INTO "User" (user_email, hashed_password, username, displayname)
-VALUES ('otheruser@example.com', 'hashedpassword', 'otheruser', 'Other User');
+VALUES ('test@example.com', '$2b$10$5Kptlt8AdBeYQfFxRif6KOpTfQKMw4vth3JKwLzel4T4irkvATLri', 'testuser', 'Test User');
+-- PW: 123456
 
 -- 2. Insert metadata
 INSERT INTO Metadata (likes, dislikes)
@@ -450,7 +452,9 @@ FROM like_video lv
 WHERE u.username = 'testuser'
   AND v.video_id = 1;
 
-SELECT *
-FROM Video;
-SELECT *
-FROM Like_Video;
+SELECT video_id, title, likes, dislikes
+FROM Video
+ORDER BY likes DESC;
+SELECT video_id, username, is_like
+FROM Like_Video
+JOIN "User" U on U.user_id = Like_Video.user_id;

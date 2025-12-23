@@ -1,7 +1,8 @@
 <script setup lang="ts">
     import { getIMGs } from './Content.vue'
-    import { ref } from 'vue'
+    import { onMounted, ref } from "vue";
     import { useRouter } from 'vue-router'
+    import Thumbnail from "./Thumbnail.vue";
 
     const router = useRouter();
 
@@ -11,6 +12,15 @@
     function edit(){
         router.push('/edituser');
     }
+
+    const thumbnails = ref([])
+    const loading = ref(true);
+
+    onMounted(async () => {
+      thumbnails.value = await getIMGs(10, 0);
+      loading.value = false;
+      console.log(thumbnails.value)
+    });
 </script>
 
 <template>
@@ -31,16 +41,11 @@
     </div>
     <hr class="line">
     <div id="thumbnails">
-			<component
-				v-for="i in 24"
-				:key="i"
-				:is="
-					createIMG(
-						'https://static.vecteezy.com/ti/gratis-vektor/p1/7160087-video-symbol-video-symbol-play-video-zeichen-kostenlos-vektor.jpg',
-						'testVideo' + i,
-					)
-				"
-			/>
+      <div id="feed">
+        <div v-if="loading">Loading thumbnails...</div>
+
+        <Thumbnail v-else :thumbnails="thumbnails" />
+      </div>
 		</div>
 
 </template>

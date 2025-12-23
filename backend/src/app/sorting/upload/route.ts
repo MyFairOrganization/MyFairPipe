@@ -13,7 +13,6 @@ async function loadVideosFromPostgres(): Promise<Video[]> {
     FROM video_details vd
     JOIN video v on vd.video_id = v.video_id
     ORDER BY score DESC
-    LIMIT 100;
   `;
 
 	const result = await connectionPool.query(query);
@@ -26,11 +25,20 @@ async function cacheVideos(videos: Video[]): Promise<void> {
 
 	await redis.del(key);
 
-	console.log(videos)
-
 	if (videos.length > 0) {
 		await redis.rpush(key, ...videos.map(v => v.video_id.toString()));
 	}
+}
+
+export async function OPTIONS() {
+	return new NextResponse(null, {
+		status: 204, headers: {
+			"Access-Control-Allow-Origin": "http://myfairpipe.com",
+			"Access-Control-Allow-Credentials": "true",
+			"Access-Control-Allow-Methods": "GET, OPTIONS",
+			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+		},
+	});
 }
 
 export async function GET(req: NextRequest) {

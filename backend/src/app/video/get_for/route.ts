@@ -20,17 +20,17 @@ export async function GET(req: Request) {
 	try {
 		const {searchParams} = new URL(req.url);
 
-		const videoId = searchParams.get("id");
+		const userId = searchParams.get("id");
 
 		// -------------------------------
 		// Request validation
 		// -------------------------------
-		if (!videoId) {
+		if (!userId) {
 			return NextError.error("Missing id", 400);
 		}
 
-		if (!checkUUID(videoId)) {
-			return NextError.error("Invalid video id format", 400);
+		if (!checkUUID(userId)) {
+			return NextError.error("Invalid user id format", 400);
 		}
 
 		// -------------------------------
@@ -52,7 +52,7 @@ export async function GET(req: Request) {
                      LEFT JOIN photo p
                                ON p.photo_id = t.photo_id
                      LEFT JOIN "User" u ON u.user_id = v.uploader
-            WHERE v.video_id = $1`, [videoId]);
+            WHERE v.uploader = $1`, [userId]);
 
 		if (result.rowCount === 0) {
 			return NextError.error("Video not found", 404);

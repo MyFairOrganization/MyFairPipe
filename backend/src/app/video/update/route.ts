@@ -1,21 +1,31 @@
-import {NextResponse} from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {checkUUID} from "@/lib/utils/util";
 import {QueryResult} from "pg";
-import {getUser, User} from "@/lib/auth/getUser";
+import {getUser} from "@/lib/auth/getUser";
 
-export async function PATCH(req: Request) {
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204, headers: {
+            "Access-Control-Allow-Origin": "http://myfairpipe.com",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "PATCH, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        },
+    });
+}
+
+export async function PATCH(req: NextRequest) {
     let client;
 
     try {
-        const userResult = await getUser(req);
+        // ====== getUser using new cookie-based getUser.ts ======
+        const user = getUser(req);
 
-        if (userResult instanceof NextError || userResult instanceof NextResponse) {
-            return userResult;
+        if (!user) {
+            return NextResponse.json({error: "Not authenticated"}, {status: 401});
         }
-
-        const user: User = userResult;
 
         const formData = await req.formData();
         const videoId = formData.get("id") as string;

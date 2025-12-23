@@ -1,33 +1,57 @@
-<script setup lang="ts">
-    import { ref } from 'vue';
-    import { useRouter } from 'vue-router'
+<script lang="ts" setup>
+import {ref} from 'vue';
+import {useRouter} from 'vue-router'
 
-    const email = ref('');
-    const password = ref('');
-    const confirmPassword = ref('');
-    const errorMessage = ref('');
-    const router = useRouter();
+const email = ref('');
+const username = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const errorMessage = ref('');
+const router = useRouter();
 
-    const register = () => {
-    if (!email.value || !password.value || !confirmPassword.value) {
-        errorMessage.value = 'Bitte alle Felder ausfüllen';
-        return;
-    } else {
-      router.push('/home');
-    }
+const register = () => {
+  if (!email.value || !password.value || !confirmPassword.value) {
+    errorMessage.value = 'Please fill all fields';
+    return;
+  }
+  if (password.value !== confirmPassword.value) {
+    errorMessage.value = 'Passwords do not match';
+    return;
+  }
+  registerApi(email.value, password.value, username.value);
+  errorMessage.value = '';
 
-    if (password.value !== confirmPassword.value) {
-        errorMessage.value = 'Passwörter stimmen nicht überein';
-        return;
-    }
-    console.log('Register:', { email: email.value, password: password.value });
-    errorMessage.value = '';
+  function registerApi(email: string, password: string, username: string) {
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://api.myfairpipe.com/auth/register', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept', 'application/json');
+
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 201) {
+          try {
+            router.push('/login');
+          } catch (e: any) {
+            errorMessage.value = 'Invalid response from server';
+          }
+        } else {
+          errorMessage.value = JSON.parse(xhr.responseText).error;
+          console.error('Request failed with status', xhr.status);
+        }
+      }
     };
 
-    localStorage.setItem('user', JSON.stringify({
-        email: email.value,
-        password: password.value
-    }));
+    const body = JSON.stringify({
+      user_email: email,
+      username: username,
+      password: password
+    });
+
+    xhr.send(body);
+  }
+}
 
 </script>
 
@@ -35,6 +59,10 @@
     <div class="register-container">
         <h1 class="title">Create New Account</h1>
         <form @submit.prevent="register">
+        <div>
+            <label for="username">Username:</label>
+            <input id="username" v-model="username" type="text" placeholder="Username" />
+        </div>
         <div>
             <label for="email">E-Mail:</label>
             <input id="email" v-model="email" type="email" placeholder="E-Mail" />
