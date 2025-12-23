@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import {countFilesInFolder, objectExists, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
 import {randomUUID} from "crypto";
 import {connectionPool} from "@/lib/services/postgres";
@@ -6,6 +6,17 @@ import NextError, {HttpError} from "@/lib/utils/error";
 import {checkUUID} from "@/lib/utils/util";
 import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
+
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204, headers: {
+            "Access-Control-Allow-Origin": "http://localhost",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        },
+    });
+}
 
 export async function POST(req: NextRequest) {
     let client;

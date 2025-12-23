@@ -4,29 +4,166 @@ import { useRouter } from 'vue-router'
 
 const title = ref('')
 const description = ref('')
+const ageRestricted = ref(false)
 const videoFile = ref<File | null>(null)
+const thumbnailFile = ref<File | null>(null)
+const subtitleFile = ref<File | null>(null)
 const videoURL = ref<string | null>(null)
+const uploading = ref(false)
+const uploadProgress = ref(0)
+const uploadError = ref<string | null>(null)
 const router = useRouter()
+
+const MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024
 
 function upload() {
   router.push('/upload')
 }
+
 function edit() {
   router.push('/edituser')
 }
-function submitForm() {
-  console.log('Title:', title.value)
-  console.log('Description:', description.value)
-  console.log('Video File:', videoFile.value)
-  router.push('/user')
-}
 
-// Video-Upload Handler
+// --- Handlers for file selection ---
 function handleVideoUpload(event: Event) {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
     videoFile.value = target.files[0]
     videoURL.value = URL.createObjectURL(target.files[0])
+    uploadError.value = null
+  }
+}
+
+function handleThumbnailUpload(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    thumbnailFile.value = target.files[0]
+  }
+}
+
+function handleSubtitleUpload(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    subtitleFile.value = target.files[0]
+  }
+}
+
+// --- Upload Functions ---
+async function uploadVideo() {
+  if (!videoFile.value) return
+
+  const formData = new FormData()
+  formData.append('file', videoFile.value)
+  formData.append('title', title.value)
+  formData.append('description', description.value)
+  formData.append('age_restricted', ageRestricted.value.toString())
+
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) {
+        uploadProgress.value = Math.round((e.loaded / e.total) * 100)
+      }
+    })
+
+    xhr.addEventListener('load', async () => {
+      const contentType = xhr.getResponseHeader('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Non-JSON response:', xhr.responseText)
+        reject(new Error(`Server returned ${xhr.status}: ${xhr.statusText}`))
+        return
+      }
+
+      const data = JSON.parse(xhr.responseText)
+      if (xhr.status >= 400) {
+        reject(new Error(data.error || 'Upload failed'))
+        return
+      }
+
+      console.log('Video uploaded:', data)
+      resolve()
+    })
+
+    xhr.addEventListener('error', () => reject(new Error('Upload failed')))
+    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')))
+
+    xhr.open('POST', 'http://api.localhost/video/upload')
+    xhr.withCredentials = true
+    xhr.send(formData)
+  })
+}
+
+async function uploadThumbnail() {
+  if (!thumbnailFile.value) return
+  const formData = new FormData()
+  formData.append('file', thumbnailFile.value)
+
+  const res = await fetch('http://api.localhost/thumbnails/upload', {
+    method: 'POST',
+    body: formData,
+    credentials: 'include'
+  })
+  if (!res.ok) throw new Error('Thumbnail upload failed')
+  const data = await res.json()
+  console.log('Thumbnail uploaded:', data)
+}
+
+async function uploadSubtitle() {
+  if (!subtitleFile.value) return
+  const formData = new FormData()
+  formData.append('file', subtitleFile.value)
+
+  const res = await fetch('http://api.localhost/subtitles/upload', {
+    method: 'POST',
+    body: formData,
+    credentials: 'include'
+  })
+  if (!res.ok) throw new Error('Subtitle upload failed')
+  const data = await res.json()
+  console.log('Subtitle uploaded:', data)
+}
+
+// --- Main Form Submission ---
+async function submitForm() {
+  // Validation
+  if (!videoFile.value) {
+    uploadError.value = 'Please select a video file'
+    return
+  }
+
+  if (!thumbnailFile.value) {
+    uploadError.value = 'Please select a thumbnail file'
+    return
+  }
+
+  if (!title.value || !description.value) {
+    uploadError.value = 'Title and description are required'
+    return
+  }
+
+  if (videoFile.value.size > MAX_FILE_SIZE) {
+    const sizeMB = Math.round(videoFile.value.size / (1024 * 1024))
+    const maxMB = Math.round(MAX_FILE_SIZE / (1024 * 1024))
+    uploadError.value = `File too large (${sizeMB}MB). Maximum size is ${maxMB}MB`
+    return
+  }
+
+  uploading.value = true
+  uploadProgress.value = 0
+  uploadError.value = null
+
+  try {
+    await uploadVideo()
+    await uploadThumbnail()
+    await uploadSubtitle()
+    router.push('/user')
+  } catch (error) {
+    console.error('Upload error:', error)
+    uploadError.value = error instanceof Error ? error.message : 'Upload failed'
+  } finally {
+    uploading.value = false
+    uploadProgress.value = 0
   }
 }
 </script>
@@ -40,7 +177,6 @@ function handleVideoUpload(event: Event) {
         <p id="descr">This is a brief user description.</p>
         <button id="b1">Channel information</button>
       </div>
-
       <div class="right">
         <button class="btn" @click="upload">Upload Video</button>
         <button class="btn" @click="edit">Edit Account</button>
@@ -50,32 +186,42 @@ function handleVideoUpload(event: Event) {
 
   <hr class="line" />
 
-  <!-- Zeigt das hochgeladene Video an -->
+  <div v-if="uploadError" class="error-message">
+    {{ uploadError }}
+  </div>
+
+  <div v-if="uploading" class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" :style="{ width: uploadProgress + '%' }"></div>
+    </div>
+    <p>Uploading: {{ uploadProgress }}%</p>
+  </div>
+
   <div v-if="videoURL" class="video-preview">
     <video :src="videoURL" controls width="400"></video>
   </div>
 
   <div class="form-container">
     <label for="title">Title:</label><br>
-    <input id="title" v-model="title" type="text" placeholder="Enter title" required/>
-    <br>
+    <input id="title" v-model="title" type="text" placeholder="Enter title" :disabled="uploading" /><br>
+
     <label for="description">Description:</label><br>
-    <textarea id="description" v-model="description" placeholder="Enter description" required></textarea>
-    <br>
+    <textarea id="description" v-model="description" placeholder="Enter description" :disabled="uploading"></textarea><br>
+
     <label for="video">Video Upload:</label><br>
-    <input id="video" type="file" accept="video/*" @change="handleVideoUpload" required/>
-    <br>
-    <br>
+    <input id="video" type="file" accept="video/*" @change="handleVideoUpload" :disabled="uploading" /><br><br>
+
     <label for="thumbnail">Thumbnail Upload:</label><br>
-    <input id="thumbnail" type="file" accept="image/*" @change="handleVideoUpload" required/>
-    <br>
-    <br>
+    <input id="thumbnail" type="file" accept="image/*" @change="handleThumbnailUpload" required/><br><br>
+
     <label for="subtitle">Subtitle Upload:</label><br>
-    <input id="subtitle" type="file" accept="text/vtt" @change="handleVideoUpload" /><br>
+    <input id="subtitle" type="file" accept="text/vtt" @change="handleSubtitleUpload" /><br>
     <input id="language" placeholder="Language" /><br>
-    <input id="language_short" placeholder="language code" />
-    <br>
-    <button class="upload" @click="submitForm">Upload</button>
+    <input id="language_short" placeholder="language code" /><br><br>
+
+    <button class="upload" @click="submitForm" :disabled="uploading">
+      {{ uploading ? 'Uploading...' : 'Upload' }}
+    </button>
   </div>
 </template>
 
@@ -175,7 +321,40 @@ function handleVideoUpload(event: Event) {
   margin-bottom: 10px;
 }
 
+.upload:disabled {
+  background-color: #6c7a89;
+  cursor: not-allowed;
+}
+
 .video-preview {
   margin: 20px 0;
+}
+
+.error-message {
+  color: #ee4266;
+  background-color: #ffeef1;
+  padding: 12px;
+  border-radius: 5px;
+  margin: 20px 0;
+  border: 1px solid #ee4266;
+}
+
+.progress-container {
+  margin: 20px 0;
+}
+
+.progress-bar {
+  width: 400px;
+  height: 30px;
+  background-color: #e0e0e0;
+  border-radius: 15px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #3D5A80;
+  transition: width 0.3s ease;
 }
 </style>

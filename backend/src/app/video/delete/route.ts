@@ -1,10 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import {deleteFolder, objectExists, videoBucket} from "@/lib/services/minio";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {checkUUID} from "@/lib/utils/util";
 import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
+
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204, headers: {
+            "Access-Control-Allow-Origin": "http://localhost",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        },
+    });
+}
 
 export async function DELETE(req: NextRequest) {
     let client;

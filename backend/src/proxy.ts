@@ -4,42 +4,42 @@ import jwt from "jsonwebtoken";
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export const config = {
-    // Welche Pfade sollen geschützt werden?
-    // Du kannst hier erweitern!
-    matcher: ["/video/:path*", "/api/secure/:path*"],
+	matcher: ["/video/delete", "/video/update", "/video/delete", "/thumbnail/activate", "/thumbnail/delete", "/thumbnail/upload", "/subtitles/delete", "/subtitles/upload",],
 };
 
-/**
- * Läuft im Node.js Runtime (nicht Edge!),
- * deswegen funktioniert crypto und jsonwebtoken.
- */
-export const runtime = "nodejs";
-
 export default async function proxy(req: NextRequest) {
-    const url = req.nextUrl.pathname;
+	if (req.method === 'OPTIONS') {
+		return new NextResponse(null, {
+			status: 204,
+			headers: {
+				'Access-Control-Allow-Origin': 'http://localhost',
+				'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+				'Access-Control-Allow-Headers': 'Content-Type,Authorization,Cookie',
+				'Access-Control-Allow-Credentials': 'true',
+			},
+		});
+	}
 
-    // Ausschließen, damit nicht Login/Logout/Signup blockiert werden
-    if (
-        url.startsWith("/auth/login") ||
-        url.startsWith("/auth/register") ||
-        url.startsWith("/auth/logout")
-    ) {
-        return NextResponse.next();
-    }
+	const url = req.nextUrl.pathname;
 
-    // Cookie auslesen
-    const cookie = req.cookies.get("session")?.value;
+	if (url.startsWith("/auth/login") || url.startsWith("/auth/register") || url.startsWith("/auth/logout")) {
+		return NextResponse.next();
+	} else if (url in config.matcher) {
+		const cookie = req.cookies.get("session")?.value;
 
-    if (!cookie) {
-        return NextResponse.json({error: "Not authenticated"}, {status: 401});
-    }
+		if (!cookie) {
+			return NextResponse.json({error: "Not authenticated"}, {status: 401});
+		}
 
-    try {
-        // JWT validieren
-        jwt.verify(cookie, JWT_SECRET);
-    } catch (err) {
-        return NextResponse.json({error: "Invalid token"}, {status: 401});
-    }
+		try {
+			jwt.verify(cookie, JWT_SECRET);
+		} catch {
+			return NextResponse.json({error: "Invalid token"}, {status: 401});
+		}
+	}
 
-    return NextResponse.next();
+	const response = NextResponse.next();
+	response.headers.set('Access-Control-Allow-Origin', 'http://localhost');
+	response.headers.set('Access-Control-Allow-Credentials', 'true');
+	return response;
 }

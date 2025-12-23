@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import {minioClient, videoBucket} from "@/lib/services/minio";
 import {checkUUID} from "@/lib/utils/util";
@@ -6,89 +6,101 @@ import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
 
+export async function OPTIONS() {
+	return new NextResponse(null, {
+		status: 204, headers: {
+			"Access-Control-Allow-Origin": "http://localhost",
+			"Access-Control-Allow-Credentials": "true",
+			"Access-Control-Allow-Methods": "DELETE, OPTIONS",
+			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+		},
+	});
+}
+
 export async function DELETE(req: NextRequest) {
-    let client;
+	let client;
 
-    try {
-        // ====== getUser using new cookie-based getUser.ts ======
-        const user = getUser(req);
+	try {
+		// ====== getUser using new cookie-based getUser.ts ======
+		const user = getUser(req);
 
-        if (!user) {
-            return NextResponse.json({error: "Not authenticated"}, {status: 401});
-        }
+		if (!user) {
+			return NextResponse.json({error: "Not authenticated"}, {status: 401});
+		}
 
-        const {searchParams} = new URL(req.url);
+		const {searchParams} = new URL(req.url);
 
-        const thumbnail_id = searchParams.get("id");
+		const thumbnail_id = searchParams.get("id");
 
-        // -------------------------------
-        // Request validation
-        // -------------------------------
-        if (!thumbnail_id) {
-            return NextError.error("Missing id", HttpError.BadRequest);
-        }
+		// -------------------------------
+		// Request validation
+		// -------------------------------
+		if (!thumbnail_id) {
+			return NextError.error("Missing id", HttpError.BadRequest);
+		}
 
-        if (!checkUUID(thumbnail_id)) {
-            return NextError.error("Invalid thumbnail id format", HttpError.BadRequest);
-        }
+		if (!checkUUID(thumbnail_id)) {
+			return NextError.error("Invalid thumbnail id format", HttpError.BadRequest);
+		}
 
-        // -------------------------------
-        // Database Transaction
-        // -------------------------------
-        client = await connectionPool.connect();
-        try {
-            await client.query("BEGIN");
+		// -------------------------------
+		// Database Transaction
+		// -------------------------------
+		client = await connectionPool.connect();
+		try {
+			await client.query("BEGIN");
 
-            // Check ownership and get thumbnail info
-            const result: QueryResult = await client.query(`
+			// Check ownership and get thumbnail info
+			const result: QueryResult = await client.query(`
                 SELECT t.thumbnail_id, p.photo_id, p.path, v.uploader
                 FROM Thumbnail t
                          JOIN Photo p ON p.photo_id = t.photo_id
                          JOIN video v ON v.video_id = t.video_id
                 WHERE t.thumbnail_id = $1
-            `, [thumbnail_id]);
+			`, [thumbnail_id]);
 
-            if (result.rowCount === 0) {
-                await client.query("ROLLBACK");
-                return NextError.error("Thumbnail not found", HttpError.NotFound);
-            }
+			if (result.rowCount === 0) {
+				await client.query("ROLLBACK");
+				return NextError.error("Thumbnail not found", HttpError.NotFound);
+			}
 
-            const {path, uploader} = result.rows[0];
+			const {path, uploader} = result.rows[0];
 
-            // Check if user owns the video
-            if (uploader !== user.id) {
-                await client.query("ROLLBACK");
-                return NextError.error("You don't have permission to delete this thumbnail", HttpError.Forbidden);
-            }
+			// Check if user owns the video
+			if (uploader !== user.id) {
+				await client.query("ROLLBACK");
+				return NextError.error("You don't have permission to delete this thumbnail", HttpError.Forbidden);
+			}
 
-            try {
-                await minioClient.removeObject(videoBucket, path);
-            } catch (err) {
-                await client.query("ROLLBACK");
-                console.error("MinIO delete failed:", err);
-                return NextError.error("Could not delete file from storage", HttpError.InternalServerError);
-            }
+			try {
+				await minioClient.removeObject(videoBucket, path);
+			} catch (err) {
+				await client.query("ROLLBACK");
+				console.error("MinIO delete failed:", err);
+				return NextError.error("Could not delete file from storage", HttpError.InternalServerError);
+			}
 
-            await client.query(`
-                DELETE FROM Thumbnail
+			await client.query(`
+                DELETE
+                FROM Thumbnail
                 WHERE thumbnail_id = $1
-            `, [thumbnail_id]);
+			`, [thumbnail_id]);
 
-            await client.query("COMMIT");
+			await client.query("COMMIT");
 
-            return NextResponse.json({success: true}, {status: 200});
+			return NextResponse.json({success: true}, {status: 200});
 
-        } catch (dbErr) {
-            await client.query("ROLLBACK");
-            console.error("Database transaction error:", dbErr);
-            return NextError.error("Database write failed", HttpError.InternalServerError);
-        } finally {
-            client.release();
-        }
+		} catch (dbErr) {
+			await client.query("ROLLBACK");
+			console.error("Database transaction error:", dbErr);
+			return NextError.error("Database write failed", HttpError.InternalServerError);
+		} finally {
+			client.release();
+		}
 
-    } catch (err) {
-        console.error("Request handling error:", err);
-        const message = err instanceof Error ? err.message : "Server error";
-        return NextError.error(message, HttpError.InternalServerError);
-    }
+	} catch (err) {
+		console.error("Request handling error:", err);
+		const message = err instanceof Error ? err.message : "Server error";
+		return NextError.error(message, HttpError.InternalServerError);
+	}
 }

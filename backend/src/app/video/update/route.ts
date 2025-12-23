@@ -1,9 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {checkUUID} from "@/lib/utils/util";
 import {QueryResult} from "pg";
 import {getUser} from "@/lib/auth/getUser";
+
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204, headers: {
+            "Access-Control-Allow-Origin": "http://localhost",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "PATCH, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        },
+    });
+}
 
 export async function PATCH(req: NextRequest) {
     let client;
