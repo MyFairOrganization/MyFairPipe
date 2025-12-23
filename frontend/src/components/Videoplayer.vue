@@ -24,7 +24,7 @@ async function getLiked() {
   params.append('username', 'testuser')
 
   try {
-    const response = await fetch(`http://api.localhost/like_dislike/get?${params}`)
+    const response = await fetch(`http://api.myfairpipe.com/like_dislike/get?${params}`)
 
     if (response.ok) {
       const data = await response.json()
@@ -45,7 +45,7 @@ async function like() {
   params.append('username', 'testuser')
 
   try {
-    const response = await fetch(`http://api.localhost/like_dislike/like?${params}`)
+    const response = await fetch(`http://api.myfairpipe.com/like_dislike/like?${params}`)
 
     if (response.ok) {
       const data = await response.json()
@@ -66,7 +66,7 @@ async function dislike() {
   params.append('username', 'testuser')
 
   try {
-    const response = await fetch(`http://api.localhost/like_dislike/dislike?${params}`)
+    const response = await fetch(`http://api.myfairpipe.com/like_dislike/dislike?${params}`)
 
     if (response.ok) {
       const data = await response.json()
