@@ -38,7 +38,7 @@ const login = async () => {
     }
 
     // Login erfolgreich, Cookie wird automatisch gespeichert
-    // router.push('/home');
+    await router.push('/home');
   } catch (err) {
     console.error('Login error:', err);
     errorMessage.value = 'Server error. Please try again.';
