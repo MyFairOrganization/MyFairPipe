@@ -88,7 +88,7 @@ async function uploadVideo() {
     xhr.addEventListener('error', () => reject(new Error('Upload failed')))
     xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')))
 
-    xhr.open('POST', 'http://api.localhost/video/upload')
+    xhr.open('POST', 'http://api.myfairpipe.com/video/upload')
     xhr.withCredentials = true
     xhr.send(formData)
   })
@@ -99,7 +99,7 @@ async function uploadThumbnail() {
   const formData = new FormData()
   formData.append('file', thumbnailFile.value)
 
-  const res = await fetch('http://api.localhost/thumbnails/upload', {
+  const res = await fetch('http://api.myfairpipe.com/thumbnails/upload', {
     method: 'POST',
     body: formData,
     credentials: 'include'
@@ -114,7 +114,7 @@ async function uploadSubtitle() {
   const formData = new FormData()
   formData.append('file', subtitleFile.value)
 
-  const res = await fetch('http://api.localhost/subtitles/upload', {
+  const res = await fetch('http://api.myfairpipe.com/subtitles/upload', {
     method: 'POST',
     body: formData,
     credentials: 'include'

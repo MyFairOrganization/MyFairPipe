@@ -14,7 +14,7 @@ async function getVideos(limit, offset) {
     params.append('offset', offset)
 
     try {
-        const response = await fetch(`http://api.localhost/sorting/get?${params}`)
+        const response = await fetch(`http://api.myfairpipe.com/sorting/get?${params}`)
 
         if (response.ok) {
             const data = await response.json()
