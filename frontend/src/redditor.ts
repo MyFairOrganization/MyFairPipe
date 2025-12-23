@@ -1,4 +1,4 @@
-const API_URL = "http://api.localhost/sorting/upload";
+const API_URL = "http://api.myfairpipe.com/sorting/upload";
 
 export function startRedditor(intervalMs: number = 60_000) {
 	async function updateCache() {

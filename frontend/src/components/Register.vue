@@ -24,7 +24,7 @@ const register = () => {
   function registerApi(email: string, password: string, username: string) {
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://api.localhost/auth/register', true);
+    xhr.open('POST', 'http://api.myfairpipe.com/auth/register', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept', 'application/json');
 

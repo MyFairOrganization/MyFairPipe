@@ -19,7 +19,7 @@ const login = async () => {
   }
 
   try {
-    const response = await fetch('http://api.localhost/auth/login', {
+    const response = await fetch('http://api.myfairpipe.com/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
