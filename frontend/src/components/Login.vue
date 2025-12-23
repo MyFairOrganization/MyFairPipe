@@ -12,38 +12,47 @@ function goToRegister() {
   router.push('/register');
 }
 
-const login = async () => {
+const login = () => {
   if (!email.value || !password.value) {
     errorMessage.value = 'Please fill all fields';
     return;
   }
 
-  try {
-    const response = await fetch('http://api.myfairpipe.com/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // <-- sehr wichtig, damit Cookies gespeichert werden
-      body: JSON.stringify({
-        user_email: email.value,
-        password: password.value,
-      }),
-    });
+  errorMessage.value = '';
 
-    if (!response.ok) {
-      const data = await response.json();
-      errorMessage.value = data.error || 'Login failed';
-      return;
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', 'http://api.myfairpipe.com/auth/login', true);
+
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('Accept', 'application/json');
+
+  // WICHTIG: Cookies (Session / JWT) erlauben
+  xhr.withCredentials = true;
+
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        // Login erfolgreich → Cookie ist gesetzt
+        router.push('/home');
+      } else {
+        try {
+          const res = JSON.parse(xhr.responseText);
+          errorMessage.value = res.error || 'Login failed';
+        } catch {
+          errorMessage.value = 'Invalid response from server';
+        }
+        console.error('Login failed:', xhr.status);
+      }
     }
+  };
 
-    // Login erfolgreich, Cookie wird automatisch gespeichert
-    await router.push('/home');
-  } catch (err) {
-    console.error('Login error:', err);
-    errorMessage.value = 'Server error. Please try again.';
-  }
-}
+  const body = JSON.stringify({
+    user_email: email.value,
+    password: password.value,
+  });
+
+  xhr.send(body);
+};
 </script>
 
 <template>
