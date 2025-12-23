@@ -78,6 +78,7 @@ const login = async () => {
           {{ errorMessage }}
         </div>
       </form>
+    </div>
   </div>
 </template>
 
