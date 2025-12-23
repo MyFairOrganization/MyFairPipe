@@ -1,85 +1,122 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <div>
+    <nav class="header">
+      <div class="row">
+        <RouterLink to="/home">MyFairPipe</RouterLink>
+        <div class="searchbar">
+          <input type="text" placeholder="Search..." />
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016
+            9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5
+            4.99L20.49 19l-4.99-5zM10 15a5 5 0 110-10 5 5 0 010 10z"
+            />
+          </svg>
+        </div>
+        <RouterLink to="/home">Home</RouterLink>
+        <RouterLink to="/login">Login</RouterLink>
+        <RouterLink to="/user">User</RouterLink>
+      </div>
+    </nav>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <main class="content">
+      <RouterView :key="$route.fullPath" />
+    </main>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+    <nav class="footer">
+      <h2>MyFairPipe</h2>
+    </nav>
+  </div>
 </template>
 
 <style scoped>
-header {
+.header {
   line-height: 1.5;
-  max-height: 100vh;
+  z-index: 1000;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+video {
+  z-index: 1;
 }
 
 nav {
   width: 100%;
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
-  margin-top: 2rem;
 }
 
 nav a.router-link-exact-active {
   color: var(--color-text);
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
 nav a {
   display: inline-block;
   padding: 0 1rem;
   border-left: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
 }
 
 nav a:first-of-type {
   border: 0;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  color: black;
+  padding: 2.5rem 2rem;
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.content {
+  margin-top: 100px;
+}
 
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
+.footer {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  color: black;
+  padding: 2.5rem 2rem;
+}
 
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.searchbar {
+  background: #eee;
+  border-radius: 999px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 240px;
+}
+
+.searchbar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  flex: 1;
+}
+
+.searchbar svg {
+  width: 18px;
+  height: 18px;
+  fill: gray;
 }
 </style>

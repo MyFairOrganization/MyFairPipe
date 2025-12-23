@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Ebene_1" data-name="Ebene 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 712.12 691.86">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #3d5a80;
+        stroke: #e0fbfc;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 66.67px;
+      }
+    </style>
+  </defs>
+  <g id="SVGRepo_iconCarrier" data-name="SVGRepo iconCarrier">
+    <g id="Complete">
+      <g id="thumbs-down">
+        <path class="cls-1" d="M200,366.67l93.33,280c4.5,10.09,16.33,14.62,26.41,10.11.08-.04.17-.08.25-.11l33.33-16.67c28.61-14.88,46.59-44.42,46.67-76.67v-130h213.33c36.81-.67,66.11-31.06,65.44-67.87-.1-5.22-.8-10.41-2.11-15.46l-66.67-266.67c-7.48-29-33.39-49.45-63.33-50H100c-36.82,0-66.67,29.85-66.67,66.67v200c0,36.82,29.85,66.67,66.67,66.67h100V33.33"/>
+      </g>
+    </g>
+  </g>
+</svg>

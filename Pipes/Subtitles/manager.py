@@ -66,7 +66,7 @@ def start_transcriber(job_id: str, object_key: str):
 
 	try:
 		container = docker_client.containers.run(
-			image="mepipe.tail0e128.ts.net:5000/transcription-worker:latest",
+			image="transcription-worker:latest",
 			environment=env,
 			network="internal-network",
 			name=container_name,
