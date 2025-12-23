@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { connectionPool } from "@/lib/services/postgres";
 import bcrypt from "bcrypt";
 
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204, headers: {
+            "Access-Control-Allow-Origin": "http://myfairpipe.com",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        },
+    });
+}
+
 export async function POST(req: Request) {
     try {
         const { user_email, username, password } = await req.json();

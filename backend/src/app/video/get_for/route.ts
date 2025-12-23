@@ -3,6 +3,17 @@ import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {checkUUID} from "@/lib/utils/util";
 
+export async function OPTIONS() {
+	return new NextResponse(null, {
+		status: 204, headers: {
+			"Access-Control-Allow-Origin": "http://myfairpipe.com",
+			"Access-Control-Allow-Credentials": "true",
+			"Access-Control-Allow-Methods": "GET, OPTIONS",
+			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+		},
+	});
+}
+
 export async function GET(req: Request) {
 	let client;
 
