@@ -21,7 +21,7 @@ onMounted(async () => {
 async function getLiked() {
   const params = new URLSearchParams()
   params.append('videoID', props.id)
-  params.append('username', 'testuser')
+  params.append('userID', '1')
 
   try {
     const response = await fetch(`http://api.myfairpipe.com/like_dislike/get?${params}`)
@@ -42,7 +42,7 @@ async function getLiked() {
 async function like() {
   const params = new URLSearchParams()
   params.append('videoID', props.id)
-  params.append('username', 'testuser')
+  params.append('userID', '1')
 
   try {
     const response = await fetch(`http://api.myfairpipe.com/like_dislike/like?${params}`)
@@ -63,7 +63,7 @@ async function like() {
 async function dislike() {
   const params = new URLSearchParams()
   params.append('videoID', props.id)
-  params.append('username', 'testuser')
+  params.append('userID', '1')
 
   try {
     const response = await fetch(`http://api.myfairpipe.com/like_dislike/dislike?${params}`)

@@ -458,3 +458,4 @@ ORDER BY likes DESC;
 SELECT video_id, username, is_like
 FROM Like_Video
 JOIN "User" U on U.user_id = Like_Video.user_id;
+SELECT * FROM "User";

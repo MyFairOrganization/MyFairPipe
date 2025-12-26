@@ -2,27 +2,21 @@ import { connectionPool } from "@/lib/services/postgres";
 import { NextRequest, NextResponse } from "next/server";
 import NextError, { HttpError } from "@/lib/utils/error";
 
-async function like(videoID: number, username: string) {
+async function like(videoID: number, userID: number) {
   const client = await connectionPool.connect();
 
   await client.query("BEGIN");
-
-  const test = `
-    SELECT * FROM video;
-  `;
-
-  const result = await client.query(test);
 
   // SQL query to check if user already liked video
   const query = `
     SELECT lv.is_like
     FROM Like_Video lv
 		JOIN "User" u ON u.user_id = lv.user_id
-    WHERE u.username = $1 AND lv.video_id = $2
+    WHERE u.user_id = $1 AND lv.video_id = $2
   `;
 
   try {
-    const result = await client.query(query, [username, videoID]);
+    const result = await client.query(query, [userID, videoID]);
 
     var is_like :boolean | null;
 
@@ -32,20 +26,6 @@ async function like(videoID: number, username: string) {
     } catch (e) {
       is_like = null;
     }
-
-    // SELECT UserID for future queries
-    const selectUID = `
-      SELECT user_id
-      FROM "User"
-      WHERE username = $1
-    `;
-
-    // UserID from SELECT
-    const uidResult = await client.query(selectUID, [username]);
-    if (uidResult.rows.length < 1) {
-      return NextError.error("Error with UID", HttpError.BadRequest)
-    }
-    const userID = uidResult.rows[0].user_id;
 
     // Check if User already liked videos => returns if true
     if (result.rows.length > 0 && is_like) {
@@ -136,20 +116,19 @@ export async function OPTIONS() {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
-    const videoIDParam = searchParams.get('videoID');
+    const videoID = searchParams.get('videoID');
 
-    if (videoIDParam === null) {
+    if (videoID === null) {
       return NextError.error("No Video ID", HttpError.BadRequest);
     }
 
-    const videoID = Number.parseInt(videoIDParam, 10);
-    const usernameParam = searchParams.get('username');
+    const userID = searchParams.get('userID');
 
-    if (usernameParam === null) {
-      return NextError.error("No Username", HttpError.BadRequest);
+    if (userID === null) {
+      return NextError.error("No User ID", HttpError.BadRequest);
     }
 
-    const result = await like(videoID, usernameParam);
+    const result = await like(Number(videoID), Number(userID));
     if (result instanceof NextResponse) {
       return result
     }

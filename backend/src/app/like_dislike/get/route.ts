@@ -2,7 +2,7 @@ import { connectionPool } from "@/lib/services/postgres";
 import { NextRequest, NextResponse } from "next/server";
 import NextError, { HttpError } from "@/lib/utils/error";
 
-async function getstatus(videoID: number, username: string) {
+async function getstatus(videoID: number, userID: number) {
 	const client = await connectionPool.connect();
 
 	client.query("BEGIN")
@@ -13,11 +13,11 @@ async function getstatus(videoID: number, username: string) {
     FROM Like_Video lv
     JOIN "User" u ON u.user_id = lv.user_id
     JOIN video v ON lv.video_id = v.video_id
-    WHERE u.username = $1 AND lv.video_id = $2
+    WHERE u.user_id = $1 AND lv.video_id = $2
   `;
 
 	try {
-		const result = await client.query(query, [username, videoID])
+		const result = await client.query(query, [userID, videoID])
 
 		var liked: boolean
 		var likes = 0
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
 			return NextError.error("No Username", HttpError.BadRequest);
 		}
 
-		const result = await getstatus(videoID, usernameParam);
+		const result = await getstatus(videoID, Number(usernameParam));
 		return NextResponse.json({ result }, {status: 200});
 	} catch (err) {
 		console.error(err);
