@@ -5,7 +5,9 @@ import { onMounted, ref } from 'vue'
 import Thumbnail from './Thumbnail.vue'
 
 const route = useRoute()
-const props = { id: route.query.id as string, desc: route.query.desc as string }
+const props = { id: route.query.id as string }
+const title = ref("")
+const description = ref("")
 const liked = ref(false)
 const disliked = ref(false)
 const thumbnails = ref([])
@@ -13,15 +15,33 @@ const loading = ref(true)
 
 onMounted(async () => {
   await getLiked()
+  await getDetails()
   thumbnails.value = await getIMGs(30, 0)
   loading.value = false
   console.log(thumbnails.value)
 })
 
+async function getDetails() {
+  const params = new URLSearchParams()
+  params.append('id', props.id)
+
+  const req = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
+  const data = await req.json()
+
+  title.value = data.title
+  description.value = data.description
+}
+
 async function getLiked() {
+  const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+    credentials: 'include'
+  });
+  const user = await req.json()
+  console.log(user)
+
   const params = new URLSearchParams()
   params.append('videoID', props.id)
-  params.append('userID', '1')
+  params.append('userID', user.user.user_id)
 
   try {
     const response = await fetch(`http://api.myfairpipe.com/like_dislike/get?${params}`)
@@ -40,9 +60,15 @@ async function getLiked() {
 }
 
 async function like() {
+  const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+    credentials: 'include'
+  });
+  const user = await req.json()
+  console.log(user)
+
   const params = new URLSearchParams()
   params.append('videoID', props.id)
-  params.append('userID', '1')
+  params.append('userID', user.user.user_id)
 
   try {
     const response = await fetch(`http://api.myfairpipe.com/like_dislike/like?${params}`)
@@ -61,9 +87,15 @@ async function like() {
 }
 
 async function dislike() {
+  const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+    credentials: 'include'
+  });
+  const user = await req.json()
+  console.log(user)
+
   const params = new URLSearchParams()
   params.append('videoID', props.id)
-  params.append('userID', '1')
+  params.append('userID', user.user.user_id)
 
   try {
     const response = await fetch(`http://api.myfairpipe.com/like_dislike/dislike?${params}`)
@@ -98,39 +130,42 @@ function postComment() {
   <div class="layout">
     <div id="leftSide">
       <div class="player">
-        <component :is="createVID(props.id, props.desc)" />
-        <div id="underVideo">
-          <h2>{{ props.desc }}</h2>
-          <div class="interactivePanel">
-            <input
-              class="interactive"
-              id="like"
-              type="image"
-              :src="liked ? '/liked.svg' : '/like.svg'"
-              v-on:click="like()"
-            />
-            <input
-              class="interactive"
-              id="dislike"
-              type="image"
-              :src="disliked ? '/disliked.svg' : '/dislike.svg'"
-              v-on:click="dislike()"
-            />
-            <input
-              class="interactive"
-              id="share"
-              type="image"
-              src="/share.svg"
-              v-on:click="share()"
-            />
-            <input
-              class="interactive"
-              id="download"
-              type="image"
-              src="/download.svg"
-              v-on:click="download()"
-            />
+        <component :is="createVID(props.id, title)" />
+        <div>
+          <div id="underVideo">
+            <h2>{{ title }}</h2>
+            <div class="interactivePanel">
+              <input
+                class="interactive"
+                id="like"
+                type="image"
+                :src="liked ? '/liked.svg' : '/like.svg'"
+                v-on:click="like()"
+              />
+              <input
+                class="interactive"
+                id="dislike"
+                type="image"
+                :src="disliked ? '/disliked.svg' : '/dislike.svg'"
+                v-on:click="dislike()"
+              />
+              <input
+                class="interactive"
+                id="share"
+                type="image"
+                src="/share.svg"
+                v-on:click="share()"
+              />
+              <input
+                class="interactive"
+                id="download"
+                type="image"
+                src="/download.svg"
+                v-on:click="download()"
+              />
+            </div>
           </div>
+          <p>{{ description }}</p>
         </div>
       </div>
     </div>

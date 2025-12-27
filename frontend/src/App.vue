@@ -1,8 +1,22 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import { useRouter } from 'vue-router'
+import { onMounted, ref } from "vue";
 
 const router = useRouter()
+const loggedIn = ref(false)
+
+onMounted(async () => {
+  loggedIn.value = await checkLoggedIn()
+})
+
+async function checkLoggedIn() {
+  const req = await fetch("http://api.myfairpipe.com/user/get", {
+    credentials: 'include'
+  })
+
+  return req.status < 400;
+}
 </script>
 
 <template>
@@ -22,7 +36,7 @@ const router = useRouter()
           </svg>
         </div>
         <RouterLink to="/home" class="navtxt">Home</RouterLink>
-        <RouterLink to="/user" class="navtxt">User</RouterLink>
+        <RouterLink v-if="loggedIn" to="/user" class="navtxt">User</RouterLink>
         <RouterLink to="/login" class="navtxt" id="loginbtn">Login</RouterLink>
       </div>
     </nav>

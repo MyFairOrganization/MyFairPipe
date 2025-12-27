@@ -29,10 +29,6 @@ export async function GET(req: Request) {
 			return NextError.error("Missing id", 400);
 		}
 
-		if (!checkUUID(userId)) {
-			return NextError.error("Invalid user id format", 400);
-		}
-
 		// -------------------------------
 		// Database Transaction
 		// -------------------------------
@@ -58,7 +54,7 @@ export async function GET(req: Request) {
 			return NextError.error("Video not found", 404);
 		}
 
-		return NextResponse.json(result.rows[0], {status: 200});
+		return NextResponse.json(result.rows, {status: 200});
 
 	} catch (err: any) {
 		console.error("Database error: ", err);

@@ -1,4 +1,4 @@
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -38,8 +38,5 @@ export default async function proxy(req: NextRequest) {
 		}
 	}
 
-	const response = NextResponse.next();
-	response.headers.set('Access-Control-Allow-Origin', 'http://myfairpipe.com');
-	response.headers.set('Access-Control-Allow-Credentials', 'true');
-	return response;
+	return NextResponse.next();
 }

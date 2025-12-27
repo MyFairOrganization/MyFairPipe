@@ -10,37 +10,37 @@ const router = createRouter({
     {
       path: '/home',
       name: 'home',
-      component: () => import('../components/Home.vue'),
+      component: () => import('../components/Home.vue')
     },
     {
       path: '/player',
       name: 'player',
-      component: () => import('../components/Videoplayer.vue'),
+      component: () => import('../components/Videoplayer.vue')
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('../components/Login.vue'),
+      component: () => import('../components/Login.vue')
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('../components/Register.vue'),
+      component: () => import('../components/Register.vue')
     },
     {
       path: '/upload',
       name: 'upload',
-      component: () => import('../components/Upload.vue'),
+      component: () => import('../components/Upload.vue')
     },
     {
       path: '/user',
       name: 'user',
-      component: () => import('../components/User.vue'),
+      component: () => import('../components/User.vue')
     },
     {
       path: '/edituser',
       name: 'edituser',
-      component: () => import('../components/EditUser.vue'),
+      component: () => import('../components/EditUser.vue')
     },
   ],
   scrollBehavior(to, from, savedPosition) {
@@ -50,6 +50,14 @@ const router = createRouter({
 
     return { top: 0 };
   },
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.meta.reload) {
+    window.location.href = to.fullPath
+  } else {
+    next()
+  }
 })
 
 export default router

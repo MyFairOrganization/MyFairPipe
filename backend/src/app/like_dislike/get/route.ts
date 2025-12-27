@@ -64,10 +64,10 @@ export async function GET(req: NextRequest) {
 		}
 
 		const videoID = Number.parseInt(videoIDParam, 10);
-		const usernameParam = searchParams.get('username');
+		const usernameParam = searchParams.get('userID');
 
 		if (usernameParam === null) {
-			return NextError.error("No Username", HttpError.BadRequest);
+			return NextError.error("No User ID", HttpError.BadRequest);
 		}
 
 		const result = await getstatus(videoID, Number(usernameParam));

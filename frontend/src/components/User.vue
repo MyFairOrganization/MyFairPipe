@@ -17,10 +17,18 @@
     const loading = ref(true);
 
     onMounted(async () => {
-      thumbnails.value = await getIMGs(10, 0);
+      const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+        credentials: 'include'
+      });
+      const user = await req.json()
+      console.log(user)
+
+      thumbnails.value = await getIMGs(10, 0, user.user.user_id);
       loading.value = false;
       console.log(thumbnails.value)
     });
+
+
 </script>
 
 <template>

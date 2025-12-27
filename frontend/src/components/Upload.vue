@@ -58,7 +58,9 @@ async function uploadVideo() {
   formData.append('description', description.value)
   formData.append('age_restricted', ageRestricted.value.toString())
 
-  return new Promise<void>((resolve, reject) => {
+  var finalData;
+
+  const promise = await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
 
     xhr.upload.addEventListener('progress', (e) => {
@@ -68,6 +70,7 @@ async function uploadVideo() {
     })
 
     xhr.addEventListener('load', async () => {
+      console.log(xhr.getAllResponseHeaders())
       const contentType = xhr.getResponseHeader('content-type')
       if (!contentType || !contentType.includes('application/json')) {
         console.error('Non-JSON response:', xhr.responseText)
@@ -83,6 +86,7 @@ async function uploadVideo() {
 
       console.log('Video uploaded:', data)
       resolve()
+      finalData = data
     })
 
     xhr.addEventListener('error', () => reject(new Error('Upload failed')))
@@ -91,22 +95,50 @@ async function uploadVideo() {
     xhr.open('POST', 'http://api.myfairpipe.com/video/upload')
     xhr.withCredentials = true
     xhr.send(formData)
+    xhr.DONE;
   })
+
+  return { promise, finalData };
 }
 
-async function uploadThumbnail() {
+async function uploadThumbnail(id:number) {
   if (!thumbnailFile.value) return
+
   const formData = new FormData()
   formData.append('file', thumbnailFile.value)
+  formData.append('id', String(id))
 
-  const res = await fetch('http://api.myfairpipe.com/thumbnails/upload', {
-    method: 'POST',
-    body: formData,
-    credentials: 'include'
-  })
-  if (!res.ok) throw new Error('Thumbnail upload failed')
-  const data = await res.json()
-  console.log('Thumbnail uploaded:', data)
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+
+    xhr.addEventListener('load', async () => {
+      const contentType = xhr.getResponseHeader('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Non-JSON response:', xhr.responseText)
+        reject(new Error(`Server returned ${xhr.status}: ${xhr.statusText}`))
+        return
+      }
+
+      console.log(xhr.getAllResponseHeaders())
+
+      const data = JSON.parse(xhr.responseText)
+      if (xhr.status >= 400) {
+        reject(new Error(data.error || 'Thumbnail upload failed'))
+        return
+      }
+
+      console.log('Thumbnail uploaded:', data)
+      return data;
+    })
+
+    xhr.addEventListener('error', () => reject(new Error('Thumbnail upload failed')))
+    xhr.addEventListener('abort', () => reject(new Error('Thumbnail upload cancelled')))
+
+    xhr.open('POST', 'http://api.myfairpipe.com/thumbnail/upload')
+    xhr.withCredentials = true
+    xhr.send(formData)
+    xhr.DONE;
+  });
 }
 
 async function uploadSubtitle() {
@@ -154,9 +186,15 @@ async function submitForm() {
   uploadError.value = null
 
   try {
-    await uploadVideo()
-    await uploadThumbnail()
-    await uploadSubtitle()
+    const videoData = await uploadVideo()
+    if (videoData?.finalData) {
+      const videoId = videoData.finalData.id;
+      console.log(videoId)
+      await uploadThumbnail(videoId)
+      if (subtitleFile) {
+        await uploadSubtitle()
+      }
+    }
     router.push('/user')
   } catch (error) {
     console.error('Upload error:', error)

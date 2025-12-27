@@ -1,6 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import {createBucketIfNeeded, uploadBucket, uploadFileToMinio} from "@/lib/services/minio";
-import {randomUUID} from "crypto";
+import { createBucketIfNeeded, uploadBucket, uploadFileToMinio, videoBucket } from "@/lib/services/minio";
 import {sendMessage} from "@/lib/services/rabbitmq";
 import {connectionPool} from "@/lib/services/postgres";
 import {getMp4Duration} from "@/lib/utils/video";
@@ -50,14 +49,22 @@ export async function POST(req: NextRequest) {
 		if (!file.type.startsWith("video/")) {
 			return NextError.error("Wrong file type. Only video files are allowed.", HttpError.BadRequest);
 		}
+		// -------------------------------
+		// Prepare Client for Database
+		// -------------------------------
+		client = await connectionPool.connect();
+
+		await client.query("BEGIN");
+
+		const rows = await client.query(`SELECT * FROM video;`);
 
 		// -------------------------------
 		// Prepare file
 		// -------------------------------
 		const buffer = Buffer.from(await file.arrayBuffer());
-		const id = randomUUID();
+		const id = rows.rowCount + 1;
 		const extension = file.name.split(".").pop() || "mp4";
-		const filename = `${id}.${extension}`;
+		const filename = `${id}/${id}.${extension}`;
 
 		let duration: number | null = null;
 		if (file.type === "video/mp4" || file.name.endsWith(".mp4") || file.name.endsWith(".mov")) {
@@ -67,8 +74,8 @@ export async function POST(req: NextRequest) {
 		// -------------------------------
 		// Upload file to MinIO
 		// -------------------------------
-		await createBucketIfNeeded(uploadBucket);
-		await uploadFileToMinio(filename, uploadBucket, buffer, file.type);
+		await createBucketIfNeeded(videoBucket);
+		await uploadFileToMinio(filename, videoBucket, buffer, file.type);
 
 		// -------------------------------
 		// Send RabbitMQ Jobs
@@ -87,21 +94,14 @@ export async function POST(req: NextRequest) {
 		// -------------------------------
 		// Database Transaction
 		// -------------------------------
-		const metadataId = randomUUID();
-		client = await connectionPool.connect();
 
 		try {
-			await client.query("BEGIN");
-
-			await client.query(`INSERT INTO metadata (metadata_id)
-                                VALUES ($1)`, [metadataId]);
-
 			await client.query(`INSERT INTO video
                                 (video_id, path, duration, title, description,
-                                 is_age_restricted, tested, views, uploader, metadata_id)
-                                VALUES ($1, $2, $3, $4, $5, DEFAULT, DEFAULT, DEFAULT, $7,
-                                        $8)`, [id, `/video/${id}/master.m3u8`, duration, title, description, user.user_id, // <- neuer getUser user_id
-				metadataId,]);
+                                 is_age_restricted, tested, views, uploader)
+                                VALUES ($1, $2, $3, $4, $5, DEFAULT, DEFAULT, DEFAULT, $6)`
+				, [id, `/video/${id}/master.m3u8`, duration, title, description, user.user_id, // <- neuer getUser user_id
+					]);
 
 			await client.query("COMMIT");
 			return NextResponse.json({id: id, success: true}, {status: 200});

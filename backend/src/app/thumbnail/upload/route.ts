@@ -1,6 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import {countFilesInFolder, objectExists, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
-import {randomUUID} from "crypto";
+import { countFilesInFolder, objectExists, uploadBucket, uploadFileToMinio, videoBucket } from "@/lib/services/minio";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {checkUUID} from "@/lib/utils/util";
@@ -41,10 +40,6 @@ export async function POST(req: NextRequest) {
             return NextError.error("No video given", HttpError.BadRequest);
         }
 
-        if (!checkUUID(videoId)) {
-            return NextError.error("Invalid video id format", HttpError.BadRequest);
-        }
-
         if (!file) {
             return NextError.error("No file uploaded", HttpError.BadRequest);
         }
@@ -63,7 +58,7 @@ export async function POST(req: NextRequest) {
                 SELECT v.video_id
                 FROM video v
                 WHERE v.video_id = $1 AND v.uploader = $2
-            `, [videoId, user.id]);
+            `, [videoId, user.user_id]);
 
             if (ownershipResult.rowCount === 0) {
                 return NextError.error("Video not found or you don't have permission to add thumbnails", HttpError.NotFound);
@@ -75,7 +70,9 @@ export async function POST(req: NextRequest) {
         // -------------------------------
         // MinIO validation
         // -------------------------------
-        const exists = await objectExists(videoBucket, `${videoId}/master.m3u8`);
+        const exists = await objectExists(videoBucket, `${videoId}/${videoId}.mp4`) || await objectExists(uploadBucket, `${videoId}.mov`);
+        // const exists = await objectExists(videoBucket, `${videoId}/master.m3u8`);
+
 
         if (!exists) {
             return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
@@ -88,10 +85,19 @@ export async function POST(req: NextRequest) {
         }
 
         // -------------------------------
+        // Prepare Client for Database
+        // -------------------------------
+        client = await connectionPool.connect();
+
+        await client.query("BEGIN");
+
+        const rows = await client.query(`SELECT * FROM thumbnail;`);
+
+        // -------------------------------
         // Prepare file
         // -------------------------------
         const buffer = Buffer.from(await file.arrayBuffer());
-        const id = randomUUID();
+        const id = rows.rowCount + 1;
         const extension = file.name.split(".").pop() || "png";
         const filename = `${id}.${extension}`;
 
@@ -105,8 +111,6 @@ export async function POST(req: NextRequest) {
         // -------------------------------
         client = await connectionPool.connect();
         try {
-            await client.query("BEGIN");
-
             await client.query(`
                 INSERT INTO photo (photo_id, path)
                 VALUES ($1, $2)
@@ -116,6 +120,12 @@ export async function POST(req: NextRequest) {
                 INSERT INTO Thumbnail (thumbnail_id, photo_id, video_id, is_active)
                 VALUES ($1, $2, $3, $4)
             `, [id, id, videoId, false]);
+
+            await client.query(`
+                UPDATE video
+                SET thumbnail_id = $1
+                WHERE video_id = $2
+            `, [id, videoId]);
 
             await client.query("COMMIT");
             return NextResponse.json({id: id, success: true}, {status: 200});
