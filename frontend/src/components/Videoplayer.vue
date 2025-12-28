@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { createVID, getIMGs } from './Content.vue'
 import { onMounted, ref } from 'vue'
 import Thumbnail from './Thumbnail.vue'
 
+const router = useRouter()
 const route = useRoute()
 const props = { id: route.query.id as string }
-const title = ref("")
-const description = ref("")
+const title = ref('')
+const description = ref('')
 const liked = ref(false)
+const likes = ref('0')
 const disliked = ref(false)
+const dislikes = ref('0')
 const thumbnails = ref([])
 const loading = ref(true)
 
@@ -33,23 +36,24 @@ async function getDetails() {
 }
 
 async function getLiked() {
-  const req = await fetch(`http://api.myfairpipe.com/user/get`, {
-    credentials: 'include'
-  });
-  const user = await req.json()
-  console.log(user)
-
-  const params = new URLSearchParams()
-  params.append('videoID', props.id)
-  params.append('userID', user.user.user_id)
+  const body = JSON.stringify({
+    videoID: props.id,
+  })
 
   try {
-    const response = await fetch(`http://api.myfairpipe.com/like_dislike/get?${params}`)
+    const response = await fetch(`http://api.myfairpipe.com/like_dislike/get`, {
+      method: 'POST',
+      body: body,
+      credentials: 'include',
+    })
 
     if (response.ok) {
       const data = await response.json()
-      liked.value = data.result.liked
-      disliked.value = data.result.disliked
+        console.log(data)
+      liked.value = data.result?.liked
+      likes.value = data.result.likes
+      disliked.value = data.result?.disliked
+      dislikes.value = data.result.dislikes
       console.log(data.result)
     } else {
       console.log(response)
@@ -60,18 +64,16 @@ async function getLiked() {
 }
 
 async function like() {
-  const req = await fetch(`http://api.myfairpipe.com/user/get`, {
-    credentials: 'include'
-  });
-  const user = await req.json()
-  console.log(user)
-
-  const params = new URLSearchParams()
-  params.append('videoID', props.id)
-  params.append('userID', user.user.user_id)
+  const body = JSON.stringify({
+    videoID: props.id,
+  })
 
   try {
-    const response = await fetch(`http://api.myfairpipe.com/like_dislike/like?${params}`)
+    const response = await fetch(`http://api.myfairpipe.com/like_dislike/like`, {
+      method: 'POST',
+      body: body,
+      credentials: 'include',
+    })
 
     if (response.ok) {
       const data = await response.json()
@@ -84,21 +86,21 @@ async function like() {
   } catch (e) {
     console.error(e)
   }
+
+  getLiked()
 }
 
 async function dislike() {
-  const req = await fetch(`http://api.myfairpipe.com/user/get`, {
-    credentials: 'include'
-  });
-  const user = await req.json()
-  console.log(user)
-
-  const params = new URLSearchParams()
-  params.append('videoID', props.id)
-  params.append('userID', user.user.user_id)
+  const body = JSON.stringify({
+    videoID: props.id,
+  })
 
   try {
-    const response = await fetch(`http://api.myfairpipe.com/like_dislike/dislike?${params}`)
+    const response = await fetch(`http://api.myfairpipe.com/like_dislike/dislike`, {
+      method: 'POST',
+      body: body,
+      credentials: 'include',
+    })
 
     if (response.ok) {
       const data = await response.json()
@@ -111,6 +113,8 @@ async function dislike() {
   } catch (e) {
     console.error(e)
   }
+
+  getLiked()
 }
 
 function share() {
@@ -135,34 +139,26 @@ function postComment() {
           <div id="underVideo">
             <h2>{{ title }}</h2>
             <div class="interactivePanel">
-              <input
-                class="interactive"
-                id="like"
-                type="image"
-                :src="liked ? '/liked.svg' : '/like.svg'"
-                v-on:click="like()"
-              />
-              <input
-                class="interactive"
-                id="dislike"
-                type="image"
-                :src="disliked ? '/disliked.svg' : '/dislike.svg'"
-                v-on:click="dislike()"
-              />
-              <input
-                class="interactive"
-                id="share"
-                type="image"
-                src="/share.svg"
-                v-on:click="share()"
-              />
-              <input
-                class="interactive"
-                id="download"
-                type="image"
-                src="/download.svg"
-                v-on:click="download()"
-              />
+              <div>
+                <input
+                  class="interactive"
+                  id="like"
+                  type="image"
+                  :src="liked ? '/liked.svg' : '/like.svg'"
+                  v-on:click="like()"
+                />
+                <p class="information">likes: {{ likes }}</p>
+              </div>
+              <div>
+                <input
+                  class="interactive"
+                  id="dislike"
+                  type="image"
+                  :src="disliked ? '/disliked.svg' : '/dislike.svg'"
+                  v-on:click="dislike()"
+                />
+                <p class="information">dislikes: {{ dislikes }}</p>
+              </div>
             </div>
           </div>
           <p>{{ description }}</p>
@@ -214,9 +210,10 @@ function postComment() {
 .interactivePanel {
   display: flex;
   flex-direction: row;
-  border-radius: 999px;
+  border-radius: 10px;
   background: #c6f0ff;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  spacing: 10px;
   width: fit-content;
 }
 
@@ -232,6 +229,17 @@ function postComment() {
     transform 0.15s ease,
     box-shadow 0.15s ease,
     background 0.15s ease;
+}
+
+.information {
+  display: flex;
+  width: fit-content;
+  height: auto;
+  border-radius: 10px;
+  padding: 0 10px 0 10px;
+  justify-content: center;
+  align-content: center;
+  background-color: #e0fbfc;
 }
 
 #underVideo {

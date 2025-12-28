@@ -1,6 +1,7 @@
 import { connectionPool } from "@/lib/services/postgres";
 import { NextRequest, NextResponse } from "next/server";
 import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
 
 async function dislike(videoID: number, userID: number) {
   const client = await connectionPool.connect();
@@ -103,16 +104,19 @@ export async function OPTIONS() {
   });
 }
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const { searchParams } = req.nextUrl;
-    const videoID = searchParams.get('videoID');
+    const user = getUser(req);
+
+    console.log(user)
+
+    const {videoID} = await req.json();
 
     if (videoID === null) {
       return NextError.error("No Video ID", HttpError.BadRequest);
     }
 
-    const userID = searchParams.get('userID');
+    const userID = user.user_id;
 
     if (userID === null) {
       return NextError.error("No User ID", HttpError.BadRequest);

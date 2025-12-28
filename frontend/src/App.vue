@@ -1,21 +1,63 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import { useRouter } from 'vue-router'
-import { onMounted, ref } from "vue";
+import { onMounted, ref } from 'vue'
 
 const router = useRouter()
 const loggedIn = ref(false)
+const anonym = ref(false)
+const username = ref('')
+
+async () => {
+    await checkLoggedIn()
+}
 
 onMounted(async () => {
   loggedIn.value = await checkLoggedIn()
+    console.log(loggedIn.value)
+    console.log(anonym.value)
+
+  if (!loggedIn.value && !anonym.value) {
+    const register = await fetch('http://api.myfairpipe.com/auth/anonymLogin', {
+      method: 'POST',
+      credentials: 'include',
+    })
+
+    const data = await register.json()
+
+    console.log(data)
+
+    const body = JSON.stringify({
+      user_email: data.user.user_email,
+      password: data.password,
+    })
+
+    const login = await fetch('http://api.myfairpipe.com/auth/login', {
+      method: 'POST',
+      body: body,
+      credentials: 'include',
+    })
+
+    console.log(login)
+  }
 })
 
 async function checkLoggedIn() {
-  const req = await fetch("http://api.myfairpipe.com/user/get", {
-    credentials: 'include'
+  const req = await fetch('http://api.myfairpipe.com/user/get', {
+    credentials: 'include',
   })
 
-  return req.status < 400;
+  if (req.ok) {
+    const data = await req.json()
+    if (data.user.anonym) {
+      anonym.value = true
+      return false
+    }
+    username.value = data.user.username
+  }
+  anonym.value = false
+
+  return req.status < 400
 }
 </script>
 
@@ -36,8 +78,8 @@ async function checkLoggedIn() {
           </svg>
         </div>
         <RouterLink to="/home" class="navtxt">Home</RouterLink>
-        <RouterLink v-if="loggedIn" to="/user" class="navtxt">User</RouterLink>
-        <RouterLink to="/login" class="navtxt" id="loginbtn">Login</RouterLink>
+        <RouterLink v-if="loggedIn" to="/user" class="navtxt">{{ username }}</RouterLink>
+        <RouterLink v-if="!loggedIn" to="/login" class="navtxt" id="loginbtn">Login</RouterLink>
       </div>
     </nav>
 

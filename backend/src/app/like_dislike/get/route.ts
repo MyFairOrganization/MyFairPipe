@@ -1,33 +1,52 @@
 import { connectionPool } from "@/lib/services/postgres";
 import { NextRequest, NextResponse } from "next/server";
 import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
 
-async function getstatus(videoID: number, userID: number) {
+async function getstatus(videoID: number, userID = 1) {
 	const client = await connectionPool.connect();
 
 	client.query("BEGIN")
 
 	// SQL query to check if user already disliked video
-	const query = `
+	const isLikeQuery = `
     SELECT lv.is_like, v.likes, v.dislikes
     FROM Like_Video lv
-    JOIN "User" u ON u.user_id = lv.user_id
     JOIN video v ON lv.video_id = v.video_id
+    JOIN "User" u ON u.user_id = lv.user_id
     WHERE u.user_id = $1 AND lv.video_id = $2
   `;
 
-	try {
-		const result = await client.query(query, [userID, videoID])
+	const likesQuery = `
+		SELECT likes, dislikes
+		FROM video
+		WHERE video_id = $1
+	`;
 
-		var liked: boolean
+	try {
+		var result = undefined;
+		if (userID) {
+			result = await client.query(isLikeQuery, [userID, videoID])
+		}
+		var liked = false
 		var likes = 0
-		var disliked: boolean
+		var disliked = false
 		var dislikes = 0
 
-		if (result.rows[0] == undefined) {
+		if (result?.rows[0] == undefined) {
+			const amount = await client.query(likesQuery, [videoID])
+			console.log(amount.rows[0])
 			liked = false
 			disliked = false
+			if (amount.rows[0]) {
+				console.log("setting likes/dislikes")
+				likes = amount.rows[0].likes;
+				dislikes = amount.rows[0].dislikes;
+			}
+
+			console.log(liked, disliked, likes, dislikes)
 		} else {
+			console.log("IS LIKEEEEEE")
 			const isLike = result.rows[0].is_like
 			liked = isLike;
 			likes = result.rows[0].likes
@@ -36,6 +55,7 @@ async function getstatus(videoID: number, userID: number) {
 		}
 		return {liked, disliked, likes, dislikes}
 	} catch (err) {
+		console.log(err)
 
 	} finally {
 		client.query("COMMIT")
@@ -54,23 +74,21 @@ export async function OPTIONS() {
 	});
 }
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
 	try {
-		const { searchParams } = req.nextUrl;
-		const videoIDParam = searchParams.get('videoID');
+		const user = getUser(req);
 
-		if (videoIDParam === null) {
+		console.log(user)
+
+		const {videoID} = await req.json();
+
+		if (videoID === null) {
 			return NextError.error("No Video ID", HttpError.BadRequest);
 		}
 
-		const videoID = Number.parseInt(videoIDParam, 10);
-		const usernameParam = searchParams.get('userID');
+		const userID = user?.user_id;
 
-		if (usernameParam === null) {
-			return NextError.error("No User ID", HttpError.BadRequest);
-		}
-
-		const result = await getstatus(videoID, Number(usernameParam));
+		const result = await getstatus(Number(videoID), Number(userID));
 		return NextResponse.json({ result }, {status: 200});
 	} catch (err) {
 		console.error(err);

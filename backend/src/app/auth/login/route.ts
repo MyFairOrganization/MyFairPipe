@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export async function OPTIONS() {
     return new NextResponse(null, {
         status: 204, headers: {
-            "Access-Control-Allow-Origin": "http://myfairpipe.com",
+            "Access-Control-Allow-Origin": "http://myfairpipe.com, http://api.myfairpipe.com",
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
@@ -40,6 +40,8 @@ export async function POST(req: Request) {
 
         const user = result.rows[0];
         const valid = await bcrypt.compare(password, user.hashed_password);
+
+        console.log(valid)
 
         if (!valid) {
             return NextResponse.json({error: "Invalid email or password"}, {status: 401});

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+const username = ref('')
 const title = ref('')
 const description = ref('')
 const ageRestricted = ref(false)
@@ -23,6 +24,18 @@ function upload() {
 function edit() {
   router.push('/edituser')
 }
+
+onMounted(async () => {
+  const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+    credentials: 'include',
+  })
+  const user = await req.json()
+  if (user.user.anonym) {
+    router.push('/home')
+  } else {
+    username.value = user.user.username
+  }
+})
 
 // --- Handlers for file selection ---
 function handleVideoUpload(event: Event) {
@@ -58,7 +71,7 @@ async function uploadVideo() {
   formData.append('description', description.value)
   formData.append('age_restricted', ageRestricted.value.toString())
 
-  var finalData;
+  var finalData
 
   const promise = await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -95,13 +108,13 @@ async function uploadVideo() {
     xhr.open('POST', 'http://api.myfairpipe.com/video/upload')
     xhr.withCredentials = true
     xhr.send(formData)
-    xhr.DONE;
+    xhr.DONE
   })
 
-  return { promise, finalData };
+  return { promise, finalData }
 }
 
-async function uploadThumbnail(id:number) {
+async function uploadThumbnail(id: number) {
   if (!thumbnailFile.value) return
 
   const formData = new FormData()
@@ -128,7 +141,7 @@ async function uploadThumbnail(id:number) {
       }
 
       console.log('Thumbnail uploaded:', data)
-      return data;
+      return data
     })
 
     xhr.addEventListener('error', () => reject(new Error('Thumbnail upload failed')))
@@ -137,8 +150,8 @@ async function uploadThumbnail(id:number) {
     xhr.open('POST', 'http://api.myfairpipe.com/thumbnail/upload')
     xhr.withCredentials = true
     xhr.send(formData)
-    xhr.DONE;
-  });
+    xhr.DONE
+  })
 }
 
 async function uploadSubtitle() {
@@ -149,7 +162,7 @@ async function uploadSubtitle() {
   const res = await fetch('http://api.myfairpipe.com/subtitles/upload', {
     method: 'POST',
     body: formData,
-    credentials: 'include'
+    credentials: 'include',
   })
   if (!res.ok) throw new Error('Subtitle upload failed')
   const data = await res.json()
@@ -188,7 +201,7 @@ async function submitForm() {
   try {
     const videoData = await uploadVideo()
     if (videoData?.finalData) {
-      const videoId = videoData.finalData.id;
+      const videoId = videoData.finalData.id
       console.log(videoId)
       await uploadThumbnail(videoId)
       if (subtitleFile) {
@@ -211,7 +224,7 @@ async function submitForm() {
     <img class="pfp" src="/pfpExample.png" />
     <div class="user">
       <div class="left">
-        <h1>User Name</h1>
+        <h1>{{ username }}</h1>
         <p id="descr">This is a brief user description.</p>
         <button id="b1">Channel information</button>
       </div>
@@ -240,22 +253,46 @@ async function submitForm() {
   </div>
 
   <div class="form-container">
-    <label for="title">Title:</label><br>
-    <input id="title" v-model="title" type="text" placeholder="Enter title" :disabled="uploading" /><br>
+    <label for="title">Title:</label><br />
+    <input
+      id="title"
+      v-model="title"
+      type="text"
+      placeholder="Enter title"
+      :disabled="uploading"
+    /><br />
 
-    <label for="description">Description:</label><br>
-    <textarea id="description" v-model="description" placeholder="Enter description" :disabled="uploading"></textarea><br>
+    <label for="description">Description:</label><br />
+    <textarea
+      id="description"
+      v-model="description"
+      placeholder="Enter description"
+      :disabled="uploading"
+    ></textarea
+    ><br />
 
-    <label for="video">Video Upload:</label><br>
-    <input id="video" type="file" accept="video/*" @change="handleVideoUpload" :disabled="uploading" /><br><br>
+    <label for="video">Video Upload:</label><br />
+    <input
+      id="video"
+      type="file"
+      accept="video/*"
+      @change="handleVideoUpload"
+      :disabled="uploading"
+    /><br /><br />
 
-    <label for="thumbnail">Thumbnail Upload:</label><br>
-    <input id="thumbnail" type="file" accept="image/*" @change="handleThumbnailUpload" required/><br><br>
+    <label for="thumbnail">Thumbnail Upload:</label><br />
+    <input
+      id="thumbnail"
+      type="file"
+      accept="image/*"
+      @change="handleThumbnailUpload"
+      required
+    /><br /><br />
 
-    <label for="subtitle">Subtitle Upload:</label><br>
-    <input id="subtitle" type="file" accept="text/vtt" @change="handleSubtitleUpload" /><br>
-    <input id="language" placeholder="Language" /><br>
-    <input id="language_short" placeholder="language code" /><br><br>
+    <label for="subtitle">Subtitle Upload:</label><br />
+    <input id="subtitle" type="file" accept="text/vtt" @change="handleSubtitleUpload" /><br />
+    <input id="language" placeholder="Language" /><br />
+    <input id="language_short" placeholder="language code" /><br /><br />
 
     <button class="upload" @click="submitForm" :disabled="uploading">
       {{ uploading ? 'Uploading...' : 'Upload' }}
@@ -285,7 +322,7 @@ async function submitForm() {
   align-items: center;
   width: 900px;
   height: 250px;
-  background-color: #98C1D9;
+  background-color: #98c1d9;
   padding: 20px 30px;
   border-radius: 10px;
   gap: 20px;
@@ -320,7 +357,7 @@ async function submitForm() {
 
 .btn {
   padding: 10px 20px;
-  background-color: #3D5A80;
+  background-color: #3d5a80;
   color: white;
   border: none;
   border-radius: 10px;
@@ -351,7 +388,7 @@ async function submitForm() {
 
 .upload {
   padding: 10px 20px;
-  background-color: #3D5A80;
+  background-color: #3d5a80;
   color: white;
   border: none;
   border-radius: 5px;
@@ -392,7 +429,7 @@ async function submitForm() {
 
 .progress-fill {
   height: 100%;
-  background-color: #3D5A80;
+  background-color: #3d5a80;
   transition: width 0.3s ease;
 }
 </style>

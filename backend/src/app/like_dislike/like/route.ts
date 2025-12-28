@@ -1,6 +1,7 @@
 import { connectionPool } from "@/lib/services/postgres";
 import { NextRequest, NextResponse } from "next/server";
 import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
 
 async function like(videoID: number, userID: number) {
   const client = await connectionPool.connect();
@@ -9,7 +10,7 @@ async function like(videoID: number, userID: number) {
 
   // SQL query to check if user already liked video
   const query = `
-    SELECT lv.is_like
+    SELECT lv.is_like, u.anonym
     FROM Like_Video lv
 		JOIN "User" u ON u.user_id = lv.user_id
     WHERE u.user_id = $1 AND lv.video_id = $2
@@ -113,16 +114,19 @@ export async function OPTIONS() {
   });
 }
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const { searchParams } = req.nextUrl;
-    const videoID = searchParams.get('videoID');
+    const user = getUser(req);
+
+    console.log(user)
+
+    const {videoID} = await req.json();
 
     if (videoID === null) {
       return NextError.error("No Video ID", HttpError.BadRequest);
     }
 
-    const userID = searchParams.get('userID');
+    const userID = user.user_id;
 
     if (userID === null) {
       return NextError.error("No User ID", HttpError.BadRequest);

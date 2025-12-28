@@ -10,6 +10,16 @@ const userName = ref('User Name')
 const userDescription = ref('This is a brief user description.')
 const userImage = ref('/pfpExample.png')
 
+onMounted(async () => {
+    const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+        credentials: 'include',
+    })
+    const user = await req.json()
+    if (user.user.anonym) {
+        router.push('/home')
+    }
+})
+
 function handleFileUpload(event: Event) {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {

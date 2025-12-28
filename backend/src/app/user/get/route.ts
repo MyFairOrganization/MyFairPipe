@@ -47,7 +47,8 @@ export async function GET(req: NextRequest) {
                        displayname,
                        bio,
                        picture_id,
-                       created_at
+                       created_at,
+                       anonym
                 FROM "User"
                 WHERE user_id = $1
             `,

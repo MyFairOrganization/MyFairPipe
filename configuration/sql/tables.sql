@@ -41,6 +41,7 @@ CREATE TABLE "User"
     username        VARCHAR(100) UNIQUE NOT NULL,
     displayname     VARCHAR(150),
     bio             TEXT,
+    anonym          BOOLEAN,
     picture_id      INTEGER             REFERENCES Profile_Picture (profile_picture_id) ON DELETE SET NULL
 );
 
@@ -225,9 +226,6 @@ COMMENT ON TABLE Like_Video IS 'Tracks user likes/dislikes on videos';
 COMMENT ON TABLE Like_Comment IS 'Tracks user likes/dislikes on comments';
 COMMENT ON TABLE Subscriber IS 'User subscription relationships';
 
-INSERT INTO "User" (user_email, hashed_password, username, displayname)
-VALUES ('test@example.com', '$2b$10$5Kptlt8AdBeYQfFxRif6KOpTfQKMw4vth3JKwLzel4T4irkvATLri', 'testuser', 'Test User');
--- PW: 123456
-
 SELECT * FROM video;
 select * FROM photo;
+SELECT * FROM "User";

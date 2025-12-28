@@ -1,32 +1,39 @@
 <script setup lang="ts">
-    import { getIMGs } from './Content.vue'
-    import { onMounted, ref } from "vue";
-    import { useRouter } from 'vue-router'
-    import Thumbnail from "./Thumbnail.vue";
+import { getIMGs } from "./Content.vue";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import Thumbnail from "./Thumbnail.vue";
 
-    const router = useRouter();
+const username = ref('')
+const router = useRouter();
 
-    function upload(){
-        router.push('/upload');
-    }
-    function edit(){
-        router.push('/edituser');
-    }
+function upload() {
+    router.push("/upload");
+}
 
-    const thumbnails = ref([])
-    const loading = ref(true);
+function edit() {
+    router.push("/edituser");
+}
 
-    onMounted(async () => {
-      const req = await fetch(`http://api.myfairpipe.com/user/get`, {
-        credentials: 'include'
-      });
-      const user = await req.json()
-      console.log(user)
+const thumbnails = ref([]);
+const loading = ref(true);
 
-      thumbnails.value = await getIMGs(10, 0, user.user.user_id);
-      loading.value = false;
-      console.log(thumbnails.value)
+onMounted(async () => {
+    const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+        credentials: "include"
     });
+    const user = await req.json();
+    if (user.user.anonym) {
+        router.push("/home");
+    } else {
+        username.value = user.user.username
+
+        console.log(user);
+
+        thumbnails.value = await getIMGs(10, 0, user.user.user_id);
+        loading.value = false;
+    }
+});
 
 
 </script>
@@ -34,27 +41,27 @@
 <template>
     <div class="container">
         <img class="pfp" src="/pfpExample.png"></img>
-            <div class="user">
-                <div class="left">
-                    <h1>User Name</h1>
-                    <p id="descr">This is a brief user description.</p>
-                    <button id="b1">Channel information</button>
-                </div>
-
-                <div class="right">
-                    <button class="btn" @click="upload">Upload Video</button>
-                    <button class="btn" @click="edit">Edit Account</button>
-                </div>
+        <div class="user">
+            <div class="left">
+                <h1>{{ username }}</h1>
+                <p id="descr">This is a brief user description.</p>
+                <button id="b1">Channel information</button>
             </div>
+
+            <div class="right">
+                <button class="btn" @click="upload">Upload Video</button>
+                <button class="btn" @click="edit">Edit Account</button>
+            </div>
+        </div>
     </div>
     <hr class="line">
     <div id="thumbnails">
-      <div id="feed">
-        <div v-if="loading">Loading thumbnails...</div>
+        <div id="feed">
+            <div v-if="loading">Loading thumbnails...</div>
 
-        <Thumbnail v-else :thumbnails="thumbnails" />
-      </div>
-		</div>
+            <Thumbnail v-else :thumbnails="thumbnails" />
+        </div>
+    </div>
 
 </template>
 
