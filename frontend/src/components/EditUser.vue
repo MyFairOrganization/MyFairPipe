@@ -22,14 +22,14 @@ onMounted(async () => {
 
 function loadProfile() {
   const xhr = new XMLHttpRequest()
-  xhr.open("GET", "http://api.myfairpipe.com/user/get ", true)
+  xhr.open("GET", "http://api.myfairpipe.com/user/get", true)
   xhr.withCredentials = true
 
   xhr.onload = () => {
     if (xhr.status === 200) {
       const data = JSON.parse(xhr.responseText)
-      userName.value = data.displayName
-      userDescription.value = data.bio
+      userName.value = data.user.displayname
+      userDescription.value = data.user.bio
     }
   }
 
@@ -72,6 +72,7 @@ function applyChanges() {
   }
 
   xhr.send(formData)
+  router.push('/user')
 }
 
 function handleFileUpload(event: Event) {
@@ -131,17 +132,8 @@ onMounted(async () => {
 
       <div class="right">
         <button class="btn" @click="applyChanges">Apply</button>
+        <button class="btn" @click="">Back</button>
       </div>
-    </div>
-  </div>
-
-  <hr class="line" />
-
-  <div id="thumbnails">
-    <div id="feed">
-      <div v-if="loading">Loading thumbnails...</div>
-
-      <Thumbnail v-else :thumbnails="thumbnails" />
     </div>
   </div>
 </template>

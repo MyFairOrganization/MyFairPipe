@@ -220,83 +220,68 @@ async function submitForm() {
 </script>
 
 <template>
-  <div class="container">
-    <img class="pfp" src="/pfpExample.png" />
-    <div class="user">
-      <div class="left">
-        <h1>{{ username }}</h1>
-        <p id="descr">This is a brief user description.</p>
-        <button id="b1">Channel information</button>
-      </div>
-      <div class="right">
-        <button class="btn" @click="upload">Upload Video</button>
-        <button class="btn" @click="edit">Edit Account</button>
-      </div>
+  <div class="uploadForm">
+    <div v-if="uploadError" class="error-message">
+      {{ uploadError }}
     </div>
-  </div>
 
-  <hr class="line" />
-
-  <div v-if="uploadError" class="error-message">
-    {{ uploadError }}
-  </div>
-
-  <div v-if="uploading" class="progress-container">
-    <div class="progress-bar">
-      <div class="progress-fill" :style="{ width: uploadProgress + '%' }"></div>
+    <div v-if="uploading" class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" :style="{ width: uploadProgress + '%' }"></div>
+      </div>
+      <p>Uploading: {{ uploadProgress }}%</p>
     </div>
-    <p>Uploading: {{ uploadProgress }}%</p>
-  </div>
 
-  <div v-if="videoURL" class="video-preview">
-    <video :src="videoURL" controls width="400"></video>
-  </div>
+    <div v-if="videoURL" class="video-preview">
+      <video :src="videoURL" controls width="400"></video>
+    </div>
 
-  <div class="form-container">
-    <label for="title">Title:</label><br />
-    <input
-      id="title"
-      v-model="title"
-      type="text"
-      placeholder="Enter title"
-      :disabled="uploading"
-    /><br />
+    <div class="form-container">
+      <label for="title">Title:</label><br />
+      <input
+        id="title"
+        v-model="title"
+        type="text"
+        placeholder="Enter title"
+        :disabled="uploading"
+      /><br />
 
-    <label for="description">Description:</label><br />
-    <textarea
-      id="description"
-      v-model="description"
-      placeholder="Enter description"
-      :disabled="uploading"
-    ></textarea
-    ><br />
+      <label for="description">Description:</label><br />
+      <textarea
+        id="description"
+        v-model="description"
+        placeholder="Enter description"
+        :disabled="uploading"
+      ></textarea
+      ><br />
 
-    <label for="video">Video Upload:</label><br />
-    <input
-      id="video"
-      type="file"
-      accept="video/*"
-      @change="handleVideoUpload"
-      :disabled="uploading"
-    /><br /><br />
+      <label for="video">Video Upload:</label><br />
+      <input
+        id="video"
+        type="file"
+        accept="video/*"
+        @change="handleVideoUpload"
+        :disabled="uploading"
+      /><br /><br />
 
-    <label for="thumbnail">Thumbnail Upload:</label><br />
-    <input
-      id="thumbnail"
-      type="file"
-      accept="image/*"
-      @change="handleThumbnailUpload"
-      required
-    /><br /><br />
+      <label for="thumbnail">Thumbnail Upload:</label><br />
+      <input
+        id="thumbnail"
+        type="file"
+        accept="image/*"
+        @change="handleThumbnailUpload"
+        required
+      /><br /><br />
 
-    <label for="subtitle">Subtitle Upload:</label><br />
-    <input id="subtitle" type="file" accept="text/vtt" @change="handleSubtitleUpload" /><br />
-    <input id="language" placeholder="Language" /><br />
-    <input id="language_short" placeholder="language code" /><br /><br />
+      <label for="subtitle">Subtitle Upload:</label><br />
+      <input id="subtitle" type="file" accept="text/vtt" @change="handleSubtitleUpload" /><br />
+      <input id="language" placeholder="Language" /><br />
+      <input id="language_short" placeholder="language code" /><br /><br />
 
-    <button class="upload" @click="submitForm" :disabled="uploading">
-      {{ uploading ? 'Uploading...' : 'Upload' }}
-    </button>
+      <button class="upload" @click="submitForm" :disabled="uploading">
+        {{ uploading ? 'Uploading...' : 'Upload' }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -314,6 +299,12 @@ async function submitForm() {
   gap: 20px;
   margin-bottom: 50px;
   margin-left: 7em;
+}
+
+.uploadForm {
+  display: flex;
+  flex-direction: row;
+  width: 200%;
 }
 
 .user {
@@ -374,7 +365,7 @@ async function submitForm() {
 
 .form-container input,
 .form-container textarea {
-  width: 25%;
+  width: 100%;
   padding: 8px;
   font-size: 1rem;
   margin-bottom: 10px;

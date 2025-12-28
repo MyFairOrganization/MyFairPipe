@@ -28,6 +28,38 @@ const register = () => {
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept', 'application/json');
 
+    xhr.onreadystatechange = async () => {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 201) {
+          try {
+            await loginApi(email, password)
+            router.push('/login');
+          } catch (e: any) {
+            errorMessage.value = 'Invalid response from server';
+          }
+        } else {
+          errorMessage.value = JSON.parse(xhr.responseText).error;
+          console.error('Request failed with status', xhr.status);
+        }
+      }
+    };
+
+    const body = JSON.stringify({
+      user_email: email,
+      username: username,
+      password: password
+    });
+
+    xhr.send(body);
+  }
+
+  function loginApi(email: string, password: string) {
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://api.myfairpipe.com/auth/login', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('Accept', 'application/json');
+
     xhr.onreadystatechange = () => {
       if (xhr.readyState === XMLHttpRequest.DONE) {
         if (xhr.status === 201) {
@@ -45,7 +77,6 @@ const register = () => {
 
     const body = JSON.stringify({
       user_email: email,
-      username: username,
       password: password
     });
 

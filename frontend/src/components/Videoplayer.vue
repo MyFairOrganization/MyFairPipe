@@ -134,7 +134,7 @@ function postComment() {
   <div class="layout">
     <div id="leftSide">
       <div class="player">
-        <component :is="createVID(props.id, title)" />
+        <component :is="createVID(props.id)" />
         <div>
           <div id="underVideo">
             <h2>{{ title }}</h2>

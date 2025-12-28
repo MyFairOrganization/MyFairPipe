@@ -38,8 +38,12 @@ export async function POST(req: NextRequest) {
         return NextError.error("Only image files are allowed", HttpError.BadRequest);
     }
 
-    const photoId = randomUUID();
-    const profilePictureId = randomUUID();
+    const client = await connectionPool.connect();
+    await client.query("BEGIN");
+
+    const amount = await client.query(`SELECT * FROM photo;`)
+
+    const photoId = amount.rowCount + 1;
     const extension = file.name.split(".").pop() || "png";
     const filename = `${photoId}.${extension}`;
 
@@ -48,10 +52,7 @@ export async function POST(req: NextRequest) {
     await createBucketIfNeeded(photoBucket);
     await uploadFileToMinio(filename, photoBucket, buffer, file.type);
 
-    const client = await connectionPool.connect();
-
     try {
-        await client.query("BEGIN");
 
         await client.query(
             `
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
             INSERT INTO profile_picture (profile_picture_id, photo_id)
             VALUES ($1, $2)
             `,
-            [profilePictureId, photoId]
+            [photoId, photoId]
         );
 
         await client.query(
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
             SET picture_id = $1
             WHERE user_id = $2
             `,
-            [profilePictureId, user.user_id]
+            [photoId, user.user_id]
         );
 
         await client.query("COMMIT");

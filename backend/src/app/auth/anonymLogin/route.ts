@@ -41,8 +41,8 @@ export async function POST(req: Request) {
 		}
 
 		const result = await connectionPool.query(
-			`INSERT INTO "User" (user_email, hashed_password, username, anonym)
-             VALUES ($1, $2, $3, TRUE)
+			`INSERT INTO "User" (user_email, hashed_password, username, displayname, anonym)
+             VALUES ($1, $2, $3, $3, TRUE)
              RETURNING user_id, hashed_password, user_email, username`,
 			[user_email, hashed_password, username]
 		);

@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
         await client.query("BEGIN");
 
-        const rows = await client.query(`SELECT * FROM thumbnail;`);
+        const rows = await client.query(`SELECT * FROM photo;`);
 
         // -------------------------------
         // Prepare file

@@ -17,10 +17,25 @@ export const minioClient = new Minio.Client({
 	secretKey: process.env.MINIO_SECRET_KEY || "minioadmin",
 })
 
+
 export async function createBucketIfNeeded(bucket: string) {
 	const exists = await minioClient.bucketExists(bucket);
 	if (!exists) {
 		await minioClient.makeBucket(bucket, "us-east-1");
+		await minioClient.setBucketPolicy(
+			bucket,
+			JSON.stringify({
+				Version: "2012-10-17",
+				Statement: [
+					{
+						Effect: "Allow",
+						Principal: { AWS: "*" },
+						Action: ["s3:GetObject"],
+						Resource: [`arn:aws:s3:::${bucket}/*`]
+					}
+				]
+			})
+		);
 	}
 }
 

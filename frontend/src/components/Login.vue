@@ -33,7 +33,7 @@ const login = () => {
     if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200) {
         // Login erfolgreich → Cookie ist gesetzt
-        router.push('/home');
+        router.push('/user');
       } else {
         try {
           const res = JSON.parse(xhr.responseText);

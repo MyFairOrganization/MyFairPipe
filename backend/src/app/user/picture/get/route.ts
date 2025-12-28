@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectionPool } from "@/lib/services/postgres";
 import { getUser } from "@/lib/auth/getUser";
 
-const PHOTO_CDN = "https://cdn.myfairpipe.com/photo";
+const PHOTO_CDN = "http://cdn.myfairpipe.com:9000/photo";
 
 export async function OPTIONS() {
 	return new NextResponse(null, {
@@ -55,6 +55,8 @@ export async function GET(req: NextRequest) {
 		}
 
 		const path: string | null = result.rows[0].path;
+
+		console.log(`${PHOTO_CDN}/${path}`)
 
 		return NextResponse.json(
 			{

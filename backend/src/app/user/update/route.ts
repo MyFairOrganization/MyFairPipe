@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest) {
         let idx = 1;
 
         if (displayName) {
-            fields.push(`display_name = $${idx++}`);
+            fields.push(`displayname = $${idx++}`);
             values.push(displayName);
         }
 
@@ -52,13 +52,18 @@ export async function PATCH(req: NextRequest) {
             values.push(bio);
         }
 
-        values.push(user.id);
+        values.push(user.user_id);
+
+        console.log(user)
+
+        console.log(fields.join(", "))
+        console.log(values)
 
         const result = await client.query(
             `
-            UPDATE "user"
+            UPDATE "User"
             SET ${fields.join(", ")}
-            WHERE id = $${idx}
+            WHERE user_id = $${idx}
             `,
             values
         );
