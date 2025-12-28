@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Thumbnail from "@/components/Thumbnail.vue";
-import { getIMGs } from "@/components/Content.vue";
+import Thumbnail from "@/components/Thumbnail.vue"
+import { getIMGs } from "@/components/Content.vue"
 
 const router = useRouter()
 
@@ -20,31 +20,100 @@ onMounted(async () => {
     }
 })
 
-function handleFileUpload(event: Event) {
-  const target = event.target as HTMLInputElement
-  if (target.files && target.files[0]) {
-    const file = target.files[0]
-    const reader = new FileReader()
-    reader.onload = e => {
-      userImage.value = e.target?.result as string
+function loadProfile() {
+  const xhr = new XMLHttpRequest()
+  xhr.open("GET", "http://api.myfairpipe.com/user/get ", true)
+  xhr.withCredentials = true
+
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      const data = JSON.parse(xhr.responseText)
+      userName.value = data.displayName
+      userDescription.value = data.bio
     }
-    reader.readAsDataURL(file)
   }
+
+  xhr.send()
 }
 
-function user() {
-  router.push('/user')
+function loadProfilePicture() {
+  const xhr = new XMLHttpRequest()
+  xhr.open("GET", "http://api.myfairpipe.com/user/picture/get", true)
+  xhr.withCredentials = true
+
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      const data = JSON.parse(xhr.responseText)
+
+      if (data.photo_url) {
+        userImage.value = `${data.photo_url}?v=${Date.now()}`
+      } else {
+        userImage.value = '/pfpExample.png'
+      }
+    }
+  }
+
+  xhr.send()
+}
+
+function applyChanges() {
+  const xhr = new XMLHttpRequest()
+  xhr.open("PATCH", "http://api.myfairpipe.com/user/update", true)
+  xhr.withCredentials = true
+
+  const formData = new FormData()
+  formData.append("displayName", userName.value)
+  formData.append("bio", userDescription.value)
+
+  xhr.onload = () => {
+    if (xhr.status !== 200) {
+      console.error("Profile update failed:", xhr.responseText)
+    }
+  }
+
+  xhr.send(formData)
+}
+
+function handleFileUpload(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (!target.files || !target.files[0]) return
+
+  const file = target.files[0]
+
+  // Optimistic preview
+  userImage.value = URL.createObjectURL(file)
+
+  const xhr = new XMLHttpRequest()
+  xhr.open("POST", "http://api.myfairpipe.com/user/picture/upload", true)
+  xhr.withCredentials = true
+
+  const formData = new FormData()
+  formData.append("file", file)
+
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      // Reload real CDN image
+      loadProfilePicture()
+    } else {
+      console.error("Profile picture upload failed:", xhr.responseText)
+    }
+  }
+
+  xhr.send(formData)
 }
 
 const thumbnails = ref([])
-const loading = ref(true);
+const loading = ref(true)
 
 onMounted(async () => {
-  thumbnails.value = await getIMGs(10, 0);
-  loading.value = false;
-  console.log(thumbnails.value)
-});
+  loadProfile()
+  loadProfilePicture()
+
+  thumbnails.value = await getIMGs(10, 0)
+  loading.value = false
+})
 </script>
+
 
 <template>
   <div class="container">
@@ -61,7 +130,7 @@ onMounted(async () => {
       </div>
 
       <div class="right">
-        <button class="btn" @click="user">Apply</button>
+        <button class="btn" @click="applyChanges">Apply</button>
       </div>
     </div>
   </div>

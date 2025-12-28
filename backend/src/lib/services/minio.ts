@@ -2,6 +2,7 @@ import * as Minio from 'minio'
 
 export const uploadBucket = "upload";
 export const videoBucket = "video";
+export const photoBucket = "photo";
 
 let endpoint: string = process.env.MINIO_ENDPOINT || 'localhost:9000';
 
