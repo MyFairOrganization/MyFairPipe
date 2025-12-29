@@ -16,7 +16,7 @@ onMounted(async () => {
 <template>
     <div id="feed">
         <div v-if="loading">Loading thumbnails...</div>
-        <div v-if="thumbnails.length === 0">No Videos yet</div>
+        <div v-else-if="thumbnails.length === 0">No Videos yet</div>
 
         <Thumbnail v-else :thumbnails="thumbnails" />
     </div>

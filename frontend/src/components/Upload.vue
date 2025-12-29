@@ -13,6 +13,7 @@ const subtitleFile = ref<File | null>(null)
 const language = ref<string | null>(null)
 const language_short = ref<string | null>(null)
 const videoURL = ref<string | null>(null)
+const thumbnailURL = ref<string | null>(null)
 const uploading = ref(false)
 const uploadProgress = ref(0)
 const uploadError = ref<string | null>(null)
@@ -54,6 +55,7 @@ function handleThumbnailUpload(event: Event) {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
     thumbnailFile.value = target.files[0]
+    thumbnailURL.value = URL.createObjectURL(target.files[0])
   }
 }
 
@@ -242,8 +244,16 @@ async function submitForm() {
       <p>Uploading: {{ uploadProgress }}%</p>
     </div>
 
-    <div v-if="videoURL" class="video-preview">
-      <video :src="videoURL" controls width="400"></video>
+    <div class="preview">
+      <div v-if="videoURL" class="video-preview">
+        <p>Video to be Uploaded: </p>
+        <video :src="videoURL" controls width="200"></video>
+      </div>
+
+      <div v-if="thumbnailURL" class="video-preview">
+        <p>Thumbnail to be Uploaded: </p>
+        <img :src="thumbnailURL" width="200">
+      </div>
     </div>
 
     <div class="form-container">
@@ -313,8 +323,8 @@ async function submitForm() {
 
 .uploadForm {
   display: flex;
-  flex-direction: row;
-  width: 200%;
+  flex-direction: column;
+  width: 50%;
 }
 
 .user {
@@ -404,6 +414,12 @@ async function submitForm() {
 
 .video-preview {
   margin: 20px 0;
+}
+
+.preview {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
 }
 
 .error-message {
