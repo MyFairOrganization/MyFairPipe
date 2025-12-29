@@ -9,6 +9,9 @@ const route = useRoute()
 const props = { id: route.query.id as string }
 const title = ref('')
 const description = ref('')
+const subtitles = ref('')
+const subtitle_language = ref('')
+const subtitle_code = ref('')
 const liked = ref(false)
 const likes = ref('0')
 const disliked = ref(false)
@@ -31,8 +34,13 @@ async function getDetails() {
   const req = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
   const data = await req.json()
 
+  console.log(data)
+
   title.value = data.title
   description.value = data.description
+  subtitles.value = data.subtitle_path
+  subtitle_language.value = data.subtitle_language
+  subtitle_code.value = data.subtitle_code
 }
 
 async function getLiked() {
@@ -134,7 +142,7 @@ function postComment() {
   <div class="layout">
     <div id="leftSide">
       <div class="player">
-        <component :is="createVID(props.id)" />
+        <component :is="createVID(props.id, subtitles, subtitle_language, subtitle_code)" />
         <div>
           <div id="underVideo">
             <h2>{{ title }}</h2>

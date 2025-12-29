@@ -2,8 +2,9 @@
 import { h } from 'vue'
 import { useRouter } from 'vue-router'
 
-export const videoPath = 'http://cdn.myfairpipe.com:9000/video/%ID/%ID.mp4'
-const imagePath = 'http://cdn.myfairpipe.com:9000/video/%PATH'
+export const videoPath = 'http://cdn.myfairpipe.com/video/%ID/%ID.mp4'
+const imagePath = 'http://cdn.myfairpipe.com/video/%PATH'
+const subtitlePath = 'http://cdn.myfairpipe.com/video/%PATH'
 
 //http://cdn.10.2.23.92:9000/image/%ID/master.m3u8
 
@@ -103,7 +104,7 @@ function createIMG(id, title) {
   )
 }
 
-export function createVID(id) {
+export function createVID(id, subtitles, subtitle_language, subtitle_code) {
   return h('div', { class: 'video-block' }, [
     h(
       'video',
@@ -119,7 +120,14 @@ export function createVID(id) {
         h('source', {
           src: videoPath.replaceAll('%ID', id),
           //type: 'application/x-mpegURL',
-          type: 'video/mp4',
+          type: 'video/mp4'
+        }),
+        h('track', {
+          src: subtitlePath.replace('%PATH', subtitles),
+          type: 'text/vtt',
+          kind: 'subtitles',
+          label: subtitle_language,
+          srclang: subtitle_code
         }),
       ],
     ),
