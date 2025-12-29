@@ -78,6 +78,9 @@ CREATE TABLE Video
     views             INTEGER DEFAULT 0,
     uploader          INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
     thumbnail_id      INTEGER      REFERENCES Thumbnail (thumbnail_id) ON DELETE SET NULL,
+    subtitle_path     VARCHAR(500),
+    subtitle_language VARCHAR(255),
+    subtitle_code     VARCHAR(255),
     likes             INTEGER DEFAULT 0,
     dislikes          INTEGER DEFAULT 0
 );

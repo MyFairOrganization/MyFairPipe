@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { language } from "@vue/eslint-config-prettier";
 
 const username = ref('')
 const title = ref('')
@@ -9,6 +10,8 @@ const ageRestricted = ref(false)
 const videoFile = ref<File | null>(null)
 const thumbnailFile = ref<File | null>(null)
 const subtitleFile = ref<File | null>(null)
+const language = ref<string | null>(null)
+const language_short = ref<string | null>(null)
 const videoURL = ref<string | null>(null)
 const uploading = ref(false)
 const uploadProgress = ref(0)
@@ -121,7 +124,9 @@ async function uploadThumbnail(id: number) {
   formData.append('file', thumbnailFile.value)
   formData.append('id', String(id))
 
-  return new Promise<void>((resolve, reject) => {
+  var finalData;
+
+  const promise = new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
 
     xhr.addEventListener('load', async () => {
@@ -141,7 +146,7 @@ async function uploadThumbnail(id: number) {
       }
 
       console.log('Thumbnail uploaded:', data)
-      return data
+      finalData = data
     })
 
     xhr.addEventListener('error', () => reject(new Error('Thumbnail upload failed')))
@@ -152,12 +157,19 @@ async function uploadThumbnail(id: number) {
     xhr.send(formData)
     xhr.DONE
   })
+
+  return { promise, finalData }
 }
 
-async function uploadSubtitle() {
-  if (!subtitleFile.value) return
+async function uploadSubtitle(id: number) {
+  console.log('uploading subtitles')
+  if (!subtitleFile.value || !language.value || !language_short.value) return
   const formData = new FormData()
   formData.append('file', subtitleFile.value)
+  formData.append('id', String(id))
+  formData.append('language', language.value)
+  formData.append('language_short', language_short.value)
+
 
   const res = await fetch('http://api.myfairpipe.com/subtitles/upload', {
     method: 'POST',
@@ -204,9 +216,7 @@ async function submitForm() {
       const videoId = videoData.finalData.id
       console.log(videoId)
       await uploadThumbnail(videoId)
-      if (subtitleFile) {
-        await uploadSubtitle()
-      }
+      await uploadSubtitle(videoId)
     }
     router.push('/user')
   } catch (error) {
@@ -275,8 +285,8 @@ async function submitForm() {
 
       <label for="subtitle">Subtitle Upload:</label><br />
       <input id="subtitle" type="file" accept="text/vtt" @change="handleSubtitleUpload" /><br />
-      <input id="language" placeholder="Language" /><br />
-      <input id="language_short" placeholder="language code" /><br /><br />
+      <input id="language" placeholder="Language" v-model="language"/><br />
+      <input id="language_short" placeholder="language code" v-model="language_short"/><br /><br />
 
       <button class="upload" @click="submitForm" :disabled="uploading">
         {{ uploading ? 'Uploading...' : 'Upload' }}

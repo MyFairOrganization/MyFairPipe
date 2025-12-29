@@ -9,7 +9,6 @@ import {
 } from "@/lib/services/minio";
 import {randomUUID} from "crypto";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {checkUUID} from "@/lib/utils/util";
 import {getUser} from "@/lib/auth/getUser";
 import {connectionPool} from "@/lib/services/postgres";
 import {QueryResult} from "pg";
@@ -44,7 +43,7 @@ export async function POST(req: NextRequest) {
 		// -------------------------------
 		// Validation
 		// -------------------------------
-		if (!videoId || !checkUUID(videoId)) {
+		if (!videoId) {
 			return NextError.error("Invalid video id", HttpError.BadRequest);
 		}
 
@@ -64,26 +63,29 @@ export async function POST(req: NextRequest) {
 		// Check ownership
 		// -------------------------------
 		const client = await connectionPool.connect();
+		var videoPath;
 		try {
 			const ownershipResult: QueryResult = await client.query(`
-                SELECT v.video_id
+                SELECT v.video_id, v.minio_path
                 FROM video v
                 WHERE v.video_id = $1
                   AND v.uploader = $2
-			`, [videoId, user.id]);
+			`, [videoId, user.user_id]);
 
 			if (ownershipResult.rowCount === 0) {
 				return NextError.error("Video not found or you don't have permission to add subtitles", HttpError.NotFound);
 			}
-		} finally {
-			client.release();
+			videoPath = ownershipResult.rows[0].minio_path;
+		} catch (e) {
+
 		}
 
 		// -------------------------------
 		// Check if video exists
 		// -------------------------------
-		const videoExists = await objectExists(videoBucket, `${videoId}/master.m3u8`);
+		const videoExists = await objectExists(videoBucket, videoPath);
 		if (!videoExists) {
+			console.log("Video isn't uploaded yet.")
 			return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
 		}
 
@@ -102,12 +104,16 @@ export async function POST(req: NextRequest) {
 			filename = existingSubtitle.split('/').pop()!;
 			subtitleId = filename.replace(".vtt", "").replace("subs_", "");
 		} else {
-			subtitleId = randomUUID();
+			subtitleId = videoId;
 			filename = `subs_${language_short}.vtt`;
 		}
 
 		// Upload VTT
+		const subtitlePath = `${videoId}/subtitles/${filename}`
+
 		await uploadFileToMinio(`${videoId}/subtitles/${filename}`, videoBucket, buffer, "text/vtt");
+
+		await client.query(`UPDATE video SET subtitle_path = '${subtitlePath}', subtitle_language = '${language}', subtitle_code = '${language_short}' WHERE video_id = ${videoId}`);
 
 		// Upload subtitle playlist
 		const content = `#EXTM3U

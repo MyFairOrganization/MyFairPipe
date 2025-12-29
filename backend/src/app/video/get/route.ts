@@ -40,6 +40,9 @@ export async function GET(req: Request) {
                    v.path,
                    v.duration,
                    v.views,
+                   v.subtitle_path,
+                   v.subtitle_language,
+                   v.subtitle_code,
                    p.path    AS thumbnail_path,
                    u.user_id AS uploader_id
             FROM video v

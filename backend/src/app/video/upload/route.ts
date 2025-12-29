@@ -97,10 +97,10 @@ export async function POST(req: NextRequest) {
 
 		try {
 			await client.query(`INSERT INTO video
-                                (video_id, path, duration, title, description,
+                                (video_id, path, minio_path, duration, title, description,
                                  is_age_restricted, tested, views, uploader)
-                                VALUES ($1, $2, $3, $4, $5, DEFAULT, DEFAULT, DEFAULT, $6)`
-				, [id, `/video/${id}/master.m3u8`, duration, title, description, user.user_id, // <- neuer getUser user_id
+                                VALUES ($1, $2, $3, $4, $5, $6, DEFAULT, DEFAULT, DEFAULT, $7)`
+				, [id, `/video/${id}/master.m3u8`, filename, duration, title, description, user.user_id, // <- neuer getUser user_id
 					]);
 
 			await client.query("COMMIT");
