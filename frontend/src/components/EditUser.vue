@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import Thumbnail from "@/components/Thumbnail.vue"
-import { getIMGs } from "@/components/Content.vue"
+import {ref, onMounted, watch} from 'vue'
+import {useRouter, useRoute} from 'vue-router'
+import Thumbnail from "./Thumbnail.vue"
+import { getIMGs } from "./Content.vue"
 
 const router = useRouter()
 
