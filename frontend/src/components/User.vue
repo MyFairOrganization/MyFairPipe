@@ -44,7 +44,7 @@ const thumbnails = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
-  const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+  const req = await fetch(`http://api.myfairpipe.com/user/get?_=${Date.now()}`, {
     credentials: 'include',
     cache: 'no-store'
   })
@@ -64,8 +64,10 @@ onMounted(async () => {
     }
     console.log(path)
 
-    await loadProfile()
-    await loadProfilePicture()
+    await Promise.all([
+      loadProfile(),
+      loadProfilePicture()
+    ]);
 
     console.log(user)
 
@@ -74,40 +76,54 @@ onMounted(async () => {
   }
 })
 
-function loadProfile() {
-  const xhr = new XMLHttpRequest()
-  xhr.open('GET', 'http://api.myfairpipe.com/user/get', true)
-  xhr.withCredentials = true
+async function loadProfile() {
+  try {
+    const res = await fetch(`http://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store',
+    })
 
-  xhr.onload = () => {
-    if (xhr.status === 200) {
-      const data = JSON.parse(xhr.responseText)
-      userName.value = data.user.displayname
-      userDescription.value = data.user.bio
+    if (!res.ok) {
+      console.error('Failed to load profile:', res.status)
+      return
     }
-  }
 
-  xhr.send()
+    const data = await res.json()
+    userName.value = data.user.displayname
+    userDescription.value = data.user.bio
+  } catch (err) {
+    console.error('Network error while loading profile:', err)
+  }
 }
 
-function loadProfilePicture() {
-  const xhr = new XMLHttpRequest()
-  xhr.open('GET', 'http://api.myfairpipe.com/user/picture/get', true)
-  xhr.withCredentials = true
 
-  xhr.onload = () => {
-    if (xhr.status === 200) {
-      const data = JSON.parse(xhr.responseText)
+async function loadProfilePicture() {
+  try {
+    const res = await fetch('http://api.myfairpipe.com/user/picture/get', {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store',
+    })
 
-      if (data.photo_url) {
-        userImage.value = `${data.photo_url}?v=${Date.now()}`
-      } else {
-        userImage.value = '/pfpExample.png'
-      }
+    if (!res.ok) {
+      console.error('Failed to load profile picture:', res.status)
+      userImage.value = '/pfpExample.png'
+      return
     }
-  }
 
-  xhr.send()
+    const data = await res.json()
+
+    if (data.photo_url) {
+      // Cache-Buster für CDN/Browser
+      userImage.value = `${data.photo_url}?v=${Date.now()}`
+    } else {
+      userImage.value = '/pfpExample.png'
+    }
+  } catch (err) {
+    console.error('Network error while loading profile picture:', err)
+    userImage.value = '/pfpExample.png'
+  }
 }
 </script>
 
