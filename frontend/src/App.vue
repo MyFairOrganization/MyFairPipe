@@ -1,46 +1,44 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import { useRouter } from 'vue-router'
-import { onMounted, ref } from 'vue'
+<script lang="ts" setup>
+import {RouterLink, RouterView, useRouter, useRoute} from 'vue-router'
+import {onMounted, ref, watch} from 'vue'
 
+const route = useRoute()
 const router = useRouter()
 const loggedIn = ref(false)
 const anonym = ref(false)
 const username = ref('')
 
-async () => {
-    await checkLoggedIn()
-}
-
-onMounted(async () => {
-  loggedIn.value = await checkLoggedIn()
+watch(
+  () => route.fullPath,
+  async () => {
+    loggedIn.value = await checkLoggedIn()
     console.log(loggedIn.value)
     console.log(anonym.value)
 
-  if (!loggedIn.value && !anonym.value) {
-    const register = await fetch('http://api.myfairpipe.com/auth/anonymLogin', {
-      method: 'POST',
-      credentials: 'include',
-    })
+    if (!loggedIn.value && !anonym.value) {
+      const register = await fetch('http://api.myfairpipe.com/auth/anonymLogin', {
+        method: 'POST',
+        credentials: 'include',
+      })
 
-    const data = await register.json()
+      const data = await register.json()
 
-    console.log(data)
+      console.log(data)
 
-    const body = JSON.stringify({
-      user_email: data.user.user_email,
-      password: data.password,
-    })
+      const body = JSON.stringify({
+        user_email: data.user.user_email,
+        password: data.password,
+      })
 
-    const login = await fetch('http://api.myfairpipe.com/auth/login', {
-      method: 'POST',
-      body: body,
-      credentials: 'include',
-    })
+      const login = await fetch('http://api.myfairpipe.com/auth/login', {
+        method: 'POST',
+        body: body,
+        credentials: 'include',
+      })
 
-    console.log(login)
-  }
-})
+      console.log(login)
+    }
+  })
 
 async function checkLoggedIn() {
   const req = await fetch('http://api.myfairpipe.com/user/get', {
@@ -57,7 +55,7 @@ async function checkLoggedIn() {
   }
   anonym.value = false
 
-  return req.status < 400
+  return req.status == 200
 }
 </script>
 
@@ -65,10 +63,10 @@ async function checkLoggedIn() {
   <div>
     <nav class="header">
       <div class="row">
-        <img src="@/assets/logo.svg" alt="Logo" height="40" />
-        <RouterLink to="/home" class="navtxt">MyFairPipe</RouterLink>
+        <img alt="Logo" height="40" src="@/assets/logo.svg"/>
+        <RouterLink class="navtxt" to="/home">MyFairPipe</RouterLink>
         <div class="searchbar">
-          <input type="text" placeholder="Search..." />
+          <input placeholder="Search..." type="text"/>
           <svg viewBox="0 0 24 24">
             <path
               d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016
@@ -77,14 +75,14 @@ async function checkLoggedIn() {
             />
           </svg>
         </div>
-        <RouterLink to="/home" class="navtxt">Home</RouterLink>
-        <RouterLink v-if="loggedIn" to="/user" class="navtxt">{{ username }}</RouterLink>
-        <RouterLink v-if="!loggedIn" to="/login" class="navtxt" id="loginbtn">Login</RouterLink>
+        <RouterLink class="navtxt" to="/home">Home</RouterLink>
+        <RouterLink v-if="loggedIn" class="navtxt" to="/user">{{ username }}</RouterLink>
+        <RouterLink v-else id="loginbtn" class="navtxt" to="/login">Login</RouterLink>
       </div>
     </nav>
 
     <main class="content">
-      <RouterView :key="$route.fullPath" />
+      <RouterView :key="$route.fullPath"/>
     </main>
 
     <nav class="footer">
