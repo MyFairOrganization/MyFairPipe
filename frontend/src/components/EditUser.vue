@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import Thumbnail from "@/components/Thumbnail.vue"
-import { getIMGs } from "@/components/Content.vue"
+import {ref, onMounted, watch} from 'vue'
+import {useRouter, useRoute} from 'vue-router'
+import Thumbnail from "./Thumbnail.vue"
+import { getIMGs } from "./Content.vue"
 
 const router = useRouter()
 
@@ -127,7 +127,6 @@ onMounted(async () => {
       <div class="left">
         <input type="text" v-model="userName" class="name-input" />
         <textarea v-model="userDescription" class="descr-input"></textarea>
-        <button id="b1">Channel information</button>
       </div>
 
       <div class="right">

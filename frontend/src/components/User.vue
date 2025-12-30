@@ -1,7 +1,7 @@
-<script setup lang="ts">
-import { getIMGs } from './Content.vue'
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+<script lang="ts" setup>
+import {getIMGs} from './Content.vue'
+import {onMounted, ref, watch} from 'vue'
+import {useRouter, useRoute} from 'vue-router'
 import Thumbnail from './Thumbnail.vue'
 import Upload from './Upload.vue'
 
@@ -13,6 +13,15 @@ const userName = ref('User Name')
 const userDescription = ref('This is a brief user description.')
 const userImage = ref('/pfpExample.png')
 const router = useRouter()
+const route = useRoute()
+
+watch(
+  () => route.fullPath,
+  () => {
+    loadProfile()
+    loadProfilePicture()
+  }
+)
 
 function upload() {
   router.push('/upload')
@@ -37,6 +46,7 @@ const loading = ref(true)
 onMounted(async () => {
   const req = await fetch(`http://api.myfairpipe.com/user/get`, {
     credentials: 'include',
+    cache: 'no-store'
   })
   const user = await req.json()
   if (user.user.anonym) {
@@ -103,7 +113,7 @@ function loadProfilePicture() {
 
 <template>
   <div class="container">
-    <img class="pfp" :src="userImage" alt="Profile Picture" />
+    <img :src="userImage" alt="Profile Picture" class="pfp"/>
     <div class="user">
       <div class="left">
         <h1>{{ userName }}</h1>
@@ -117,16 +127,16 @@ function loadProfilePicture() {
       </div>
     </div>
   </div>
-  <hr class="line" />
+  <hr class="line"/>
 
   <div v-if="userPage" id="thumbnails">
     <div v-if="loading">Loading thumbnails...</div>
     <div v-if="thumbnails.length === 0">No Videos yet</div>
 
-    <Thumbnail v-else :thumbnails="thumbnails" />
+    <Thumbnail v-else :thumbnails="thumbnails"/>
   </div>
 
-  <component v-if="uploadPage" :is="Upload"/>
+  <component :is="Upload" v-if="uploadPage"/>
 </template>
 
 <style scoped>
