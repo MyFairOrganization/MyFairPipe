@@ -220,11 +220,4 @@ onMounted(async () => {
   flex-wrap: wrap;
   gap: 10px;
 }
-
-.thumbnail img {
-  width: 150px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 5px;
-}
 </style>

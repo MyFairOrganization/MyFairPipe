@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {checkUUID} from "@/lib/utils/util";
 
 export async function OPTIONS() {
 	return new NextResponse(null, {

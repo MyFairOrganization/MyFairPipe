@@ -2,7 +2,7 @@
 import { h } from 'vue'
 import { useRouter } from 'vue-router'
 
-export const videoPath = 'http://cdn.myfairpipe.com/video/%ID/%ID.mp4'
+export const videoPath = 'http://cdn.myfairpipe.com/video/%PATH'
 const imagePath = 'http://cdn.myfairpipe.com/video/%PATH'
 const subtitlePath = 'http://cdn.myfairpipe.com/video/%PATH'
 
@@ -57,25 +57,27 @@ export async function getIMGs(limit = 0, offset = 0, userID = undefined) {
 
   const result = []
 
-  for (let id of ids) {
-    console.log(id)
-    if (id instanceof Object) {
-      id = id.video_id
-    }
-    const params = new URLSearchParams()
-    params.append('id', id)
+  if (ids !== undefined) {
+      for (let id of ids) {
+          console.log(id)
+          if (id instanceof Object) {
+              id = id.video_id
+          }
+          const params = new URLSearchParams()
+          params.append('id', id)
 
-    const details = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
-    const data = await details.json()
+          const details = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
+          const data = await details.json()
 
-    const thumbnailPath = data.thumbnail_path
-    const title = data.title
+          const thumbnailPath = data.thumbnail_path
+          const title = data.title
 
-    result.push({
-      id,
-      title: title,
-      src: imagePath.replace('%PATH', String(thumbnailPath)),
-    })
+          result.push({
+              id,
+              title: title,
+              src: imagePath.replace('%PATH', String(thumbnailPath)),
+          })
+      }
   }
 
   return result
@@ -95,8 +97,6 @@ function createIMG(id, title) {
     [
       h('img', {
         src: imagePath.replace('%ID', id),
-        width: '320',
-        height: '180',
         class: 'thumbnail',
       }),
       h('p', { class: 'description' }, title),
@@ -104,14 +104,13 @@ function createIMG(id, title) {
   )
 }
 
-export function createVID(id, subtitles, subtitle_language, subtitle_code) {
+export function createVID(path, subtitles, subtitle_language, subtitle_code) {
+  console.log("replace: ", videoPath.replace('%PATH', path));
+
   return h('div', { class: 'video-block' }, [
     h(
       'video',
       {
-        width: '90%',
-        aspectRatio: '16 / 9',
-        height: 'auto',
         class: 'video',
         controls: true,
         preload: 'metadata',
@@ -119,7 +118,7 @@ export function createVID(id, subtitles, subtitle_language, subtitle_code) {
       },
       [
         h('source', {
-          src: videoPath.replaceAll('%ID', id),
+          src: videoPath.replace('%PATH', path),
           //type: 'application/x-mpegURL',
           type: 'video/mp4'
         }),

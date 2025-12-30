@@ -3,15 +3,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { createVID, getIMGs } from './Content.vue'
 import { onMounted, ref } from 'vue'
 import Thumbnail from './Thumbnail.vue'
+import Loader from '@/components/Loader.vue'
 
 const router = useRouter()
 const route = useRoute()
+const PATH = ref('')
 const props = { id: route.query.id as string }
 const title = ref('')
 const description = ref('')
 const subtitles = ref('')
 const subtitle_language = ref('')
-const subtitle_code = ref('')
 const liked = ref(false)
 const likes = ref('0')
 const disliked = ref(false)
@@ -31,16 +32,22 @@ async function getDetails() {
   const params = new URLSearchParams()
   params.append('id', props.id)
 
-  const req = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
-  const data = await req.json()
+  const VIDEOREQ = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
+  const SUBTITLEREQ = await fetch(`http://api.myfairpipe.com/subtitles/get?${params}`)
+  const VIDEODATA = await VIDEOREQ.json()
+  const SUBTITLEDATA = await SUBTITLEREQ.json()
 
-  console.log(data)
+  console.log(VIDEODATA)
+  console.log(SUBTITLEDATA)
 
-  title.value = data.title
-  description.value = data.description
-  subtitles.value = data.subtitle_path
-  subtitle_language.value = data.subtitle_language
-  subtitle_code.value = data.subtitle_code
+  var subtitlePath = SUBTITLEDATA.files
+  subtitlePath = subtitlePath.filter((subtitles: string) => subtitles.endsWith('.vtt'))
+
+  title.value = VIDEODATA.title
+  description.value = VIDEODATA.description
+  PATH.value = VIDEODATA.minio_path
+  subtitles.value = subtitlePath
+  subtitle_language.value = SUBTITLEDATA.languages[0]
 }
 
 async function getLiked() {
@@ -57,7 +64,7 @@ async function getLiked() {
 
     if (response.ok) {
       const data = await response.json()
-        console.log(data)
+      console.log(data)
       liked.value = data.result?.liked
       likes.value = data.result.likes
       disliked.value = data.result?.disliked
@@ -139,10 +146,12 @@ function postComment() {
 </script>
 
 <template>
-  <div class="layout">
+  <Loader :loading="loading" msg="Loading Video" :msg-else="thumbnails.length === 0"/>
+
+  <div class="layout" v-if="!loading">
     <div id="leftSide">
       <div class="player">
-        <component :is="createVID(props.id, subtitles, subtitle_language, subtitle_code)" />
+        <component :is="createVID(PATH, subtitles, subtitle_language, subtitle_language)" />
         <div>
           <div id="underVideo">
             <h2>{{ title }}</h2>
@@ -174,17 +183,22 @@ function postComment() {
       </div>
     </div>
 
-    <div id="thumbnails">
-      <!-- Show loading indicator if data is not ready -->
-      <div v-if="loading">Loading thumbnails...</div>
-
-      <!-- Render Thumbnail component only when data is ready -->
-      <Thumbnail v-else :thumbnails="thumbnails" />
-    </div>
+    <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
   </div>
 </template>
 
 <style scoped>
+.video {
+  width: 90%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background-color: #3d5a80;
+}
+
+.thumbnail {
+    width: 20%;
+}
+
 .layout {
   background: #e0fbfc;
   display: flex;

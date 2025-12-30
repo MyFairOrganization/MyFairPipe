@@ -1,7 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {checkUUID} from "@/lib/utils/util";
 import {QueryResult} from "pg";
 import {getUser} from "@/lib/auth/getUser";
 
@@ -41,10 +40,6 @@ export async function PATCH(req: NextRequest) {
 
         if (!title && !description) {
             return NextError.error("At least one field to update is required", HttpError.BadRequest);
-        }
-
-        if (!checkUUID(videoId)) {
-            return NextError.error("Invalid video id format", HttpError.BadRequest);
         }
 
         // -------------------------------

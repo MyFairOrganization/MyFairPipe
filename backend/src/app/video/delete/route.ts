@@ -2,7 +2,6 @@ import {NextRequest, NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import {deleteFolder, objectExists, videoBucket} from "@/lib/services/minio";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {checkUUID} from "@/lib/utils/util";
 import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
 
@@ -37,10 +36,6 @@ export async function DELETE(req: NextRequest) {
         // -------------------------------
         if (!videoId) {
             return NextError.error("Missing id", HttpError.BadRequest);
-        }
-
-        if (!checkUUID(videoId)) {
-            return NextError.error("Invalid video id format", HttpError.BadRequest);
         }
 
         // -------------------------------

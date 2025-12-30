@@ -2,7 +2,6 @@ import {NextRequest, NextResponse} from "next/server";
 import { countFilesInFolder, objectExists, uploadBucket, uploadFileToMinio, videoBucket } from "@/lib/services/minio";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {checkUUID} from "@/lib/utils/util";
 import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
 
@@ -32,6 +31,7 @@ export async function POST(req: NextRequest) {
 
         const videoId = formData.get("id") as string;
         const file = formData.get("file") as File;
+        var videoPath: string;
 
         // -------------------------------
         // Request validation
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
         try {
             const ownershipResult: QueryResult = await client.query(`
-                SELECT v.video_id
+                SELECT v.video_id, v.minio_path
                 FROM video v
                 WHERE v.video_id = $1 AND v.uploader = $2
             `, [videoId, user.user_id]);
@@ -63,6 +63,8 @@ export async function POST(req: NextRequest) {
             if (ownershipResult.rowCount === 0) {
                 return NextError.error("Video not found or you don't have permission to add thumbnails", HttpError.NotFound);
             }
+
+            videoPath = ownershipResult.rows[0].minio_path;
         } finally {
             client.release();
         }
@@ -70,8 +72,7 @@ export async function POST(req: NextRequest) {
         // -------------------------------
         // MinIO validation
         // -------------------------------
-        const exists = await objectExists(videoBucket, `${videoId}/${videoId}.mp4`) || await objectExists(uploadBucket, `${videoId}.mov`);
-        // const exists = await objectExists(videoBucket, `${videoId}/master.m3u8`);
+        const exists = await objectExists(videoBucket, videoPath);
 
 
         if (!exists) {

@@ -1,7 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import {minioClient, videoBucket} from "@/lib/services/minio";
-import {checkUUID} from "@/lib/utils/util";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
@@ -37,10 +36,6 @@ export async function DELETE(req: NextRequest) {
 		// -------------------------------
 		if (!thumbnail_id) {
 			return NextError.error("Missing id", HttpError.BadRequest);
-		}
-
-		if (!checkUUID(thumbnail_id)) {
-			return NextError.error("Invalid thumbnail id format", HttpError.BadRequest);
 		}
 
 		// -------------------------------

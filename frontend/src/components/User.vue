@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import {getIMGs} from './Content.vue'
-import {onMounted, ref, watch} from 'vue'
-import {useRouter, useRoute} from 'vue-router'
+import { getIMGs } from './Content.vue'
+import { onMounted, ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import Thumbnail from './Thumbnail.vue'
 import Upload from './Upload.vue'
+import Loader from '@/components/Loader.vue'
 
 const userPage = ref(true)
 const uploadPage = ref(false)
@@ -20,7 +21,7 @@ watch(
   () => {
     loadProfile()
     loadProfilePicture()
-  }
+  },
 )
 
 function upload() {
@@ -35,9 +36,9 @@ async function logout() {
   const req = await fetch(`http://api.myfairpipe.com/auth/logout`, {
     method: 'POST',
     credentials: 'include',
-  });
+  })
 
-  router.push('/home');
+  router.push('/home')
 }
 
 const thumbnails = ref([])
@@ -46,13 +47,13 @@ const loading = ref(true)
 onMounted(async () => {
   const req = await fetch(`http://api.myfairpipe.com/user/get?_=${Date.now()}`, {
     credentials: 'include',
-    cache: "no-cache"
+    cache: 'no-cache',
   })
   const user = await req.json()
   if (user.user.anonym) {
     router.push('/home')
   } else {
-    const path = router.currentRoute._value.fullPath;
+    const path = router.currentRoute._value.fullPath
     if (path === '/user') {
       userPage.value = true
       uploadPage.value = false
@@ -64,14 +65,12 @@ onMounted(async () => {
     }
     console.log(path)
 
-    await Promise.all([
-      loadProfile(),
-      loadProfilePicture()
-    ]);
+    await Promise.all([loadProfile(), loadProfilePicture()])
 
     console.log(user)
 
     thumbnails.value = await getIMGs(10, 0, user.user.user_id)
+    console.log('thumbnails: ', thumbnails.value)
     loading.value = false
   }
 })
@@ -96,7 +95,6 @@ async function loadProfile() {
     console.error('Network error while loading profile:', err)
   }
 }
-
 
 async function loadProfilePicture() {
   try {
@@ -129,7 +127,7 @@ async function loadProfilePicture() {
 
 <template>
   <div class="container">
-    <img :src="userImage" alt="Profile Picture" class="pfp"/>
+    <img :src="userImage" alt="Profile Picture" class="pfp" />
     <div class="user">
       <div class="left">
         <h1>{{ userName }}</h1>
@@ -143,16 +141,15 @@ async function loadProfilePicture() {
       </div>
     </div>
   </div>
-  <hr class="line"/>
+  <hr class="line" />
 
   <div v-if="userPage" id="thumbnails">
-    <div v-if="loading">Loading thumbnails...</div>
-    <div v-if="thumbnails.length === 0">No Videos yet</div>
+    <Loader :loading="loading" msg="Loading Videos" :nothing="thumbnails.length === 0" />
 
-    <Thumbnail v-else :thumbnails="thumbnails"/>
+    <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
   </div>
 
-  <component :is="Upload" v-if="uploadPage"/>
+  <component :is="Upload" v-if="uploadPage" />
 </template>
 
 <style scoped>
@@ -161,6 +158,10 @@ async function loadProfilePicture() {
   height: 250px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.thumbnail {
+  width: 75%;
 }
 
 .container {
@@ -194,16 +195,6 @@ async function loadProfilePicture() {
   margin: 10px 0;
 }
 
-#b1 {
-  margin-top: 5px;
-  padding: 10px 20px;
-  background-color: transparent;
-  color: #293241;
-  border: 1px solid #293241;
-  border-radius: 20px;
-  cursor: pointer;
-}
-
 .right {
   display: flex;
   flex-direction: column;
@@ -227,29 +218,10 @@ async function loadProfilePicture() {
   margin-bottom: 50px;
 }
 
-.thumbnail {
-  width: 320px;
-  height: 180px;
-  border-radius: 15px;
-}
-
 #videos {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 40px;
   width: 100%;
-}
-
-#thumbnails {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.thumbnail img {
-  width: 150px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 5px;
 }
 </style>

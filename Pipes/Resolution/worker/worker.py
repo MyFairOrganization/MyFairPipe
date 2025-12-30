@@ -15,7 +15,7 @@ ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
 SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
 JOB_ID = os.getenv("JOB_ID")
 OBJECT_KEY = os.getenv("OBJECT_KEY")
-BUCKET = "videos"
+BUCKET = "video"
 
 ENABLED_RENDITIONS = os.getenv("RENDITIONS", "360p,480p,720p,1080p").split(",")
 

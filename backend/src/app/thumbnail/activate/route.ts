@@ -3,7 +3,6 @@ import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
-import {checkUUID} from "@/lib/utils/util";
 
 export async function OPTIONS() {
 	return new NextResponse(null, {
@@ -36,10 +35,6 @@ export async function PATCH(req: NextRequest) {
 		// -------------------------------
 		if (!thumbnail_id) {
 			return NextError.error("Missing id", HttpError.BadRequest);
-		}
-
-		if (!checkUUID(thumbnail_id)) {
-			return NextError.error("Invalid thumbnail id format", HttpError.BadRequest);
 		}
 
 		// -------------------------------

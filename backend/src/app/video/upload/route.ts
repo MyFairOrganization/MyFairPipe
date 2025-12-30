@@ -75,6 +75,8 @@ export async function POST(req: NextRequest) {
 		// Upload file to MinIO
 		// -------------------------------
 		await createBucketIfNeeded(videoBucket);
+		await createBucketIfNeeded(uploadBucket);
+		await uploadFileToMinio(filename, uploadBucket, buffer, file.type);
 		await uploadFileToMinio(filename, videoBucket, buffer, file.type);
 
 		// -------------------------------
