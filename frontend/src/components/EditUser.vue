@@ -127,7 +127,6 @@ onMounted(async () => {
       <div class="left">
         <input type="text" v-model="userName" class="name-input" />
         <textarea v-model="userDescription" class="descr-input"></textarea>
-        <button id="b1">Channel information</button>
       </div>
 
       <div class="right">

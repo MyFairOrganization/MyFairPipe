@@ -115,6 +115,7 @@ export function createVID(id, subtitles, subtitle_language, subtitle_code) {
         class: 'video',
         controls: true,
         preload: 'metadata',
+        crossorigin: 'anonymous'
       },
       [
         h('source', {

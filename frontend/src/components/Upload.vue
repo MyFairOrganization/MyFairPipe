@@ -208,6 +208,12 @@ async function submitForm() {
     return
   }
 
+  console.log(subtitleFile.value, language.value, language_short.value)
+
+  if (subtitleFile.value && (!language.value || !language_short.value)) {
+    uploadError.value = 'Please set Subtitle language and/or ISO 639 code'
+  }
+
   uploading.value = true
   uploadProgress.value = 0
   uploadError.value = null
@@ -296,7 +302,7 @@ async function submitForm() {
       <label for="subtitle">Subtitle Upload:</label><br />
       <input id="subtitle" type="file" accept="text/vtt" @change="handleSubtitleUpload" /><br />
       <input id="language" placeholder="Language" v-model="language"/><br />
-      <input id="language_short" placeholder="language code" v-model="language_short"/><br /><br />
+      <input id="language_short" placeholder="ISO 639 language code" v-model="language_short"/><br /><br />
 
       <button class="upload" @click="submitForm" :disabled="uploading">
         {{ uploading ? 'Uploading...' : 'Upload' }}

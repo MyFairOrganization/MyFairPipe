@@ -115,46 +115,46 @@ export async function POST(req: NextRequest) {
 
 		await client.query(`UPDATE video SET subtitle_path = '${subtitlePath}', subtitle_language = '${language}', subtitle_code = '${language_short}' WHERE video_id = ${videoId}`);
 
-		// Upload subtitle playlist
-		const content = `#EXTM3U
-#EXT-X-VERSION:3
-#EXTINF:9999999,
-${filename}
-#EXT-X-ENDLIST`;
-
-		const sub_playlist_path = `${videoId}/subtitles/${filename.replace(".vtt", ".m3u8")}`;
-		await uploadFileToMinio(sub_playlist_path, videoBucket, Buffer.from(content), "application/vnd.apple.mpegurl");
-
-		// Update master playlist
-		const masterPlaylistPath = `${videoId}/master.m3u8`;
-		const stream = await minioClient.getObject(videoBucket, masterPlaylistPath);
-		const masterContent = await streamToString(stream);
-
-		if (!masterContent.trim()) {
-			return NextError.error("Master playlist is empty", HttpError.InternalServerError);
-		}
-
-		const lines = masterContent.split(/\r?\n/);
-
-		const subtitleLine = `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="${language}",DEFAULT="NO",AUTOSELECT="NO",LANGUAGE="${language_short}",URI="subtitles/subs_${language_short}.m3u8"`;
-
-		let found = false;
-		const updatedLines = lines.map(line => {
-			if (line.startsWith('#EXT-X-MEDIA:TYPE=SUBTITLES') && line.includes(`LANGUAGE="${language_short}"`)) {
-				found = true;
-				return subtitleLine;
-			}
-			return line;
-		});
-
-		if (!found) {
-			const index = updatedLines.findIndex(l => l.startsWith("#EXT-X-STREAM-INF"));
-			updatedLines.splice(index !== -1 ? index : updatedLines.length, 0, subtitleLine);
-		}
-
-		const newContent = updatedLines.join("\n");
-
-		await uploadFileToMinio(masterPlaylistPath, videoBucket, Buffer.from(newContent, "utf-8"), "application/vnd.apple.mpegurl");
+// 		// Upload subtitle playlist
+// 		const content = `#EXTM3U
+// #EXT-X-VERSION:3
+// #EXTINF:9999999,
+// ${filename}
+// #EXT-X-ENDLIST`;
+//
+// 		const sub_playlist_path = `${videoId}/subtitles/${filename.replace(".vtt", ".m3u8")}`;
+// 		await uploadFileToMinio(sub_playlist_path, videoBucket, Buffer.from(content), "application/vnd.apple.mpegurl");
+//
+// 		// Update master playlist
+// 		const masterPlaylistPath = `${videoId}/master.m3u8`;
+// 		const stream = await minioClient.getObject(videoBucket, masterPlaylistPath);
+// 		const masterContent = await streamToString(stream);
+//
+// 		if (!masterContent.trim()) {
+// 			return NextError.error("Master playlist is empty", HttpError.InternalServerError);
+// 		}
+//
+// 		const lines = masterContent.split(/\r?\n/);
+//
+// 		const subtitleLine = `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="${language}",DEFAULT="NO",AUTOSELECT="NO",LANGUAGE="${language_short}",URI="subtitles/subs_${language_short}.m3u8"`;
+//
+// 		let found = false;
+// 		const updatedLines = lines.map(line => {
+// 			if (line.startsWith('#EXT-X-MEDIA:TYPE=SUBTITLES') && line.includes(`LANGUAGE="${language_short}"`)) {
+// 				found = true;
+// 				return subtitleLine;
+// 			}
+// 			return line;
+// 		});
+//
+// 		if (!found) {
+// 			const index = updatedLines.findIndex(l => l.startsWith("#EXT-X-STREAM-INF"));
+// 			updatedLines.splice(index !== -1 ? index : updatedLines.length, 0, subtitleLine);
+// 		}
+//
+// 		const newContent = updatedLines.join("\n");
+//
+// 		await uploadFileToMinio(masterPlaylistPath, videoBucket, Buffer.from(newContent, "utf-8"), "application/vnd.apple.mpegurl");
 
 		return NextResponse.json({success: true, subtitle_id: subtitleId, filename}, {status: 200});
 

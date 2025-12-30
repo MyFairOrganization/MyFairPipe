@@ -55,7 +55,7 @@ async function checkLoggedIn() {
   }
   anonym.value = false
 
-  return req.status == 200
+  return req.status < 400
 }
 </script>
 

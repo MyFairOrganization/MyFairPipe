@@ -27,7 +27,6 @@ async function logout() {
     method: 'POST',
     credentials: 'include',
   });
-
   router.push('/home');
 }
 
@@ -37,6 +36,7 @@ const loading = ref(true)
 onMounted(async () => {
   const req = await fetch(`http://api.myfairpipe.com/user/get`, {
     credentials: 'include',
+    cache: "no-cache"
   })
   const user = await req.json()
   if (user.user.anonym) {
