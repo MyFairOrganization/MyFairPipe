@@ -120,12 +120,10 @@ function loadProfilePicture() {
   <hr class="line" />
 
   <div v-if="userPage" id="thumbnails">
-    <div id="feed">
-      <div v-if="loading">Loading thumbnails...</div>
-      <div v-if="thumbnails.length === 0">No Videos yet</div>
+    <div v-if="loading">Loading thumbnails...</div>
+    <div v-if="thumbnails.length === 0">No Videos yet</div>
 
-      <Thumbnail v-else :thumbnails="thumbnails" />
-    </div>
+    <Thumbnail v-else :thumbnails="thumbnails" />
   </div>
 
   <component v-if="uploadPage" :is="Upload"/>
@@ -201,6 +199,19 @@ function loadProfilePicture() {
   border-top: 1px solid #939393;
   width: 100%;
   margin-bottom: 50px;
+}
+
+.thumbnail {
+  width: 320px;
+  height: 180px;
+  border-radius: 15px;
+}
+
+#videos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  width: 100%;
 }
 
 #thumbnails {

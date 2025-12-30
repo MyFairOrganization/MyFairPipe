@@ -41,7 +41,7 @@ export async function OPTIONS() {
 	});
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
 	try {
 		const result = await loadVideosFromPostgres();
 		await cacheVideos(result);

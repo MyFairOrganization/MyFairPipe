@@ -1,6 +1,8 @@
+import { GET } from './src/app/sorting/upload/route'
+
 async function updateCache() {
 	try {
-		const res = await fetch("http://api.myfairpipe.com/sorting/upload");
+		const res = await GET()
 
 		if (res.ok) {
 			console.log(`Cache updated at ${new Date().toISOString()}`);
@@ -14,5 +16,5 @@ async function updateCache() {
 export function register() {
 	updateCache();
 
-	setInterval(updateCache, 60_000);
+	setInterval(updateCache, 10_000);
 }
