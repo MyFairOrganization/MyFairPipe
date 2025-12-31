@@ -33,7 +33,7 @@ function edit() {
 }
 
 async function logout() {
-  const req = await fetch(`http://api.myfairpipe.com/auth/logout`, {
+  await fetch(`http://api.myfairpipe.com/auth/logout`, {
     method: 'POST',
     credentials: 'include',
   })
@@ -127,7 +127,9 @@ async function loadProfilePicture() {
     <div class="user">
       <div class="left">
         <h1>{{ userName }}</h1>
-        <p id="descr">{{ userDescription }}</p>
+        <p id="descr">
+          {{ userDescription }}
+        </p>
       </div>
 
       <div class="right">

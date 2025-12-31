@@ -8,7 +8,7 @@ const PROPS = defineProps({
 
 <template>
   <div v-if="PROPS.loading" class="loading-screen">
-    <div class="loader"></div>
+    <div class="loader" />
     <h2>{{ PROPS.msg }}</h2>
   </div>
 

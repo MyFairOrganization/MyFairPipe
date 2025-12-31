@@ -4,6 +4,7 @@ import {
     uploadFileToMinio,
     photoBucket
 } from "@/lib/services/minio";
+import { randomUUID } from "crypto";
 import { connectionPool } from "@/lib/services/postgres";
 import NextError, { HttpError } from "@/lib/utils/error";
 import { getUser } from "@/lib/auth/getUser";
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const amount = await client.query(`SELECT * FROM photo;`)
 
-    const photoId = amount.rowCount ? amount.rowCount + 1 : 1;
+    const photoId = amount.rowCount! + 1;
     const extension = file.name.split(".").pop() || "png";
     const filename = `${photoId}.${extension}`;
 

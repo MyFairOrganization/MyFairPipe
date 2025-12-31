@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
-import { onMounted, ref, watch } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { ref, watch } from 'vue'
 
 const route = useRoute()
 const loggedIn = ref(false)
@@ -88,7 +88,6 @@ async function checkLoggedIn() {
 </template>
 
 <style scoped>
-
 .header {
   line-height: 1.5;
   z-index: 1000;

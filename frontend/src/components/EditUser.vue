@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { GetIMGs } from './Content.vue';
+import {ref, onMounted, watch} from 'vue'
+import {useRouter} from 'vue-router'
+import Thumbnail from "./Thumbnail.vue"
+import { getIMGs } from "./Content.vue"
 
 /**
  * Vue router.
