@@ -1,4 +1,5 @@
-<script>
+<!-- TODO: should "setup" be missing? -->
+<script lang="ts">
 import { h } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -83,6 +84,7 @@ export async function getIMGs(limit = 0, offset = 0, userID = undefined) {
   return result
 }
 
+// TODO: unused function
 function createIMG(id, title) {
   const router = useRouter()
 
@@ -90,7 +92,7 @@ function createIMG(id, title) {
     'div',
     {
       class: 'image-block',
-      onClick(event) {
+      onClick(_) {
         router.push({ name: 'player', query: { id: id } })
       },
     },

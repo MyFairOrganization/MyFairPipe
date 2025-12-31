@@ -33,7 +33,7 @@ const register = () => {
           try {
             await loginApi(email, password)
             router.push('/login')
-          } catch (e: any) {
+          } catch (_) {
             errorMessage.value = 'Invalid response from server'
           }
         } else {
@@ -63,7 +63,7 @@ const register = () => {
         if (xhr.status === 201) {
           try {
             router.push('/login')
-          } catch (e: any) {
+          } catch (_) {
             errorMessage.value = 'Invalid response from server'
           }
         } else {

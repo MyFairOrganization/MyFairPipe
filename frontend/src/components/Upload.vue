@@ -21,10 +21,11 @@ const router = useRouter()
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024
 
+// TODO: unused function
 function upload() {
   router.push('/upload')
 }
-
+// TODO: unused function
 function edit() {
   router.push('/edituser')
 }

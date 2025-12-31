@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute} from 'vue-router'
 import { createVID, getIMGs } from './Content.vue'
 import { onMounted, ref } from 'vue'
 import Thumbnail from './Thumbnail.vue'
 import Loader from '@/components/Loader.vue'
 
-const router = useRouter()
 const route = useRoute()
 const PATH = ref('')
 const props = { id: route.query.id as string }
@@ -131,15 +130,15 @@ async function dislike() {
 
   getLiked()
 }
-
+// TODO: unused function
 function share() {
   console.log(props.id + ' shared!')
 }
-
+// TODO: unused function
 function download() {
   console.log(props.id + ' downloaded!')
 }
-
+// TODO: unused function
 function postComment() {
   console.log(props.id + ' sendComment!')
 }

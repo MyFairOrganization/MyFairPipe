@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import Thumbnail from './Thumbnail.vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { getIMGs } from './Content.vue'
 
 const router = useRouter()
@@ -130,6 +129,7 @@ onMounted(async () => {
 
       <div class="right">
         <button class="btn" @click="applyChanges">Apply</button>
+        <!-- TODO: implement back button -->
         <button class="btn" @click="">Back</button>
       </div>
     </div>

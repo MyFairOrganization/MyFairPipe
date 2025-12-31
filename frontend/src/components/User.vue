@@ -33,7 +33,7 @@ function edit() {
 }
 
 async function logout() {
-  const req = await fetch(`http://api.myfairpipe.com/auth/logout`, {
+  await fetch(`http://api.myfairpipe.com/auth/logout`, {
     method: 'POST',
     credentials: 'include',
   })
