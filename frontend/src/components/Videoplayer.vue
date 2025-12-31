@@ -180,8 +180,8 @@ async function dislike() {
   width: 100%;
   justify-content: space-between;
   margin-top: 50px;
-	padding-left: 2%;
-	padding-right: 2%;
+  padding-left: 2%;
+  padding-right: 2%;
 }
 
 #leftSide {
@@ -189,17 +189,18 @@ async function dislike() {
 }
 
 #videos {
+  width: 30%;
   display: flex;
   flex-direction: column;
-	justify-content: normal;
+  justify-content: normal;
   gap: 10px;
 }
 
 .player {
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
   z-index: 1;
-	justify-content: center;
+  justify-content: center;
 }
 
 .player video {

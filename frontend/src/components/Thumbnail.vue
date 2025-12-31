@@ -51,8 +51,7 @@ function goToPlayer(id) {
 }
 
 #videos {
-	width: 100%;
 	display: flex;
-	justify-content: center;
+	justify-content: space-between;
 }
 </style>
