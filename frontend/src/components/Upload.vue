@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { language } from "@vue/eslint-config-prettier";
+import { language } from '@vue/eslint-config-prettier'
 
 const username = ref('')
 const title = ref('')
@@ -21,10 +21,11 @@ const router = useRouter()
 
 const MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024
 
+// TODO: unused function
 function upload() {
   router.push('/upload')
 }
-
+// TODO: unused function
 function edit() {
   router.push('/edituser')
 }
@@ -76,7 +77,7 @@ async function uploadVideo() {
   formData.append('description', description.value)
   formData.append('age_restricted', ageRestricted.value.toString())
 
-  var finalData
+  let finalData
 
   const promise = await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -126,7 +127,7 @@ async function uploadThumbnail(id: number) {
   formData.append('file', thumbnailFile.value)
   formData.append('id', String(id))
 
-  var finalData;
+  let finalData
 
   const promise = new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -171,7 +172,6 @@ async function uploadSubtitle(id: number) {
   formData.append('id', String(id))
   formData.append('language', language.value)
   formData.append('language_short', language_short.value)
-
 
   const res = await fetch('http://api.myfairpipe.com/subtitles/upload', {
     method: 'POST',
@@ -252,13 +252,13 @@ async function submitForm() {
 
     <div class="preview">
       <div v-if="videoURL" class="video-preview">
-        <p>Video to be Uploaded: </p>
+        <p>Video to be Uploaded:</p>
         <video :src="videoURL" controls width="200"></video>
       </div>
 
       <div v-if="thumbnailURL" class="video-preview">
-        <p>Thumbnail to be Uploaded: </p>
-        <img :src="thumbnailURL" width="200">
+        <p>Thumbnail to be Uploaded:</p>
+        <img :src="thumbnailURL" width="200" />
       </div>
     </div>
 
@@ -301,8 +301,12 @@ async function submitForm() {
 
       <label for="subtitle">Subtitle Upload:</label><br />
       <input id="subtitle" type="file" accept="text/vtt" @change="handleSubtitleUpload" /><br />
-      <input id="language" placeholder="Language" v-model="language"/><br />
-      <input id="language_short" placeholder="ISO 639 language code" v-model="language_short"/><br /><br />
+      <input id="language" placeholder="Language" v-model="language" /><br />
+      <input
+        id="language_short"
+        placeholder="ISO 639 language code"
+        v-model="language_short"
+      /><br /><br />
 
       <button class="upload" @click="submitForm" :disabled="uploading">
         {{ uploading ? 'Uploading...' : 'Upload' }}
