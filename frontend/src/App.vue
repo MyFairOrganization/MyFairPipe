@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
-import { onMounted, ref, watch } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { ref, watch } from 'vue'
 
 const route = useRoute()
-const router = useRouter()
 const loggedIn = ref(false)
 const anonym = ref(false)
 const username = ref('')
