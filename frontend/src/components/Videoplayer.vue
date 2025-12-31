@@ -40,7 +40,7 @@ async function getDetails() {
   console.log(VIDEODATA)
   console.log(SUBTITLEDATA)
 
-  var subtitlePath = SUBTITLEDATA.files
+  let subtitlePath = SUBTITLEDATA.files
   subtitlePath = subtitlePath.filter((subtitles: string) => subtitles.endsWith('.vtt'))
 
   title.value = VIDEODATA.title

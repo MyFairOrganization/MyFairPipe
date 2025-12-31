@@ -76,7 +76,7 @@ async function uploadVideo() {
   formData.append('description', description.value)
   formData.append('age_restricted', ageRestricted.value.toString())
 
-  var finalData
+  let finalData
 
   const promise = await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -126,7 +126,7 @@ async function uploadThumbnail(id: number) {
   formData.append('file', thumbnailFile.value)
   formData.append('id', String(id))
 
-  var finalData
+  let finalData
 
   const promise = new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest()

@@ -47,7 +47,7 @@ async function getVideos(limit, offset) {
 }
 
 export async function getIMGs(limit = 0, offset = 0, userID = undefined) {
-  var ids
+  let ids
   if (userID === undefined) {
     ids = await getVideos(limit, offset)
   } else {
