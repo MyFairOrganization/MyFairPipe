@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {ref, onMounted, watch} from 'vue'
-import {useRouter, useRoute} from 'vue-router'
-import Thumbnail from "./Thumbnail.vue"
-import { getIMGs } from "./Content.vue"
+import { ref, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import Thumbnail from './Thumbnail.vue'
+import { getIMGs } from './Content.vue'
 
 const router = useRouter()
 
@@ -11,18 +11,18 @@ const userDescription = ref('This is a brief user description.')
 const userImage = ref('/pfpExample.png')
 
 onMounted(async () => {
-    const req = await fetch(`http://api.myfairpipe.com/user/get`, {
-        credentials: 'include',
-    })
-    const user = await req.json()
-    if (user.user.anonym) {
-        router.push('/home')
-    }
+  const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+    credentials: 'include',
+  })
+  const user = await req.json()
+  if (user.user.anonym) {
+    router.push('/home')
+  }
 })
 
 function loadProfile() {
   const xhr = new XMLHttpRequest()
-  xhr.open("GET", "http://api.myfairpipe.com/user/get", true)
+  xhr.open('GET', 'http://api.myfairpipe.com/user/get', true)
   xhr.withCredentials = true
 
   xhr.onload = () => {
@@ -38,7 +38,7 @@ function loadProfile() {
 
 function loadProfilePicture() {
   const xhr = new XMLHttpRequest()
-  xhr.open("GET", "http://api.myfairpipe.com/user/picture/get", true)
+  xhr.open('GET', 'http://api.myfairpipe.com/user/picture/get', true)
   xhr.withCredentials = true
 
   xhr.onload = () => {
@@ -58,16 +58,16 @@ function loadProfilePicture() {
 
 function applyChanges() {
   const xhr = new XMLHttpRequest()
-  xhr.open("PATCH", "http://api.myfairpipe.com/user/update", true)
+  xhr.open('PATCH', 'http://api.myfairpipe.com/user/update', true)
   xhr.withCredentials = true
 
   const formData = new FormData()
-  formData.append("displayName", userName.value)
-  formData.append("bio", userDescription.value)
+  formData.append('displayName', userName.value)
+  formData.append('bio', userDescription.value)
 
   xhr.onload = () => {
     if (xhr.status !== 200) {
-      console.error("Profile update failed:", xhr.responseText)
+      console.error('Profile update failed:', xhr.responseText)
     }
   }
 
@@ -85,18 +85,18 @@ function handleFileUpload(event: Event) {
   userImage.value = URL.createObjectURL(file)
 
   const xhr = new XMLHttpRequest()
-  xhr.open("POST", "http://api.myfairpipe.com/user/picture/upload", true)
+  xhr.open('POST', 'http://api.myfairpipe.com/user/picture/upload', true)
   xhr.withCredentials = true
 
   const formData = new FormData()
-  formData.append("file", file)
+  formData.append('file', file)
 
   xhr.onload = () => {
     if (xhr.status === 200) {
       // Reload real CDN image
       loadProfilePicture()
     } else {
-      console.error("Profile picture upload failed:", xhr.responseText)
+      console.error('Profile picture upload failed:', xhr.responseText)
     }
   }
 
@@ -114,7 +114,6 @@ onMounted(async () => {
   loading.value = false
 })
 </script>
-
 
 <template>
   <div class="container">

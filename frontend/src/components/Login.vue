@@ -1,58 +1,58 @@
 <script lang="ts" setup>
-import {ref} from 'vue';
-import {useRouter} from 'vue-router';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
 
-const email = ref('');
-const password = ref('');
-const errorMessage = ref('');
+const email = ref('')
+const password = ref('')
+const errorMessage = ref('')
 
 function goToRegister() {
-  router.push('/register');
+  router.push('/register')
 }
 
 const login = () => {
   if (!email.value || !password.value) {
-    errorMessage.value = 'Please fill all fields';
-    return;
+    errorMessage.value = 'Please fill all fields'
+    return
   }
 
-  errorMessage.value = '';
+  errorMessage.value = ''
 
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', 'http://api.myfairpipe.com/auth/login', true);
+  const xhr = new XMLHttpRequest()
+  xhr.open('POST', 'http://api.myfairpipe.com/auth/login', true)
 
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.setRequestHeader('Accept', 'application/json');
+  xhr.setRequestHeader('Content-Type', 'application/json')
+  xhr.setRequestHeader('Accept', 'application/json')
 
   // WICHTIG: Cookies (Session / JWT) erlauben
-  xhr.withCredentials = true;
+  xhr.withCredentials = true
 
   xhr.onreadystatechange = () => {
     if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200) {
         // Login erfolgreich → Cookie ist gesetzt
-        router.push('/user');
+        router.push('/user')
       } else {
         try {
-          const res = JSON.parse(xhr.responseText);
-          errorMessage.value = res.error || 'Login failed';
+          const res = JSON.parse(xhr.responseText)
+          errorMessage.value = res.error || 'Login failed'
         } catch {
-          errorMessage.value = 'Invalid response from server';
+          errorMessage.value = 'Invalid response from server'
         }
-        console.error('Login failed:', xhr.status);
+        console.error('Login failed:', xhr.status)
       }
     }
-  };
+  }
 
   const body = JSON.stringify({
     user_email: email.value,
     password: password.value,
-  });
+  })
 
-  xhr.send(body);
-};
+  xhr.send(body)
+}
 </script>
 
 <template>

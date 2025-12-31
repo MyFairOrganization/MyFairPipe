@@ -47,7 +47,7 @@ async function getVideos(limit, offset) {
 }
 
 export async function getIMGs(limit = 0, offset = 0, userID = undefined) {
-  var ids;
+  var ids
   if (userID === undefined) {
     ids = await getVideos(limit, offset)
   } else {
@@ -58,26 +58,26 @@ export async function getIMGs(limit = 0, offset = 0, userID = undefined) {
   const result = []
 
   if (ids !== undefined) {
-      for (let id of ids) {
-          console.log(id)
-          if (id instanceof Object) {
-              id = id.video_id
-          }
-          const params = new URLSearchParams()
-          params.append('id', id)
-
-          const details = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
-          const data = await details.json()
-
-          const thumbnailPath = data.thumbnail_path
-          const title = data.title
-
-          result.push({
-              id,
-              title: title,
-              src: imagePath.replace('%PATH', String(thumbnailPath)),
-          })
+    for (let id of ids) {
+      console.log(id)
+      if (id instanceof Object) {
+        id = id.video_id
       }
+      const params = new URLSearchParams()
+      params.append('id', id)
+
+      const details = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
+      const data = await details.json()
+
+      const thumbnailPath = data.thumbnail_path
+      const title = data.title
+
+      result.push({
+        id,
+        title: title,
+        src: imagePath.replace('%PATH', String(thumbnailPath)),
+      })
+    }
   }
 
   return result
@@ -105,7 +105,7 @@ function createIMG(id, title) {
 }
 
 export function createVID(path, subtitles, subtitle_language, subtitle_code) {
-  console.log("replace: ", videoPath.replace('%PATH', path));
+  console.log('replace: ', videoPath.replace('%PATH', path))
 
   return h('div', { class: 'video-block' }, [
     h(
@@ -114,20 +114,20 @@ export function createVID(path, subtitles, subtitle_language, subtitle_code) {
         class: 'video',
         controls: true,
         preload: 'metadata',
-        crossorigin: 'anonymous'
+        crossorigin: 'anonymous',
       },
       [
         h('source', {
           src: videoPath.replace('%PATH', path),
           //type: 'application/x-mpegURL',
-          type: 'video/mp4'
+          type: 'video/mp4',
         }),
         h('track', {
           src: subtitlePath.replace('%PATH', subtitles),
           type: 'text/vtt',
           kind: 'subtitles',
           label: subtitle_language,
-          srclang: subtitle_code
+          srclang: subtitle_code,
         }),
       ],
     ),

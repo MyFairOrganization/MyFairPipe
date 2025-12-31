@@ -1,27 +1,27 @@
 @import './base.css';
 
 #app {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 2rem;
-    font-weight: normal;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
 }
 
 a,
 .green {
-    text-decoration: none;
-    color: #3D5A80;
-    transition: 0.4s;
-    padding: 3px;
+  text-decoration: none;
+  color: #3d5a80;
+  transition: 0.4s;
+  padding: 3px;
 }
 
 @media (hover: hover) {
-    a:hover {
-        background-color: #98C1D9;
-    }
+  a:hover {
+    background-color: #98c1d9;
+  }
 }
 
 body {
-    display: flex;
+  display: flex;
   place-items: center;
 }

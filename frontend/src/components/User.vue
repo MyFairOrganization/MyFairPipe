@@ -131,7 +131,9 @@ async function loadProfilePicture() {
     <div class="user">
       <div class="left">
         <h1>{{ userName }}</h1>
-        <p id="descr">{{ userDescription }}</p>
+        <p id="descr">
+          {{ userDescription }}
+        </p>
       </div>
 
       <div class="right">

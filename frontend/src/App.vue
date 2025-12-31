@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import {RouterLink, RouterView, useRouter, useRoute} from 'vue-router'
-import {onMounted, ref, watch} from 'vue'
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
+import { onMounted, ref, watch } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,7 +38,8 @@ watch(
 
       console.log(login)
     }
-  })
+  },
+)
 
 async function checkLoggedIn() {
   const req = await fetch('http://api.myfairpipe.com/user/get', {
@@ -63,10 +64,10 @@ async function checkLoggedIn() {
   <div>
     <nav class="header">
       <div class="row">
-        <img alt="Logo" height="40" src="@/assets/logo.svg"/>
-        <RouterLink class="navtxt" to="/home">MyFairPipe</RouterLink>
+        <img alt="Logo" height="40" src="@/assets/logo.svg" />
+        <RouterLink class="navtxt" to="/home"> MyFairPipe </RouterLink>
         <div class="searchbar">
-          <input placeholder="Search..." type="text"/>
+          <input placeholder="Search..." type="text" />
           <svg viewBox="0 0 24 24">
             <path
               d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016
@@ -75,14 +76,16 @@ async function checkLoggedIn() {
             />
           </svg>
         </div>
-        <RouterLink class="navtxt" to="/home">Home</RouterLink>
-        <RouterLink v-if="loggedIn" class="navtxt" to="/user">{{ username }}</RouterLink>
-        <RouterLink v-else id="loginbtn" class="navtxt" to="/login">Login</RouterLink>
+        <RouterLink class="navtxt" to="/home"> Home </RouterLink>
+        <RouterLink v-if="loggedIn" class="navtxt" to="/user">
+          {{ username }}
+        </RouterLink>
+        <RouterLink v-else id="loginbtn" class="navtxt" to="/login"> Login </RouterLink>
       </div>
     </nav>
 
     <main class="content">
-      <RouterView :key="$route.fullPath"/>
+      <RouterView :key="$route.fullPath" />
     </main>
 
     <nav class="footer">

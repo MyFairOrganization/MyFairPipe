@@ -146,7 +146,7 @@ function postComment() {
 </script>
 
 <template>
-  <Loader :loading="loading" msg="Loading Video" :msg-else="thumbnails.length === 0"/>
+  <Loader :loading="loading" msg="Loading Video" :msg-else="thumbnails.length === 0" />
 
   <div class="layout" v-if="!loading">
     <div id="leftSide">
@@ -196,7 +196,7 @@ function postComment() {
 }
 
 .thumbnail {
-    width: 20%;
+  width: 20%;
 }
 
 .layout {
