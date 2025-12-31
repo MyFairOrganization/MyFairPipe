@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const amount = await client.query(`SELECT * FROM photo;`)
 
-    const photoId = amount.rowCount + 1;
+    const photoId = amount.rowCount! + 1;
     const extension = file.name.split(".").pop() || "png";
     const filename = `${photoId}.${extension}`;
 

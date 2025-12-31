@@ -86,7 +86,7 @@ async function dislike(videoID: number, userID: number) {
     await client.query(updateCount, [updateLikes, updateDislikes, videoID]);
 
     return true;
-  } catch (err) {
+  } catch (err: any) {
     return NextError.error(err, HttpError.BadRequest)
   } finally {
     client.release();
