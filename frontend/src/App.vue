@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import {RouterLink, RouterView, useRouter, useRoute} from 'vue-router'
-import {onMounted, ref, watch} from 'vue'
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
+import { onMounted, ref, watch } from 'vue'
 
 const route = useRoute()
-const router = useRouter()
 const loggedIn = ref(false)
 const anonym = ref(false)
 const username = ref('')
@@ -12,8 +11,6 @@ watch(
   () => route.fullPath,
   async () => {
     loggedIn.value = await checkLoggedIn()
-    console.log(loggedIn.value)
-    console.log(anonym.value)
 
     if (!loggedIn.value && !anonym.value) {
       const register = await fetch('http://api.myfairpipe.com/auth/anonymLogin', {
@@ -23,22 +20,19 @@ watch(
 
       const data = await register.json()
 
-      console.log(data)
-
       const body = JSON.stringify({
         user_email: data.user.user_email,
         password: data.password,
       })
 
-      const login = await fetch('http://api.myfairpipe.com/auth/login', {
+      await fetch('http://api.myfairpipe.com/auth/login', {
         method: 'POST',
         body: body,
         credentials: 'include',
       })
-
-      console.log(login)
     }
-  })
+  },
+)
 
 async function checkLoggedIn() {
   const req = await fetch('http://api.myfairpipe.com/user/get', {
@@ -60,47 +54,64 @@ async function checkLoggedIn() {
 </script>
 
 <template>
-  <div>
+  <div class="full">
     <nav class="header">
       <div class="row">
-        <img alt="Logo" height="40" src="@/assets/logo.svg"/>
-        <RouterLink class="navtxt" to="/home">MyFairPipe</RouterLink>
-        <div class="searchbar">
-          <input placeholder="Search..." type="text"/>
-          <svg viewBox="0 0 24 24">
-            <path
-              d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016
-            9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5
-            4.99L20.49 19l-4.99-5zM10 15a5 5 0 110-10 5 5 0 010 10z"
-            />
-          </svg>
+        <div class="left-side">
+          <img alt="Logo" height="40" src="@/assets/logo.svg" />
+          <RouterLink class="navtxt" to="/home">MyFairPipe</RouterLink>
         </div>
-        <RouterLink class="navtxt" to="/home">Home</RouterLink>
-        <RouterLink v-if="loggedIn" class="navtxt" to="/user">{{ username }}</RouterLink>
-        <RouterLink v-else id="loginbtn" class="navtxt" to="/login">Login</RouterLink>
+        <div class="right-side">
+          <RouterLink class="navtxt" to="/home">Home</RouterLink>
+          <RouterLink v-if="loggedIn" class="navtxt" to="/user">{{ username }}</RouterLink>
+          <RouterLink v-else id="loginbtn" class="navtxt" to="/login">Login</RouterLink>
+        </div>
       </div>
     </nav>
 
     <main class="content">
-      <RouterView :key="$route.fullPath"/>
+      <RouterView :key="$route.fullPath" />
     </main>
 
-    <nav class="footer">
-      <h2>MyFairPipe</h2>
+    <nav class="footer-container">
+      <div class="footer">
+		  <div class="footer-nav">
+		  	<h2>© MyFairPipe</h2>
+		  </div>
+		  <div class="footer-nav">
+			  <RouterLink class="footer-txt" to="/about">About</RouterLink>
+			  <RouterLink class="footer-txt" to="/imprint">Imprint</RouterLink>
+		  </div>
+	  </div>
     </nav>
   </div>
 </template>
 
 <style scoped>
+
 .header {
   line-height: 1.5;
   z-index: 1000;
+}
+
+template {
+    width: 100%;
+}
+
+.full {
+  width: 100%;
 }
 
 .navtxt {
   font-size: 20px;
   color: var(--color-text);
   text-decoration: none;
+}
+
+.footer-txt {
+	font-size: 15px;
+	color: var(--color-text);
+	text-decoration: none;
 }
 
 video {
@@ -141,30 +152,42 @@ nav a:first-of-type {
 .row {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
+}
+
+.left-side,
+.right-side {
+  display: flex;
+  flex-direction: row;
   gap: 20px;
 }
 
 .content {
   margin-top: 100px;
+    align-content: space-around;
 }
 
-.footer {
-  bottom: 0;
-  left: 0;
+.footer-container {
   width: 100%;
   background: white;
   color: black;
   padding: 2.5rem 2rem;
+  left: 0;
+  bottom: 0;
 }
 
-.searchbar {
-  background: #eee;
-  border-radius: 999px;
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  width: 500px;
+.footer {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-evenly;
+	align-content: center;
+}
+
+.footer-nav {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	gap: 10px;
 }
 
 .searchbar input {

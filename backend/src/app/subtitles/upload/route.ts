@@ -85,7 +85,6 @@ export async function POST(req: NextRequest) {
 		// -------------------------------
 		const videoExists = await objectExists(videoBucket, videoPath);
 		if (!videoExists) {
-			console.log("Video isn't uploaded yet.")
 			return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
 		}
 

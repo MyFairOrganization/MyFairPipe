@@ -8,25 +8,25 @@ interface Video {
 }
 
 async function loadVideosFromPostgres(): Promise<Video[]> {
-	const query = `
+	const QUERY = `
     SELECT v.video_id, (((vd.likes * 2 + vd.views * 0.1 - vd.dislikes * 3) + 1) * (1 + RANDOM())) - 1 AS score
     FROM video_details vd
     JOIN video v on vd.video_id = v.video_id
     ORDER BY score DESC
   `;
 
-	const result = await connectionPool.query(query);
+	const RESULT = await connectionPool.query(QUERY);
 
-	return result.rows;
+	return RESULT.rows;
 }
 
 async function cacheVideos(videos: Video[]): Promise<void> {
-	const key = "sortedVids";
+	const KEY = "sortedVids";
 
-	await redis.del(key);
+	await redis.del(KEY);
 
 	if (videos.length > 0) {
-		await redis.rpush(key, ...videos.map(v => v.video_id.toString()));
+		await redis.rpush(KEY, ...videos.map(v => v.video_id.toString()));
 	}
 }
 
@@ -43,10 +43,10 @@ export async function OPTIONS() {
 
 export async function GET() {
 	try {
-		const result = await loadVideosFromPostgres();
-		await cacheVideos(result);
+		const RESULT = await loadVideosFromPostgres();
+		await cacheVideos(RESULT);
 
-		return NextResponse.json({ result }, { status: 200 });
+		return NextResponse.json({ result: RESULT }, { status: 200 });
 	} catch (err) {
 		console.error(err);
 		return NextError.error(err + "", HttpError.BadRequest);

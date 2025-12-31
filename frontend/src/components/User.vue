@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getIMGs } from './Content.vue'
+import { GetIMGs } from './Content.vue'
 import { onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import Thumbnail from './Thumbnail.vue'
@@ -12,7 +12,7 @@ const editPage = ref(false)
 
 const userName = ref('User Name')
 const userDescription = ref('This is a brief user description.')
-const userImage = ref('/pfpExample.png')
+const userImage = ref('')
 const router = useRouter()
 const route = useRoute()
 
@@ -47,7 +47,7 @@ const loading = ref(true)
 onMounted(async () => {
   const req = await fetch(`http://api.myfairpipe.com/user/get?_=${Date.now()}`, {
     credentials: 'include',
-    cache: 'no-cache',
+    cache: 'no-store',
   })
   const user = await req.json()
   if (user.user.anonym) {
@@ -63,15 +63,11 @@ onMounted(async () => {
       uploadPage.value = true
       editPage.value = false
     }
-    console.log(path)
 
     await Promise.all([loadProfile(), loadProfilePicture()])
 
-    console.log(user)
-
-    thumbnails.value = await getIMGs(10, 0, user.user.user_id)
-    console.log('thumbnails: ', thumbnails.value)
-    loading.value = false
+    thumbnails.value = await GetIMGs(10, 0, user.user.user_id);
+    loading.value = false;
   }
 })
 
@@ -168,6 +164,7 @@ async function loadProfilePicture() {
   display: flex;
   align-items: center;
   gap: 20px;
+	margin-top: 50px;
   margin-bottom: 50px;
   margin-left: 7em;
 }
@@ -219,9 +216,16 @@ async function loadProfilePicture() {
 }
 
 #videos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
-  width: 100%;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 40px;
+	width: 100%;
+	max-width: 1400px;
+	margin: 0 auto;
+}
+
+#thumbnails {
+	display: flex;
+	justify-content: center;
 }
 </style>

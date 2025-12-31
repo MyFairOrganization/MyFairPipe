@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         // Prepare file
         // -------------------------------
         const buffer = Buffer.from(await file.arrayBuffer());
-        const id = rows.rowCount + 1;
+        const id = rows.rowCount ? rows.rowCount + 1 : 1;
         const extension = file.name.split(".").pop() || "png";
         const filename = `${id}.${extension}`;
 

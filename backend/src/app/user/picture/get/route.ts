@@ -56,8 +56,6 @@ export async function GET(req: NextRequest) {
 
 		const path: string | null = result.rows[0].path;
 
-		console.log(`${PHOTO_CDN}/${path}`)
-
 		return NextResponse.json(
 			{
 				photo_url: path ? `${PHOTO_CDN}/${path}` : null,

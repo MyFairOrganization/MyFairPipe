@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import Thumbnail from './Thumbnail.vue'
-import { getIMGs } from './Content.vue'
+import { GetIMGs } from './Content.vue'
 import Loader from '@/components/Loader.vue'
 
 const thumbnails = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
-  thumbnails.value = await getIMGs(30, 0)
+  thumbnails.value = await GetIMGs(30, 0)
   loading.value = false
-  console.log(thumbnails.value)
 })
 </script>
 
@@ -22,7 +21,7 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
+<style>
 .thumbnail {
   width: 75%;
   border-radius: 15px;
@@ -31,12 +30,14 @@ onMounted(async () => {
 #videos {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  margin: 50px;
-  gap: 40px;
   width: 100%;
+  max-width: 1400px;
 }
 
 #feed {
+	margin-top: 50px;
+	margin-bottom: 50px;
+  display: flex;
   justify-content: space-around;
 }
 </style>

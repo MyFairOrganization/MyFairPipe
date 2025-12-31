@@ -96,7 +96,7 @@ async function like(videoID: number, userID: number) {
     await client.query("COMMIT");
 
     return true;
-  } catch (err) {
+  } catch (err: any) {
     return NextError.error(err, HttpError.BadRequest)
   } finally {
     client.release();
@@ -117,8 +117,6 @@ export async function OPTIONS() {
 export async function POST(req: NextRequest) {
   try {
     const user = getUser(req);
-
-    console.log(user)
 
     const {videoID} = await req.json();
 

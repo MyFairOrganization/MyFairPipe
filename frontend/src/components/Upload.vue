@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { language } from "@vue/eslint-config-prettier";
+import { language } from '@vue/eslint-config-prettier'
 
 const username = ref('')
 const title = ref('')
@@ -68,13 +68,18 @@ function handleSubtitleUpload(event: Event) {
 
 // --- Upload Functions ---
 async function uploadVideo() {
-  if (!videoFile.value) return
+  if (!videoFile.value) return;
 
-  const formData = new FormData()
-  formData.append('file', videoFile.value)
-  formData.append('title', title.value)
-  formData.append('description', description.value)
-  formData.append('age_restricted', ageRestricted.value.toString())
+  const formData = new FormData();
+  formData.append('file', videoFile.value);
+  formData.append('title', title.value);
+  formData.append('description', description.value);
+  formData.append('age_restricted', ageRestricted.value.toString());
+  if (subtitleFile.value) {
+    formData.append('subtitles', 'true');
+  } else {
+    formData.append('subtitles', 'false');
+  }
 
   var finalData
 
@@ -88,7 +93,6 @@ async function uploadVideo() {
     })
 
     xhr.addEventListener('load', async () => {
-      console.log(xhr.getAllResponseHeaders())
       const contentType = xhr.getResponseHeader('content-type')
       if (!contentType || !contentType.includes('application/json')) {
         console.error('Non-JSON response:', xhr.responseText)
@@ -102,9 +106,8 @@ async function uploadVideo() {
         return
       }
 
-      console.log('Video uploaded:', data)
-      resolve()
-      finalData = data
+      resolve();
+      finalData = data;
     })
 
     xhr.addEventListener('error', () => reject(new Error('Upload failed')))
@@ -126,7 +129,7 @@ async function uploadThumbnail(id: number) {
   formData.append('file', thumbnailFile.value)
   formData.append('id', String(id))
 
-  var finalData;
+  var finalData
 
   const promise = new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -139,15 +142,12 @@ async function uploadThumbnail(id: number) {
         return
       }
 
-      console.log(xhr.getAllResponseHeaders())
-
       const data = JSON.parse(xhr.responseText)
       if (xhr.status >= 400) {
         reject(new Error(data.error || 'Thumbnail upload failed'))
         return
       }
 
-      console.log('Thumbnail uploaded:', data)
       finalData = data
     })
 
@@ -164,14 +164,12 @@ async function uploadThumbnail(id: number) {
 }
 
 async function uploadSubtitle(id: number) {
-  console.log('uploading subtitles')
   if (!subtitleFile.value || !language.value || !language_short.value) return
   const formData = new FormData()
   formData.append('file', subtitleFile.value)
   formData.append('id', String(id))
   formData.append('language', language.value)
   formData.append('language_short', language_short.value)
-
 
   const res = await fetch('http://api.myfairpipe.com/subtitles/upload', {
     method: 'POST',
@@ -180,7 +178,6 @@ async function uploadSubtitle(id: number) {
   })
   if (!res.ok) throw new Error('Subtitle upload failed')
   const data = await res.json()
-  console.log('Subtitle uploaded:', data)
 }
 
 // --- Main Form Submission ---
@@ -208,8 +205,6 @@ async function submitForm() {
     return
   }
 
-  console.log(subtitleFile.value, language.value, language_short.value)
-
   if (subtitleFile.value && (!language.value || !language_short.value)) {
     uploadError.value = 'Please set Subtitle language and/or ISO 639 code'
   }
@@ -222,7 +217,6 @@ async function submitForm() {
     const videoData = await uploadVideo()
     if (videoData?.finalData) {
       const videoId = videoData.finalData.id
-      console.log(videoId)
       await uploadThumbnail(videoId)
       await uploadSubtitle(videoId)
     }
@@ -252,13 +246,13 @@ async function submitForm() {
 
     <div class="preview">
       <div v-if="videoURL" class="video-preview">
-        <p>Video to be Uploaded: </p>
-        <video :src="videoURL" controls width="200"></video>
+        <p>Video to be Uploaded:</p>
+        <video :src="videoURL" controls width="400"></video>
       </div>
 
       <div v-if="thumbnailURL" class="video-preview">
-        <p>Thumbnail to be Uploaded: </p>
-        <img :src="thumbnailURL" width="200">
+        <p>Thumbnail to be Uploaded:</p>
+        <img :src="thumbnailURL" width="400" />
       </div>
     </div>
 
@@ -301,8 +295,12 @@ async function submitForm() {
 
       <label for="subtitle">Subtitle Upload:</label><br />
       <input id="subtitle" type="file" accept="text/vtt" @change="handleSubtitleUpload" /><br />
-      <input id="language" placeholder="Language" v-model="language"/><br />
-      <input id="language_short" placeholder="ISO 639 language code" v-model="language_short"/><br /><br />
+      <input id="language" placeholder="Language" v-model="language" /><br />
+      <input
+        id="language_short"
+        placeholder="ISO 639 language code"
+        v-model="language_short"
+      /><br /><br />
 
       <button class="upload" @click="submitForm" :disabled="uploading">
         {{ uploading ? 'Uploading...' : 'Upload' }}
@@ -319,18 +317,11 @@ async function submitForm() {
   object-fit: cover;
 }
 
-.container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 50px;
-  margin-left: 7em;
-}
-
 .uploadForm {
   display: flex;
   flex-direction: column;
-  width: 50%;
+  width: 70%;
+	padding-left: 10%;
 }
 
 .user {
@@ -420,6 +411,19 @@ async function submitForm() {
 
 .video-preview {
   margin: 20px 0;
+}
+
+.video-preview video {
+	aspect-ratio: 16 / 9;
+	background-color: #3D5A80;
+	border-radius: 10px;
+}
+
+.video-preview img {
+	aspect-ratio: 16 / 9;
+	background-color: #3D5A80;
+	object-fit: contain;
+	border-radius: 10px;
 }
 
 .preview {

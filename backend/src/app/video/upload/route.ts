@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
 		const file = formData.get("file") as File | null;
 		const title = formData.get("title") as string | null;
 		const description = formData.get("description") as string | null;
+		const subtitles = formData.get("subtitles") as boolean | null;
 
 		// -------------------------------
 		// Request validation
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
 		// Prepare file
 		// -------------------------------
 		const buffer = Buffer.from(await file.arrayBuffer());
-		const id = rows.rowCount + 1;
+		const id = rows.rowCount ? rows.rowCount + 1 : 1;
 		const extension = file.name.split(".").pop() || "mp4";
 		const filename = `${id}/${id}.${extension}`;
 
@@ -87,7 +88,10 @@ export async function POST(req: NextRequest) {
 		});
 
 		try {
-			await Promise.all([sendMessage("resolution_jobs", jobMessage), sendMessage("transcribe_jobs", jobMessage),]);
+			await sendMessage("resolution_jobs", jobMessage);
+			if (!subtitles) {
+				await sendMessage("transcribe_jobs", jobMessage);
+			}
 		} catch (err) {
 			console.error("RabbitMQ send error:", err);
 			return NextError.error("Failed to send RabbitMQ jobs.", HttpError.InternalServerError);

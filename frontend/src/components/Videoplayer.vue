@@ -1,77 +1,69 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { createVID, getIMGs } from './Content.vue'
+import { CreateVID, GetIMGs } from '@/components/Content.vue'
 import { onMounted, ref } from 'vue'
-import Thumbnail from './Thumbnail.vue'
+import Thumbnail from '@/components/Thumbnail.vue'
 import Loader from '@/components/Loader.vue'
 
-const router = useRouter()
-const route = useRoute()
+const ROUTER = useRouter()
+const ROUTE = useRoute()
 const PATH = ref('')
-const props = { id: route.query.id as string }
-const title = ref('')
-const description = ref('')
-const subtitles = ref('')
-const subtitle_language = ref('')
-const liked = ref(false)
-const likes = ref('0')
-const disliked = ref(false)
-const dislikes = ref('0')
-const thumbnails = ref([])
-const loading = ref(true)
+const PROPS = { id: ROUTE.query.id as string }
+const TITLE = ref('')
+const DESCRIPTION = ref('')
+const SUBTITLES = ref('')
+const SUBTITLE_LANGUAGE = ref('')
+const LIKED = ref(false)
+const LIKES = ref('0')
+const DISLIKED = ref(false)
+const DISLIKES = ref('0')
+const THUMBNAILS = ref([])
+const LOADING = ref(true)
 
 onMounted(async () => {
   await getLiked()
   await getDetails()
-  thumbnails.value = await getIMGs(30, 0)
-  loading.value = false
-  console.log(thumbnails.value)
+  THUMBNAILS.value = await GetIMGs(30, 0)
+  LOADING.value = false
 })
 
 async function getDetails() {
-  const params = new URLSearchParams()
-  params.append('id', props.id)
+  const PARAMS = new URLSearchParams()
+  PARAMS.append('id', PROPS.id)
 
-  const VIDEOREQ = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
-  const SUBTITLEREQ = await fetch(`http://api.myfairpipe.com/subtitles/get?${params}`)
+  const VIDEOREQ = await fetch(`http://api.myfairpipe.com/video/get?${PARAMS}`)
+  const SUBTITLEREQ = await fetch(`http://api.myfairpipe.com/subtitles/get?${PARAMS}`)
   const VIDEODATA = await VIDEOREQ.json()
   const SUBTITLEDATA = await SUBTITLEREQ.json()
-
-  console.log(VIDEODATA)
-  console.log(SUBTITLEDATA)
 
   var subtitlePath = SUBTITLEDATA.files
   subtitlePath = subtitlePath.filter((subtitles: string) => subtitles.endsWith('.vtt'))
 
-  title.value = VIDEODATA.title
-  description.value = VIDEODATA.description
+  TITLE.value = VIDEODATA.title
+  DESCRIPTION.value = VIDEODATA.description
   PATH.value = VIDEODATA.minio_path
-  subtitles.value = subtitlePath
-  subtitle_language.value = SUBTITLEDATA.languages[0]
+  SUBTITLES.value = subtitlePath
+  SUBTITLE_LANGUAGE.value = SUBTITLEDATA.languages[0]
 }
 
 async function getLiked() {
-  const body = JSON.stringify({
-    videoID: props.id,
+  const BODY = JSON.stringify({
+    videoID: PROPS.id,
   })
 
   try {
-    const response = await fetch(`http://api.myfairpipe.com/like_dislike/get`, {
+    const RES = await fetch(`http://api.myfairpipe.com/like_dislike/get`, {
       method: 'POST',
-      body: body,
+      body: BODY,
       credentials: 'include',
     })
 
-    if (response.ok) {
-      const data = await response.json()
-      console.log(data)
-      liked.value = data.result?.liked
-      likes.value = data.result.likes
-      disliked.value = data.result?.disliked
-      dislikes.value = data.result.dislikes
-      console.log(data.result)
-    } else {
-      console.log(response)
+    if (RES.ok) {
+      const DATA = await RES.json()
+      LIKED.value = DATA.result?.liked
+      LIKES.value = DATA.result.likes
+      DISLIKED.value = DATA.result?.disliked
+      DISLIKES.value = DATA.result.dislikes
     }
   } catch (e) {
     console.error(e)
@@ -79,24 +71,21 @@ async function getLiked() {
 }
 
 async function like() {
-  const body = JSON.stringify({
-    videoID: props.id,
+  const BODY = JSON.stringify({
+    videoID: PROPS.id,
   })
 
   try {
-    const response = await fetch(`http://api.myfairpipe.com/like_dislike/like`, {
+    const RES = await fetch(`http://api.myfairpipe.com/like_dislike/like`, {
       method: 'POST',
-      body: body,
+      body: BODY,
       credentials: 'include',
     })
 
-    if (response.ok) {
-      const data = await response.json()
-      liked.value = Boolean(data.result)
-      disliked.value = false
-      console.log(data.result)
-    } else {
-      console.log(response)
+    if (RES.ok) {
+      const DATA = await RES.json()
+      LIKED.value = Boolean(DATA.result)
+      DISLIKED.value = false
     }
   } catch (e) {
     console.error(e)
@@ -106,24 +95,21 @@ async function like() {
 }
 
 async function dislike() {
-  const body = JSON.stringify({
-    videoID: props.id,
+  const BODY = JSON.stringify({
+    videoID: PROPS.id,
   })
 
   try {
-    const response = await fetch(`http://api.myfairpipe.com/like_dislike/dislike`, {
+    const RES = await fetch(`http://api.myfairpipe.com/like_dislike/dislike`, {
       method: 'POST',
-      body: body,
+      body: BODY,
       credentials: 'include',
     })
 
-    if (response.ok) {
-      const data = await response.json()
-      disliked.value = Boolean(data.result)
-      liked.value = false
-      console.log(data.result)
-    } else {
-      console.log(response)
+    if (RES.ok) {
+      const DATA = await RES.json()
+      DISLIKED.value = Boolean(DATA.result)
+      LIKED.value = false
     }
   } catch (e) {
     console.error(e)
@@ -131,59 +117,47 @@ async function dislike() {
 
   getLiked()
 }
-
-function share() {
-  console.log(props.id + ' shared!')
-}
-
-function download() {
-  console.log(props.id + ' downloaded!')
-}
-
-function postComment() {
-  console.log(props.id + ' sendComment!')
-}
 </script>
 
 <template>
-  <Loader :loading="loading" msg="Loading Video" :msg-else="thumbnails.length === 0"/>
+  <Loader :loading="LOADING" msg="Loading Video" :msg-else="THUMBNAILS.length === 0" />
 
-  <div class="layout" v-if="!loading">
+  <div class="layout" v-if="!LOADING">
     <div id="leftSide">
       <div class="player">
-        <component :is="createVID(PATH, subtitles, subtitle_language, subtitle_language)" />
+        <component :is="CreateVID(PATH, SUBTITLES, SUBTITLE_LANGUAGE, SUBTITLE_LANGUAGE)" />
         <div>
           <div id="underVideo">
-            <h2>{{ title }}</h2>
+            <h2>{{ TITLE }}</h2>
             <div class="interactivePanel">
               <div>
                 <input
                   class="interactive"
                   id="like"
                   type="image"
-                  :src="liked ? '/liked.svg' : '/like.svg'"
+                  :src="LIKED ? '/liked.svg' : '/like.svg'"
                   v-on:click="like()"
                 />
-                <p class="information">likes: {{ likes }}</p>
+                <p class="information">likes: {{ LIKES }}</p>
               </div>
               <div>
                 <input
                   class="interactive"
                   id="dislike"
                   type="image"
-                  :src="disliked ? '/disliked.svg' : '/dislike.svg'"
+                  :src="DISLIKED ? '/disliked.svg' : '/dislike.svg'"
                   v-on:click="dislike()"
                 />
-                <p class="information">dislikes: {{ dislikes }}</p>
+                <p class="information">dislikes: {{ DISLIKES }}</p>
               </div>
             </div>
           </div>
-          <p>{{ description }}</p>
+          <p>{{ DESCRIPTION }}</p>
         </div>
       </div>
     </div>
 
-    <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
+    <Thumbnail v-if="!LOADING" :thumbnails="THUMBNAILS" />
   </div>
 </template>
 
@@ -196,32 +170,36 @@ function postComment() {
 }
 
 .thumbnail {
-    width: 20%;
+  width: 20%;
 }
 
 .layout {
   background: #e0fbfc;
   display: flex;
   flex-direction: row;
+  width: 100%;
   justify-content: space-between;
-  gap: 20px;
+  margin-top: 50px;
+	padding-left: 2%;
+	padding-right: 2%;
 }
 
 #leftSide {
-  flex: 90%;
-  display: flex;
-  flex-direction: column;
+  width: 60%;
 }
 
 #videos {
-  flex: 30%;
   display: flex;
   flex-direction: column;
+	justify-content: normal;
   gap: 10px;
 }
 
 .player {
+	display: flex;
+	flex-direction: column;
   z-index: 1;
+	justify-content: center;
 }
 
 .player video {

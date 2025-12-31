@@ -27,11 +27,9 @@ export const sendMessage = async (queue: string, message: string) => {
 export const consumeMessages = async (queue: string) => {
     const {channel} = await connectRabbitMQ();
     await channel.assertQueue(queue, {durable: true});
-    console.log(`Waiting for messages in ${queue}...`);
 
     await channel.consume(queue, (message) => {
         if (message) {
-            console.log(`Received: ${message.content.toString()}`);
             channel.ack(message); // Acknowledge message
         }
     });

@@ -54,11 +54,6 @@ export async function PATCH(req: NextRequest) {
 
         values.push(user.user_id);
 
-        console.log(user)
-
-        console.log(fields.join(", "))
-        console.log(values)
-
         const result = await client.query(
             `
             UPDATE "User"

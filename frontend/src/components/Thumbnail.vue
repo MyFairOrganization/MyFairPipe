@@ -8,8 +8,8 @@ const props = defineProps({
 const router = useRouter();
 const thumbnails = props.thumbnails;
 
-function goToPlayer(id, title) {
-    router.push({ name: "player", query: { id, desc: title } });
+function goToPlayer(id) {
+    router.push({ name: "player", query: { id } });
 }
 </script>
 
@@ -19,7 +19,7 @@ function goToPlayer(id, title) {
             v-for="thumb in thumbnails"
             :key="thumb.id"
             class="image-block"
-            @click="goToPlayer(thumb.id, thumb.title)"
+            @click="goToPlayer(thumb.id)"
             style="aspect-ratio: 16/9; cursor: pointer;"
         >
             <img :src="thumb.src"  class="thumbnail" />
@@ -34,7 +34,7 @@ function goToPlayer(id, title) {
     height: auto;
     aspect-ratio: 16 / 9;
     object-fit: contain;
-    background: radial-gradient(circle, #3D5A80 50%, #E0FBFC 100%);
+	background-color: #3D5A80;
     border-radius: 5px;
 }
 
@@ -42,7 +42,17 @@ function goToPlayer(id, title) {
     color: #98c1d9;
 }
 
-p {
+.image-block p {
     text-align: left;
+	max-width: 320px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#videos {
+	width: 100%;
+	display: flex;
+	justify-content: center;
 }
 </style>

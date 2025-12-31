@@ -35,28 +35,22 @@ async function getstatus(videoID: number, userID = 1) {
 
 		if (result?.rows[0] == undefined) {
 			const amount = await client.query(likesQuery, [videoID])
-			console.log(amount.rows[0])
 			liked = false
 			disliked = false
 			if (amount.rows[0]) {
-				console.log("setting likes/dislikes")
 				likes = amount.rows[0].likes;
 				dislikes = amount.rows[0].dislikes;
 			}
-
-			console.log(liked, disliked, likes, dislikes)
 		} else {
-			console.log("IS LIKEEEEEE")
-			const isLike = result.rows[0].is_like
+			const isLike = result.rows[0].is_like;
 			liked = isLike;
-			likes = result.rows[0].likes
+			likes = result.rows[0].likes;
 			disliked = !isLike;
-			dislikes = result.rows[0].dislikes
+			dislikes = result.rows[0].dislikes;
 		}
-		return {liked, disliked, likes, dislikes}
+		return {liked, disliked, likes, dislikes};
 	} catch (err) {
-		console.log(err)
-
+		console.error(err);
 	} finally {
 		client.query("COMMIT")
 		client.release();
@@ -77,8 +71,6 @@ export async function OPTIONS() {
 export async function POST(req: NextRequest) {
 	try {
 		const user = getUser(req);
-
-		console.log(user)
 
 		const {videoID} = await req.json();
 
