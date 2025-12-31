@@ -1,32 +1,38 @@
 {
-  "name": "backend",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "amqplib": "^0.10.9",
-    "bcrypt": "^6.0.0",
-    "formidable": "^3.5.4",
-    "ioredis": "^5.8.2",
-    "jsonwebtoken": "^9.0.2",
-    "minio": "^8.0.6",
-    "mp4box": "^2.3.0",
-    "next": "^16.0.1",
-    "pg": "^8.16.3",
-    "bcryptjs": "^3.0.3"
-  },
-  "devDependencies": {
-    "@types/amqplib": "^0.10.8",
-    "@types/bcrypt": "^6.0.0",
-    "@types/formidable": "^3.4.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^20",
-    "@types/pg": "^8.15.6",
-    "@types/react": "19.2.2",
-    "typescript": "^5"
-  }
+    "name": "backend",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix"
+    },
+    "dependencies": {
+        "amqplib": "^0.10.9",
+        "bcrypt": "^6.0.0",
+        "bcryptjs": "^3.0.3",
+        "formidable": "^3.5.4",
+        "ioredis": "^5.8.2",
+        "jsonwebtoken": "^9.0.2",
+        "minio": "^8.0.6",
+        "mp4box": "^2.3.0",
+        "next": "^16.0.1",
+        "pg": "^8.16.3"
+    },
+    "devDependencies": {
+        "@types/amqplib": "^0.10.8",
+        "@types/bcrypt": "^6.0.0",
+        "@types/formidable": "^3.4.6",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/node": "^20",
+        "@types/pg": "^8.15.6",
+        "@types/react": "19.2.2",
+        "@typescript-eslint/eslint-plugin": "^8.51.0",
+        "@typescript-eslint/parser": "^8.51.0",
+        "eslint": "^9.39.2",
+        "eslint-config-next": "^16.1.1",
+        "typescript": "^5"
+    }
 }
