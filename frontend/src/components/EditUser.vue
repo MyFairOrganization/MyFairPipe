@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import {ref, onMounted, watch} from 'vue'
-import {useRouter} from 'vue-router'
-import Thumbnail from "./Thumbnail.vue"
-import { getIMGs } from "./Content.vue"
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 /**
  * Vue router.
  */
-const ROUTER = useRouter();
+const ROUTER = useRouter()
 
 /**
  * Vue refs for HTML contents.
  */
-const USER_NAME = ref('User Name');
-const USER_DESCRIPTION = ref('This is a brief user description.');
-const USER_IMAGE = ref('');
-const PFP_FILE = ref<File | null>(null);
+const USER_NAME = ref('User Name')
+const USER_DESCRIPTION = ref('This is a brief user description.')
+const USER_IMAGE = ref('')
+const PFP_FILE = ref<File | null>(null)
 
 /**
  * Executed after site loaded.
@@ -23,82 +21,79 @@ const PFP_FILE = ref<File | null>(null);
 onMounted(async () => {
   const REQ = await fetch(`http://api.myfairpipe.com/user/get`, {
     credentials: 'include',
-  });
-  const USER = await REQ.json();
+  })
+  const USER = await REQ.json()
   if (USER.user.anonym) {
-    ROUTER.push('/home');
+    ROUTER.push('/home')
   }
 
-  loadProfile();
-  loadProfilePicture();
-
-  THUMBNAILS.value = await GetIMGs(10, 0);
-  LOADING.value = false;
+  loadProfile()
+  loadProfilePicture()
 })
 
 /**
  * Loads Profile data. (Username and bio)
  */
 function loadProfile() {
-  const XHR = new XMLHttpRequest();
-  XHR.open('GET', 'http://api.myfairpipe.com/user/get', true);
-  XHR.withCredentials = true;
+  const XHR = new XMLHttpRequest()
+  XHR.open('GET', 'http://api.myfairpipe.com/user/get', true)
+  XHR.withCredentials = true
 
   XHR.onload = () => {
     if (XHR.status === 200) {
       const DATA = JSON.parse(XHR.responseText)
-      USER_NAME.value = DATA.user.displayname;
-      USER_DESCRIPTION.value = DATA.user.bio;
+      USER_NAME.value = DATA.user.displayname
+      USER_DESCRIPTION.value = DATA.user.bio
     }
   }
 
-  XHR.send();
+  XHR.send()
 }
 
 /**
  * Loads profile picture.
  */
 function loadProfilePicture() {
-  const XHR = new XMLHttpRequest();
-  XHR.open('GET', 'http://api.myfairpipe.com/user/picture/get', true);
-  XHR.withCredentials = true;
+  const XHR = new XMLHttpRequest()
+  XHR.open('GET', 'http://api.myfairpipe.com/user/picture/get', true)
+  XHR.withCredentials = true
 
   XHR.onload = () => {
     if (XHR.status === 200) {
-      const DATA = JSON.parse(XHR.responseText);
+      const DATA = JSON.parse(XHR.responseText)
 
       if (DATA.photo_url) {
-        USER_IMAGE.value = `${DATA.photo_url}?v=${Date.now()}`;
+        USER_IMAGE.value = `${DATA.photo_url}?v=${Date.now()}`
       } else {
-        USER_IMAGE.value = '/pfpExample.png';
+        USER_IMAGE.value = '/pfpExample.png'
       }
     }
   }
 
-  XHR.send();
+  XHR.send()
 }
 
 /**
  * Uploads changes to db.
  */
 function applyChanges() {
-  uploadPfp();
-  const XHR = new XMLHttpRequest();
-  XHR.open('PATCH', 'http://api.myfairpipe.com/user/update', true);
-  XHR.withCredentials = true;
+  uploadPfp()
+  const XHR = new XMLHttpRequest()
+  XHR.open('PATCH', 'http://api.myfairpipe.com/user/update', true)
+  XHR.withCredentials = true
 
-  const FORMDATA = new FormData();
-  FORMDATA.append('displayName', USER_NAME.value);
-  FORMDATA.append('bio', USER_DESCRIPTION.value);
+  const FORMDATA = new FormData()
+  FORMDATA.append('displayName', USER_NAME.value)
+  FORMDATA.append('bio', USER_DESCRIPTION.value)
 
   XHR.onload = () => {
     if (XHR.status !== 200) {
-      console.error('Profile update failed:', XHR.responseText);
+      console.error('Profile update failed:', XHR.responseText)
     }
   }
 
-  XHR.send(FORMDATA);
-  ROUTER.push('/user');
+  XHR.send(FORMDATA)
+  ROUTER.push('/user')
 }
 
 /**
@@ -106,49 +101,43 @@ function applyChanges() {
  * @param event
  */
 function handleFileUpload(event: Event) {
-  const TARGET = event.target as HTMLInputElement;
-  if (!TARGET.files || !TARGET.files[0]) return;
+  const TARGET = event.target as HTMLInputElement
+  if (!TARGET.files || !TARGET.files[0]) return
 
   // Optimistic preview
-  PFP_FILE.value = TARGET.files[0];
-  USER_IMAGE.value = URL.createObjectURL(PFP_FILE.value);
+  PFP_FILE.value = TARGET.files[0]
+  USER_IMAGE.value = URL.createObjectURL(PFP_FILE.value)
 }
 
 /**
  * Uploads PFP to db.
  */
 async function uploadPfp() {
-  const XHR = new XMLHttpRequest();
-  XHR.open('POST', 'http://api.myfairpipe.com/user/picture/upload', true);
-  XHR.withCredentials = true;
+  const XHR = new XMLHttpRequest()
+  XHR.open('POST', 'http://api.myfairpipe.com/user/picture/upload', true)
+  XHR.withCredentials = true
 
-  const formData = new FormData();
-  formData.append('file', PFP_FILE.value);
+  const formData = new FormData()
+  formData.append('file', PFP_FILE.value)
 
   XHR.onload = () => {
     if (XHR.status === 200) {
       // Reload real CDN image
-      loadProfilePicture();
+      loadProfilePicture()
     } else {
-      console.error('Profile picture upload failed:', XHR.responseText);
+      console.error('Profile picture upload failed:', XHR.responseText)
     }
   }
 
-  XHR.send(formData);
+  XHR.send(formData)
 }
 
 /**
  * Returns to User-page.
  */
 function back() {
-  ROUTER.push('/user');
+  ROUTER.push('/user')
 }
-
-/**
- * Constants for Videos and loading.
- */
-const THUMBNAILS = ref([]);
-const LOADING = ref(true);
 </script>
 
 <template>
@@ -177,8 +166,7 @@ const LOADING = ref(true);
   display: flex;
   align-items: flex-start;
   gap: 20px;
-  margin-bottom: 50px;
-  margin-left: 5em;
+  margin: 100px 5em 30%;
 }
 
 .pfp-container {

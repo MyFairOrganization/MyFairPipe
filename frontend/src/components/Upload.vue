@@ -46,6 +46,7 @@ function handleVideoUpload(event: Event) {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
     videoFile.value = target.files[0]
+      console.log(target.files[0].type)
     videoURL.value = URL.createObjectURL(target.files[0])
     uploadError.value = null
   }
@@ -177,7 +178,6 @@ async function uploadSubtitle(id: number) {
     credentials: 'include',
   })
   if (!res.ok) throw new Error('Subtitle upload failed')
-  const data = await res.json()
 }
 
 // --- Main Form Submission ---
@@ -247,7 +247,7 @@ async function submitForm() {
     <div class="preview">
       <div v-if="videoURL" class="video-preview">
         <p>Video to be Uploaded:</p>
-        <video :src="videoURL" controls width="400"></video>
+        <video :src="videoURL" :type="videoFile?.type" controls width="400"></video>
       </div>
 
       <div v-if="thumbnailURL" class="video-preview">

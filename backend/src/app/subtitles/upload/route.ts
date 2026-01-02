@@ -12,6 +12,7 @@ import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
 import {connectionPool} from "@/lib/services/postgres";
 import {QueryResult} from "pg";
+import { GET as GetUserData } from "@/app/user/get/route";
 
 export async function OPTIONS() {
 	return new NextResponse(null, {
@@ -28,8 +29,10 @@ export async function POST(req: NextRequest) {
 	try {
 		// ====== getUser using new cookie-based getUser.ts ======
 		const user = getUser(req);
+		const test = await GetUserData(req);
+		const data = await test.json();
 
-		if (!user) {
+		if (!user || data.user.anonym) {
 			return NextResponse.json({error: "Not authenticated"}, {status: 401});
 		}
 

@@ -5,6 +5,7 @@ import {connectionPool} from "@/lib/services/postgres";
 import {getMp4Duration} from "@/lib/utils/video";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
+import { GET as GetUserData } from '@/app/user/get/route'
 
 export async function OPTIONS() {
 	return new NextResponse(null, {
@@ -25,7 +26,10 @@ export async function POST(req: NextRequest) {
 		// ====== getUser using new cookie-based getUser.ts ======
 		const user = getUser(req);
 
-		if (!user) {
+		const test = await GetUserData(req);
+		const data = await test.json();
+
+		if (!user || data.user.anonym) {
 			return NextResponse.json({error: "Not authenticated"}, {status: 401});
 		}
 
@@ -34,7 +38,7 @@ export async function POST(req: NextRequest) {
 		const file = formData.get("file") as File | null;
 		const title = formData.get("title") as string | null;
 		const description = formData.get("description") as string | null;
-		const subtitles = formData.get("subtitles") as boolean | null;
+		const subtitles = formData.get("subtitles") as string | null;
 
 		// -------------------------------
 		// Request validation
@@ -88,10 +92,11 @@ export async function POST(req: NextRequest) {
 		});
 
 		try {
-			await sendMessage("resolution_jobs", jobMessage);
-			if (!subtitles) {
+			const hasSubtitles = subtitles === "true";
+			if (!hasSubtitles) {
 				await sendMessage("transcribe_jobs", jobMessage);
 			}
+			await sendMessage("resolution_jobs", jobMessage);
 		} catch (err) {
 			console.error("RabbitMQ send error:", err);
 			return NextError.error("Failed to send RabbitMQ jobs.", HttpError.InternalServerError);
