@@ -27,7 +27,7 @@ CREATE TABLE Thumbnail
     photo_id     INTEGER REFERENCES Photo (photo_id) ON DELETE CASCADE,
     video_id     INT,
     is_active    BOOLEAN,
-    FOREIGN KEY (video_id) REFERENCES video(video_id)
+    FOREIGN KEY (video_id) REFERENCES video (video_id)
 );
 
 -- User table
@@ -158,7 +158,7 @@ CREATE TABLE Comment
     written_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     author     INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
     answer_to  INTEGER REFERENCES Comment (comment_id) ON DELETE CASCADE,
-    video_id INT REFERENCES Video (video_id) ON DELETE CASCADE
+    video_id   INT REFERENCES Video (video_id) ON DELETE CASCADE
 );
 
 -- Like_Comment junction table
@@ -229,11 +229,16 @@ COMMENT ON TABLE Like_Video IS 'Tracks user likes/dislikes on videos';
 COMMENT ON TABLE Like_Comment IS 'Tracks user likes/dislikes on comments';
 COMMENT ON TABLE Subscriber IS 'User subscription relationships';
 
-SELECT * FROM video;
-select * FROM photo;
-SELECT * FROM Thumbnail;
-SELECT * FROM profile_picture;
-SELECT * FROM "User";
+SELECT *
+FROM video;
+select *
+FROM photo;
+SELECT *
+FROM Thumbnail;
+SELECT *
+FROM profile_picture;
+SELECT *
+FROM "User";
 
 SELECT ph.path
 FROM "User" u
