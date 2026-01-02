@@ -237,7 +237,7 @@ async function submitForm() {
         <div class="preview">
             <div v-if="videoURL" class="video-preview">
                 <p>Video to be Uploaded:</p>
-                <video :src="videoURL" controls width="400"></video>
+                <video :src="videoURL" :type="videoFile?.type" controls width="400"></video>
             </div>
 
             <div v-if="thumbnailURL" class="video-preview">

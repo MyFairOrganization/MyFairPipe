@@ -166,8 +166,7 @@ function back() {
     display: flex;
     align-items: flex-start;
     gap: 20px;
-    margin-bottom: 50px;
-    margin-left: 5em;
+    margin: 100px 5em 30%;
 }
 
 .pfp-container {

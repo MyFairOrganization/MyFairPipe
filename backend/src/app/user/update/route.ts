@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectionPool } from "@/lib/services/postgres";
 import NextError, { HttpError } from "@/lib/utils/error";
 import { getUser } from "@/lib/auth/getUser";
+import { GET as GetUserData } from "@/app/user/get/route";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -19,7 +20,11 @@ export async function PATCH(req: NextRequest) {
 
     try {
         const user = getUser(req);
-        if (!user) {
+
+        const test = await GetUserData(req);
+        const data = await test.json();
+
+        if (!user || data.user.anonym) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 

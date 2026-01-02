@@ -105,6 +105,16 @@ export async function GetIMGs(limit = 0, offset = 0, userID = undefined) {
  * @constructor
  */
 export function CreateVID(path, subtitles, subtitleLanguage, subtitleCode) {
+    var type = path.split('.')[1]
+
+    console.log(type)
+
+    if (type === 'mp4' || type === 'mkv') {
+        type = 'video/mp4'
+    } else if (type === 'mov') {
+        type = 'video/quicktime'
+    }
+
     return h('div', {class: 'video-block'}, [
         h(
             'video',
@@ -117,7 +127,7 @@ export function CreateVID(path, subtitles, subtitleLanguage, subtitleCode) {
             [
                 h('source', {
                     src: cdnPath.replace('%PATH', path),
-                    type: 'video/mp4',
+                    type: type,
                 }),
                 h('track', {
                     src: cdnPath.replace('%PATH', subtitles),

@@ -25,7 +25,7 @@ const props = defineProps({
     justify-content: center;
     width: auto;
     height: auto;
-    margin: 50px;
+    margin: 20% 50px 30%;
 }
 
 .loader {
