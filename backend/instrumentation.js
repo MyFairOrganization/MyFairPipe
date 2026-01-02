@@ -1,16 +1,16 @@
-import { GET } from './src/app/sorting/upload/route'
+import {GET} from './src/app/sorting/upload/route'
 
 async function updateCache() {
-	try {
-		await GET()
+    try {
+        await GET()
 
-	} catch (err) {
-		console.error("Failed to update cache:", err);
-	}
+    } catch (err) {
+        console.error("Failed to update cache:", err);
+    }
 }
 
 export function register() {
-	updateCache();
+    updateCache();
 
-	setInterval(updateCache, 10_000);
+    setInterval(updateCache, 10_000);
 }

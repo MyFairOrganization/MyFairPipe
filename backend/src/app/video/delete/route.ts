@@ -50,7 +50,8 @@ export async function DELETE(req: NextRequest) {
             const ownershipResult: QueryResult = await client.query(`
                 SELECT v.video_id, v.path
                 FROM video v
-                WHERE v.video_id = $1 AND v.uploader = $2
+                WHERE v.video_id = $1
+                  AND v.uploader = $2
             `, [videoId, user.id]);
 
             if (ownershipResult.rowCount === 0) {
@@ -67,8 +68,10 @@ export async function DELETE(req: NextRequest) {
             }
 
             await client.query(`
-                DELETE FROM video
-                WHERE video_id = $1 AND uploader = $2
+                DELETE
+                FROM video
+                WHERE video_id = $1
+                  AND uploader = $2
             `, [videoId, user.id]);
 
             await client.query("COMMIT");

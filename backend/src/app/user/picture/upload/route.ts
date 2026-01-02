@@ -1,18 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import {
-    createBucketIfNeeded,
-    uploadFileToMinio,
-    photoBucket
-} from "@/lib/services/minio";
-import { randomUUID } from "crypto";
-import { connectionPool } from "@/lib/services/postgres";
-import NextError, { HttpError } from "@/lib/utils/error";
-import { getUser } from "@/lib/auth/getUser";
+import {NextRequest, NextResponse} from "next/server";
+import {createBucketIfNeeded, photoBucket, uploadFileToMinio} from "@/lib/services/minio";
+import {connectionPool} from "@/lib/services/postgres";
+import NextError, {HttpError} from "@/lib/utils/error";
+import {getUser} from "@/lib/auth/getUser";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
-        status: 204,
-        headers: {
+        status: 204, headers: {
             "Access-Control-Allow-Origin": "http://myfairpipe.com",
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -24,7 +18,7 @@ export async function OPTIONS() {
 export async function POST(req: NextRequest) {
     const user = getUser(req);
     if (!user) {
-        return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+        return NextResponse.json({error: "Not authenticated"}, {status: 401});
     }
 
     const formData = await req.formData();
@@ -41,7 +35,8 @@ export async function POST(req: NextRequest) {
     const client = await connectionPool.connect();
     await client.query("BEGIN");
 
-    const amount = await client.query(`SELECT * FROM photo;`)
+    const amount = await client.query(`SELECT *
+                                       FROM photo;`)
 
     const photoId = amount.rowCount! + 1;
     const extension = file.name.split(".").pop() || "png";
@@ -54,37 +49,25 @@ export async function POST(req: NextRequest) {
 
     try {
 
-        await client.query(
-            `
+        await client.query(`
             INSERT INTO photo (photo_id, path)
             VALUES ($1, $2)
-            `,
-            [photoId, filename]
-        );
+        `, [photoId, filename]);
 
-        await client.query(
-            `
+        await client.query(`
             INSERT INTO profile_picture (profile_picture_id, photo_id)
             VALUES ($1, $2)
-            `,
-            [photoId, photoId]
-        );
+        `, [photoId, photoId]);
 
-        await client.query(
-            `
+        await client.query(`
             UPDATE "User"
             SET picture_id = $1
             WHERE user_id = $2
-            `,
-            [photoId, user.user_id]
-        );
+        `, [photoId, user.user_id]);
 
         await client.query("COMMIT");
 
-        return NextResponse.json(
-            { success: true },
-            { status: 200 }
-        );
+        return NextResponse.json({success: true}, {status: 200});
 
     } catch (err) {
         await client.query("ROLLBACK");

@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-import { countFilesInFolder, objectExists, uploadBucket, uploadFileToMinio, videoBucket } from "@/lib/services/minio";
+import {countFilesInFolder, objectExists, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
@@ -57,7 +57,8 @@ export async function POST(req: NextRequest) {
             const ownershipResult: QueryResult = await client.query(`
                 SELECT v.video_id, v.minio_path
                 FROM video v
-                WHERE v.video_id = $1 AND v.uploader = $2
+                WHERE v.video_id = $1
+                  AND v.uploader = $2
             `, [videoId, user.user_id]);
 
             if (ownershipResult.rowCount === 0) {
@@ -92,7 +93,8 @@ export async function POST(req: NextRequest) {
 
         await client.query("BEGIN");
 
-        const rows = await client.query(`SELECT * FROM photo;`);
+        const rows = await client.query(`SELECT *
+                                         FROM photo;`);
 
         // -------------------------------
         // Prepare file

@@ -55,7 +55,8 @@ export async function PATCH(req: NextRequest) {
             const ownershipResult: QueryResult = await client.query(`
                 SELECT v.video_id
                 FROM video v
-                WHERE v.video_id = $1 AND v.uploader = $2
+                WHERE v.video_id = $1
+                  AND v.uploader = $2
             `, [videoId, user.id]);
 
             if (ownershipResult.rowCount === 0) {
@@ -68,19 +69,22 @@ export async function PATCH(req: NextRequest) {
                     UPDATE video
                     SET title       = $1,
                         description = $2
-                    WHERE video_id = $3 AND uploader = $4
+                    WHERE video_id = $3
+                      AND uploader = $4
                 `, [title, description, videoId, user.id]);
             } else if (title) {
                 result = await client.query(`
                     UPDATE video
                     SET title = $1
-                    WHERE video_id = $2 AND uploader = $3
+                    WHERE video_id = $2
+                      AND uploader = $3
                 `, [title, videoId, user.id]);
             } else if (description) {
                 result = await client.query(`
                     UPDATE video
                     SET description = $1
-                    WHERE video_id = $2 AND uploader = $3
+                    WHERE video_id = $2
+                      AND uploader = $3
                 `, [description, videoId, user.id]);
             } else {
                 await client.query("ROLLBACK");

@@ -27,12 +27,9 @@ export async function POST(req: Request) {
             return NextResponse.json({error: "Missing email or password"}, {status: 400});
         }
 
-        const result = await connectionPool.query(
-            `SELECT user_id, user_email, hashed_password
-             FROM "User"
-             WHERE user_email = $1`,
-            [user_email]
-        );
+        const result = await connectionPool.query(`SELECT user_id, user_email, hashed_password
+                                                   FROM "User"
+                                                   WHERE user_email = $1`, [user_email]);
 
         if (result.rowCount === 0) {
             return NextResponse.json({error: "Invalid email or password"}, {status: 401});
@@ -46,24 +43,16 @@ export async function POST(req: Request) {
         }
 
         // === Create JWT ===
-        const token = jwt.sign(
-            {user_id: user.user_id, email: user.user_email},
-            JWT_SECRET,
-            {expiresIn: "7d"}
-        );
+        const token = jwt.sign({user_id: user.user_id, email: user.user_email}, JWT_SECRET, {expiresIn: "7d"});
 
-        const response = NextResponse.json(
-            {message: "Login successful", user: {user_id: user.user_id, email: user.user_email}},
-            {status: 200}
-        );
+        const response = NextResponse.json({
+            message: "Login successful",
+            user: {user_id: user.user_id, email: user.user_email}
+        }, {status: 200});
 
         response.cookies.set("session", token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",      // Cross-Site erlaubt
-            domain: ".myfairpipe.com",
-            path: "/",
-            maxAge: 60 * 60 * 24 * 7,
+            httpOnly: true, secure: false, sameSite: "lax",      // Cross-Site erlaubt
+            domain: ".myfairpipe.com", path: "/", maxAge: 60 * 60 * 24 * 7,
         });
 
         return response;

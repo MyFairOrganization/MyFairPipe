@@ -22,55 +22,37 @@ export async function GET(req: NextRequest) {
     if (idParam) {
         const parsedId = Number(idParam);
         if (isNaN(parsedId)) {
-            return NextResponse.json(
-                {error: "Invalid user id"},
-                {status: 400}
-            );
+            return NextResponse.json({error: "Invalid user id"}, {status: 400});
         }
         userId = parsedId;
     } else {
         const sessionUser = getUser(req);
         if (!sessionUser) {
-            return NextResponse.json(
-                {error: "Unauthorized"},
-                {status: 401}
-            );
+            return NextResponse.json({error: "Unauthorized"}, {status: 401});
         }
         userId = sessionUser.user_id;
     }
 
     try {
-        const result = await connectionPool.query(
-            `
-                SELECT user_id,
-                       username,
-                       displayname,
-                       bio,
-                       picture_id,
-                       created_at,
-                       anonym
-                FROM "User"
-                WHERE user_id = $1
-            `,
-            [userId]
-        );
+        const result = await connectionPool.query(`
+            SELECT user_id,
+                   username,
+                   displayname,
+                   bio,
+                   picture_id,
+                   created_at,
+                   anonym
+            FROM "User"
+            WHERE user_id = $1
+        `, [userId]);
 
         if (result.rowCount === 0) {
-            return NextResponse.json(
-                {error: "User not found"},
-                {status: 404}
-            );
+            return NextResponse.json({error: "User not found"}, {status: 404});
         }
 
-        return NextResponse.json(
-            {user: result.rows[0]},
-            {status: 200}
-        );
+        return NextResponse.json({user: result.rows[0]}, {status: 200});
     } catch (err) {
         console.error(err);
-        return NextResponse.json(
-            {error: "Server error"},
-            {status: 500}
-        );
+        return NextResponse.json({error: "Server error"}, {status: 500});
     }
 }

@@ -1,118 +1,114 @@
 import {NextRequest, NextResponse} from "next/server";
-import {
-	listFilesInFolder,
-	minioClient,
-	objectExists,
-	streamToString,
-	uploadFileToMinio,
-	videoBucket
-} from "@/lib/services/minio";
-import {randomUUID} from "crypto";
+import {listFilesInFolder, objectExists, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
 import {connectionPool} from "@/lib/services/postgres";
 import {QueryResult} from "pg";
 
 export async function OPTIONS() {
-	return new NextResponse(null, {
-		status: 204, headers: {
-			"Access-Control-Allow-Origin": "http://myfairpipe.com",
-			"Access-Control-Allow-Credentials": "true",
-			"Access-Control-Allow-Methods": "POST, OPTIONS",
-			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
-		},
-	});
+    return new NextResponse(null, {
+        status: 204, headers: {
+            "Access-Control-Allow-Origin": "http://myfairpipe.com",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        },
+    });
 }
 
 export async function POST(req: NextRequest) {
-	try {
-		// ====== getUser using new cookie-based getUser.ts ======
-		const user = getUser(req);
+    try {
+        // ====== getUser using new cookie-based getUser.ts ======
+        const user = getUser(req);
 
-		if (!user) {
-			return NextResponse.json({error: "Not authenticated"}, {status: 401});
-		}
+        if (!user) {
+            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+        }
 
-		const formData = await req.formData();
+        const formData = await req.formData();
 
-		const videoId = formData.get("id") as string;
-		const file = formData.get("file") as File;
-		const language = formData.get("language") as string;
-		const language_short = formData.get("language_short") as string;
+        const videoId = formData.get("id") as string;
+        const file = formData.get("file") as File;
+        const language = formData.get("language") as string;
+        const language_short = formData.get("language_short") as string;
 
-		// -------------------------------
-		// Validation
-		// -------------------------------
-		if (!videoId) {
-			return NextError.error("Invalid video id", HttpError.BadRequest);
-		}
+        // -------------------------------
+        // Validation
+        // -------------------------------
+        if (!videoId) {
+            return NextError.error("Invalid video id", HttpError.BadRequest);
+        }
 
-		if (!file) {
-			return NextError.error("No file uploaded", HttpError.BadRequest);
-		}
+        if (!file) {
+            return NextError.error("No file uploaded", HttpError.BadRequest);
+        }
 
-		if (!file.name.endsWith(".vtt") && file.type !== "text/vtt") {
-			return NextError.error("Only VTT subtitle files are allowed", HttpError.BadRequest);
-		}
+        if (!file.name.endsWith(".vtt") && file.type !== "text/vtt") {
+            return NextError.error("Only VTT subtitle files are allowed", HttpError.BadRequest);
+        }
 
-		if (!language || !language_short || !language.match(/^[a-zA-Z]+(-[a-zA-Z]+)?$/)) {
-			return NextError.error("Invalid language", HttpError.BadRequest);
-		}
+        if (!language || !language_short || !language.match(/^[a-zA-Z]+(-[a-zA-Z]+)?$/)) {
+            return NextError.error("Invalid language", HttpError.BadRequest);
+        }
 
-		// -------------------------------
-		// Check ownership
-		// -------------------------------
-		const client = await connectionPool.connect();
-		var videoPath;
-		try {
-			const ownershipResult: QueryResult = await client.query(`
+        // -------------------------------
+        // Check ownership
+        // -------------------------------
+        const client = await connectionPool.connect();
+        var videoPath;
+        try {
+            const ownershipResult: QueryResult = await client.query(`
                 SELECT v.video_id, v.minio_path
                 FROM video v
                 WHERE v.video_id = $1
                   AND v.uploader = $2
-			`, [videoId, user.user_id]);
+            `, [videoId, user.user_id]);
 
-			if (ownershipResult.rowCount === 0) {
-				return NextError.error("Video not found or you don't have permission to add subtitles", HttpError.NotFound);
-			}
-			videoPath = ownershipResult.rows[0].minio_path;
-		} catch (e) {
+            if (ownershipResult.rowCount === 0) {
+                return NextError.error("Video not found or you don't have permission to add subtitles", HttpError.NotFound);
+            }
+            videoPath = ownershipResult.rows[0].minio_path;
+        } catch (e) {
 
-		}
+        }
 
-		// -------------------------------
-		// Check if video exists
-		// -------------------------------
-		const videoExists = await objectExists(videoBucket, videoPath);
-		if (!videoExists) {
-			return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
-		}
+        // -------------------------------
+        // Check if video exists
+        // -------------------------------
+        const videoExists = await objectExists(videoBucket, videoPath);
+        if (!videoExists) {
+            return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
+        }
 
-		// -------------------------------
-		// List existing subtitles for this video
-		// -------------------------------
-		const subtitleFiles = await listFilesInFolder(videoBucket, `${videoId}/subtitles`);
+        // -------------------------------
+        // List existing subtitles for this video
+        // -------------------------------
+        const subtitleFiles = await listFilesInFolder(videoBucket, `${videoId}/subtitles`);
 
-		const existingSubtitle = subtitleFiles.find(f => f.includes(`_${language_short}.vtt`));
+        const existingSubtitle = subtitleFiles.find(f => f.includes(`_${language_short}.vtt`));
 
-		const buffer = Buffer.from(await file.arrayBuffer());
-		let subtitleId: string;
-		let filename: string;
+        const buffer = Buffer.from(await file.arrayBuffer());
+        let subtitleId: string;
+        let filename: string;
 
-		if (existingSubtitle) {
-			filename = existingSubtitle.split('/').pop()!;
-			subtitleId = filename.replace(".vtt", "").replace("subs_", "");
-		} else {
-			subtitleId = videoId;
-			filename = `subs_${language_short}.vtt`;
-		}
+        if (existingSubtitle) {
+            filename = existingSubtitle.split('/').pop()!;
+            subtitleId = filename.replace(".vtt", "").replace("subs_", "");
+        } else {
+            subtitleId = videoId;
+            filename = `subs_${language_short}.vtt`;
+        }
 
-		// Upload VTT
-		const subtitlePath = `${videoId}/subtitles/${filename}`
+        // Upload VTT
+        const subtitlePath = `${videoId}/subtitles/${filename}`
 
-		await uploadFileToMinio(`${videoId}/subtitles/${filename}`, videoBucket, buffer, "text/vtt");
+        await uploadFileToMinio(`${videoId}/subtitles/${filename}`, videoBucket, buffer, "text/vtt");
 
-		await client.query(`UPDATE video SET subtitle_path = '${subtitlePath}', subtitle_language = '${language}', subtitle_code = '${language_short}' WHERE video_id = ${videoId}`);
+        await client.query(`UPDATE video
+                            SET subtitle_path     = '${subtitlePath}',
+                                subtitle_language = '${language}',
+                                subtitle_code     = '${language_short}'
+                            WHERE video_id = ${videoId}`);
 
 // 		// Upload subtitle playlist
 // 		const content = `#EXTM3U
@@ -155,11 +151,11 @@ export async function POST(req: NextRequest) {
 //
 // 		await uploadFileToMinio(masterPlaylistPath, videoBucket, Buffer.from(newContent, "utf-8"), "application/vnd.apple.mpegurl");
 
-		return NextResponse.json({success: true, subtitle_id: subtitleId, filename}, {status: 200});
+        return NextResponse.json({success: true, subtitle_id: subtitleId, filename}, {status: 200});
 
-	} catch (err: any) {
-		console.error("Upload/update subtitle error:", err);
-		const message = err instanceof Error ? err.message : "Server error.";
-		return NextError.error(message, HttpError.InternalServerError);
-	}
+    } catch (err: any) {
+        console.error("Upload/update subtitle error:", err);
+        const message = err instanceof Error ? err.message : "Server error.";
+        return NextError.error(message, HttpError.InternalServerError);
+    }
 }
