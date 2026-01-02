@@ -37,15 +37,15 @@ export async function POST(req: NextRequest) {
         // Request validation
         // -------------------------------
         if (!videoId) {
-            return NextError.error("No video given", HttpError.BadRequest);
+            return NextError.Error("No video given", HttpError.BadRequest);
         }
 
         if (!file) {
-            return NextError.error("No file uploaded", HttpError.BadRequest);
+            return NextError.Error("No file uploaded", HttpError.BadRequest);
         }
 
         if (!file.type.startsWith("image/")) {
-            return NextError.error("Only image files are allowed", HttpError.BadRequest);
+            return NextError.Error("Only image files are allowed", HttpError.BadRequest);
         }
 
         // -------------------------------
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
             `, [videoId, user.user_id]);
 
             if (ownershipResult.rowCount === 0) {
-                return NextError.error("Video not found or you don't have permission to add thumbnails", HttpError.NotFound);
+                return NextError.Error("Video not found or you don't have permission to add thumbnails", HttpError.NotFound);
             }
 
             videoPath = ownershipResult.rows[0].minio_path;
@@ -77,13 +77,13 @@ export async function POST(req: NextRequest) {
 
 
         if (!exists) {
-            return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
+            return NextError.Error("Video isn't uploaded yet.", HttpError.BadRequest);
         }
 
-        const thumbnails_existing = await countFilesInFolder(videoBucket, `${videoId}/thumbnails`);
+        const thumbnailsExisting = await countFilesInFolder(videoBucket, `${videoId}/thumbnails`);
 
-        if (thumbnails_existing >= 5) {
-            return NextError.error("Only 5 thumbnails are allowed at the same time", HttpError.BadRequest);
+        if (thumbnailsExisting >= 5) {
+            return NextError.Error("Only 5 thumbnails are allowed at the same time", HttpError.BadRequest);
         }
 
         // -------------------------------
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
         } catch (err) {
             await client.query("ROLLBACK");
             console.error("Database error:", err);
-            return NextError.error("Database write failed.", HttpError.InternalServerError);
+            return NextError.Error("Database write failed.", HttpError.InternalServerError);
 
         } finally {
             client.release();
@@ -145,6 +145,6 @@ export async function POST(req: NextRequest) {
     } catch (err: any) {
         console.error("Upload processing error:", err);
         const message = err instanceof Error ? err.message : "Server error.";
-        return NextError.error(message, HttpError.InternalServerError);
+        return NextError.Error(message, HttpError.InternalServerError);
     }
 }

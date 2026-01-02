@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectionPool } from "@/lib/services/postgres";
 import { getUser } from "@/lib/auth/getUser";
 
-const PHOTO_CDN = "http://cdn.myfairpipe.com:9000/photo";
+const photoCdn = "http://cdn.myfairpipe.com:9000/photo";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
         const path: string | null = result.rows[0].path;
 
         return NextResponse.json({
-            photo_url: path ? `${PHOTO_CDN}/${path}` : null,
+            photo_url: path ? `${photoCdn}/${path}` : null,
         }, { status: 200 });
     } catch (err) {
         console.error(err);

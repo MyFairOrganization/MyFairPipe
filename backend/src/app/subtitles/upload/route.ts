@@ -30,25 +30,25 @@ export async function POST(req: NextRequest) {
         const videoId = formData.get("id") as string;
         const file = formData.get("file") as File;
         const language = formData.get("language") as string;
-        const language_short = formData.get("language_short") as string;
+        const languageShort = formData.get("language_short") as string;
 
         // -------------------------------
         // Validation
         // -------------------------------
         if (!videoId) {
-            return NextError.error("Invalid video id", HttpError.BadRequest);
+            return NextError.Error("Invalid video id", HttpError.BadRequest);
         }
 
         if (!file) {
-            return NextError.error("No file uploaded", HttpError.BadRequest);
+            return NextError.Error("No file uploaded", HttpError.BadRequest);
         }
 
         if (!file.name.endsWith(".vtt") && file.type !== "text/vtt") {
-            return NextError.error("Only VTT subtitle files are allowed", HttpError.BadRequest);
+            return NextError.Error("Only VTT subtitle files are allowed", HttpError.BadRequest);
         }
 
-        if (!language || !language_short || !language.match(/^[a-zA-Z]+(-[a-zA-Z]+)?$/)) {
-            return NextError.error("Invalid language", HttpError.BadRequest);
+        if (!language || !languageShort || !language.match(/^[a-zA-Z]+(-[a-zA-Z]+)?$/)) {
+            return NextError.Error("Invalid language", HttpError.BadRequest);
         }
 
         // -------------------------------
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
             `, [videoId, user.user_id]);
 
             if (ownershipResult.rowCount === 0) {
-                return NextError.error("Video not found or you don't have permission to add subtitles", HttpError.NotFound);
+                return NextError.Error("Video not found or you don't have permission to add subtitles", HttpError.NotFound);
             }
             videoPath = ownershipResult.rows[0].minio_path;
         } catch (e) {
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         // -------------------------------
         const videoExists = await objectExists(videoBucket, videoPath);
         if (!videoExists) {
-            return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
+            return NextError.Error("Video isn't uploaded yet.", HttpError.BadRequest);
         }
 
         // -------------------------------
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         const subtitleFiles = await listFilesInFolder(videoBucket, `${videoId}/subtitles`);
 
         const existingSubtitle = subtitleFiles.find(f => {
-            return f.includes(`_${language_short}.vtt`);
+            return f.includes(`_${languageShort}.vtt`);
         });
 
         const buffer = Buffer.from(await file.arrayBuffer());
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
             subtitleId = filename.replace(".vtt", "").replace("subs_", "");
         } else {
             subtitleId = videoId;
-            filename = `subs_${language_short}.vtt`;
+            filename = `subs_${languageShort}.vtt`;
         }
 
         // Upload VTT
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
         await client.query(`UPDATE video
                             SET subtitle_path     = '${subtitlePath}',
                                 subtitle_language = '${language}',
-                                subtitle_code     = '${language_short}'
+                                subtitle_code     = '${languageShort}'
                             WHERE video_id = ${videoId}`);
 
         // 		// Upload subtitle playlist
@@ -133,11 +133,11 @@ export async function POST(req: NextRequest) {
         //
         // 		const lines = masterContent.split(/\r?\n/);
         //
-        // 		const subtitleLine = `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="${language}",DEFAULT="NO",AUTOSELECT="NO",LANGUAGE="${language_short}",URI="subtitles/subs_${language_short}.m3u8"`;
+        // 		const subtitleLine = `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="${language}",DEFAULT="NO",AUTOSELECT="NO",LANGUAGE="${languageShort}",URI="subtitles/subs_${languageShort}.m3u8"`;
         //
         // 		let found = false;
         // 		const updatedLines = lines.map(line => {
-        // 			if (line.startsWith('#EXT-X-MEDIA:TYPE=SUBTITLES') && line.includes(`LANGUAGE="${language_short}"`)) {
+        // 			if (line.startsWith('#EXT-X-MEDIA:TYPE=SUBTITLES') && line.includes(`LANGUAGE="${languageShort}"`)) {
         // 				found = true;
         // 				return subtitleLine;
         // 			}
@@ -158,6 +158,6 @@ export async function POST(req: NextRequest) {
     } catch (err: any) {
         console.error("Upload/update subtitle error:", err);
         const message = err instanceof Error ? err.message : "Server error.";
-        return NextError.error(message, HttpError.InternalServerError);
+        return NextError.Error(message, HttpError.InternalServerError);
     }
 }

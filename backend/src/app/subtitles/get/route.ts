@@ -14,27 +14,25 @@ export async function OPTIONS() {
 }
 
 export async function GET(req: Request) {
-    let client;
-
     try {
         const { searchParams } = new URL(req.url);
 
-        const video_id = searchParams.get("id") as string;
+        const videoId = searchParams.get("id") as string;
 
         // -------------------------------
         // Request validation
         // -------------------------------
-        if (!video_id) {
-            return NextError.error("Missing id", HttpError.BadRequest);
+        if (!videoId) {
+            return NextError.Error("Missing id", HttpError.BadRequest);
         }
 
         // -------------------------------
         // Response
         // -------------------------------
-        let count = await countFilesInFolder(videoBucket, `${video_id}/subtitles`);
+        let count = await countFilesInFolder(videoBucket, `${videoId}/subtitles`);
         let languages: string[] = [];
 
-        let files = await listFilesInFolder(videoBucket, `${video_id}/subtitles`);
+        let files = await listFilesInFolder(videoBucket, `${videoId}/subtitles`);
 
         files.map(file => {
             let language = file.split(".")[0].split("_")[1];
@@ -48,6 +46,6 @@ export async function GET(req: Request) {
         }, { status: 200 });
     } catch (err: any) {
         console.error("Minio error: ", err);
-        return NextError.error(err || "Server error.", HttpError.InternalServerError);
+        return NextError.Error(err || "Server error.", HttpError.InternalServerError);
     }
 }

@@ -28,13 +28,13 @@ export async function PATCH(req: NextRequest) {
 
         const { searchParams } = new URL(req.url);
 
-        const thumbnail_id = searchParams.get("id");
+        const thumbnailId = searchParams.get("id");
 
         // -------------------------------
         // Request validation
         // -------------------------------
-        if (!thumbnail_id) {
-            return NextError.error("Missing id", HttpError.BadRequest);
+        if (!thumbnailId) {
+            return NextError.Error("Missing id", HttpError.BadRequest);
         }
 
         // -------------------------------
@@ -51,19 +51,19 @@ export async function PATCH(req: NextRequest) {
                 FROM Thumbnail t
                          JOIN video v ON v.video_id = t.video_id
                 WHERE t.thumbnail_id = $1
-            `, [thumbnail_id]);
+            `, [thumbnailId]);
 
             if (resultVideo.rowCount === 0) {
                 await client.query("ROLLBACK");
-                return NextError.error("Thumbnail not found", HttpError.NotFound);
+                return NextError.Error("Thumbnail not found", HttpError.NotFound);
             }
 
-            const { video_id, uploader } = resultVideo.rows[0];
+            const { video_id: videoId, uploader } = resultVideo.rows[0];
 
             // Check if user owns the video
             if (uploader !== user.id) {
                 await client.query("ROLLBACK");
-                return NextError.error("You don't have permission to modify this thumbnail", HttpError.Forbidden);
+                return NextError.Error("You don't have permission to modify this thumbnail", HttpError.Forbidden);
             }
 
             // Deactivate all thumbnails for this video
@@ -72,7 +72,7 @@ export async function PATCH(req: NextRequest) {
                 SET is_active = FALSE
                 WHERE video_id = $1
                   AND is_active = TRUE
-            `, [video_id]);
+            `, [videoId]);
 
             // Activate the selected thumbnail
             const resultActivate: QueryResult = await client.query(`
@@ -80,11 +80,11 @@ export async function PATCH(req: NextRequest) {
                 SET is_active = TRUE
                 WHERE thumbnail_id = $1
                 RETURNING *
-            `, [thumbnail_id]);
+            `, [thumbnailId]);
 
             if (resultActivate.rowCount === 0) {
                 await client.query("ROLLBACK");
-                return NextError.error("Failed to activate thumbnail", HttpError.InternalServerError);
+                return NextError.Error("Failed to activate thumbnail", HttpError.InternalServerError);
             }
 
             await client.query("COMMIT");
@@ -94,7 +94,7 @@ export async function PATCH(req: NextRequest) {
         } catch (dbErr) {
             await client.query("ROLLBACK");
             console.error("Database transaction error:", dbErr);
-            return NextError.error("Database write failed", HttpError.InternalServerError);
+            return NextError.Error("Database write failed", HttpError.InternalServerError);
         } finally {
             client.release();
         }
@@ -102,6 +102,6 @@ export async function PATCH(req: NextRequest) {
     } catch (err) {
         console.error("Request handling error:", err);
         const message = err instanceof Error ? err.message : "Server error";
-        return NextError.error(message, HttpError.InternalServerError);
+        return NextError.Error(message, HttpError.InternalServerError);
     }
 }

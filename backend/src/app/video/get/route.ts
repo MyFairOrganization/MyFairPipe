@@ -25,7 +25,7 @@ export async function GET(req: Request) {
         // Request validation
         // -------------------------------
         if (!videoId) {
-            return NextError.error("Missing id", 400);
+            return NextError.Error("Missing id", 400);
         }
 
         // -------------------------------
@@ -54,14 +54,14 @@ export async function GET(req: Request) {
             WHERE v.video_id = $1`, [videoId]);
 
         if (result.rowCount === 0) {
-            return NextError.error("Video not found", 404);
+            return NextError.Error("Video not found", 404);
         }
 
         return NextResponse.json(result.rows[0], { status: 200 });
 
     } catch (err: any) {
         console.error("Database error: ", err);
-        return NextError.error(err || "Server error.", HttpError.InternalServerError);
+        return NextError.Error(err || "Server error.", HttpError.InternalServerError);
     } finally {
         if (client) client.release();
     }

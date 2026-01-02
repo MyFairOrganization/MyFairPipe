@@ -31,13 +31,13 @@ export async function GET(req: NextRequest) {
         const offsetParam = searchParams.get('offset');
 
         if (limitParam === null) {
-            return NextError.error("No Limit", HttpError.BadRequest);
+            return NextError.Error("No Limit", HttpError.BadRequest);
         }
 
         const limit = Number.parseInt(limitParam, 10);
 
         if (offsetParam === null) {
-            return NextError.error("No Offset", HttpError.BadRequest);
+            return NextError.Error("No Offset", HttpError.BadRequest);
         }
 
         const offset = Number.parseInt(offsetParam, 10);
@@ -47,6 +47,6 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ cachedVids }, { status: 200 });
     } catch (err) {
         console.error(err);
-        return NextError.error(err + "", HttpError.BadRequest);
+        return NextError.Error(err + "", HttpError.BadRequest);
     }
 }

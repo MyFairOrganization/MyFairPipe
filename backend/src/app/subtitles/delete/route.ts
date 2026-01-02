@@ -34,11 +34,11 @@ export async function DELETE(req: NextRequest) {
         // Request validation
         // -------------------------------
         if (!videoId) {
-            return NextError.error("Missing id", HttpError.BadRequest);
+            return NextError.Error("Missing id", HttpError.BadRequest);
         }
 
         if (!language) {
-            return NextError.error("Missing language", HttpError.BadRequest);
+            return NextError.Error("Missing language", HttpError.BadRequest);
         }
 
         // -------------------------------
@@ -54,7 +54,7 @@ export async function DELETE(req: NextRequest) {
             `, [videoId, user.id]);
 
             if (ownershipResult.rowCount === 0) {
-                return NextError.error("Video not found or you don't have permission to delete subtitles", HttpError.NotFound);
+                return NextError.Error("Video not found or you don't have permission to delete subtitles", HttpError.NotFound);
             }
         } finally {
             client.release();
@@ -66,12 +66,12 @@ export async function DELETE(req: NextRequest) {
         const files = await listFilesInFolder(videoBucket, `${videoId}/subtitles`);
 
         const filesToDelete = files.filter(file => {
-            const file_lang = file.split(".")[0].split("_").pop();
-            return file_lang === language;
+            const fileLang = file.split(".")[0].split("_").pop();
+            return fileLang === language;
         });
 
         if (filesToDelete.length === 0) {
-            return NextError.error("Subtitle not found for this language", HttpError.NotFound);
+            return NextError.Error("Subtitle not found for this language", HttpError.NotFound);
         }
 
         // Delete all matching files (VTT and M3U8)
@@ -108,6 +108,6 @@ export async function DELETE(req: NextRequest) {
     } catch (err) {
         console.error("Delete subtitle error:", err);
         const message = err instanceof Error ? err.message : "Server error";
-        return NextError.error(message, HttpError.InternalServerError);
+        return NextError.Error(message, HttpError.InternalServerError);
     }
 }

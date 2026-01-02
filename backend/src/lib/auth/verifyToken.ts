@@ -1,14 +1,14 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const jwtSecret = process.env.JWT_SECRET!;
 
-if (!JWT_SECRET) {
+if (!jwtSecret) {
     throw new Error("JWT_SECRET environment variable is not set. Please set it before starting the application.");
 }
 
 export function verifyToken(token: string): JwtPayload {
     try {
-        return <JwtPayload>jwt.verify(token, JWT_SECRET);
+        return <JwtPayload>jwt.verify(token, jwtSecret);
     } catch (err) {
         if (err instanceof jwt.TokenExpiredError) {
             console.error("JWT verification failed: Token expired.", err);

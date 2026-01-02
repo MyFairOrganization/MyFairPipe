@@ -35,11 +35,11 @@ export async function PATCH(req: NextRequest) {
         // Request validation
         // -------------------------------
         if (!videoId) {
-            return NextError.error("Missing id", HttpError.BadRequest);
+            return NextError.Error("Missing id", HttpError.BadRequest);
         }
 
         if (!title && !description) {
-            return NextError.error("At least one field to update is required", HttpError.BadRequest);
+            return NextError.Error("At least one field to update is required", HttpError.BadRequest);
         }
 
         // -------------------------------
@@ -61,7 +61,7 @@ export async function PATCH(req: NextRequest) {
 
             if (ownershipResult.rowCount === 0) {
                 await client.query("ROLLBACK");
-                return NextError.error("Video not found or you don't have permission to edit it", HttpError.NotFound);
+                return NextError.Error("Video not found or you don't have permission to edit it", HttpError.NotFound);
             }
 
             if (title && description) {
@@ -88,13 +88,13 @@ export async function PATCH(req: NextRequest) {
                 `, [description, videoId, user.id]);
             } else {
                 await client.query("ROLLBACK");
-                return NextError.error("At least one field to update is required", HttpError.BadRequest);
+                return NextError.Error("At least one field to update is required", HttpError.BadRequest);
             }
 
             await client.query("COMMIT");
 
             if (result.rowCount === 0) {
-                return NextError.error("Video not found", HttpError.NotFound);
+                return NextError.Error("Video not found", HttpError.NotFound);
             }
 
             return NextResponse.json({ success: true }, { status: 200 });
@@ -102,7 +102,7 @@ export async function PATCH(req: NextRequest) {
         } catch (err) {
             await client.query("ROLLBACK");
             console.error("Database error:", err);
-            return NextError.error("Database write failed", HttpError.InternalServerError);
+            return NextError.Error("Database write failed", HttpError.InternalServerError);
 
         } finally {
             client.release();
@@ -111,6 +111,6 @@ export async function PATCH(req: NextRequest) {
     } catch (err: any) {
         console.error("Update processing error:", err);
         const message = err instanceof Error ? err.message : "Server error.";
-        return NextError.error(message, HttpError.InternalServerError);
+        return NextError.Error(message, HttpError.InternalServerError);
     }
 }

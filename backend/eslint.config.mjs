@@ -75,7 +75,7 @@ let ex = [...next,
                ========================= */
 
             "unicorn/filename-case": ["error", {
-                case: "kebabCase"
+                case: "camelCase"
             }],
 
             /* =========================

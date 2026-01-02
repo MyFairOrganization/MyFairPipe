@@ -18,17 +18,17 @@ async function dislike(videoID: number, userID: number) {
     try {
         const result = await client.query(query, [userID, videoID]);
 
-        var is_like: boolean | null;
+        var isLike: boolean | null;
 
-        // sets is_like to null or is_like from DB if it exists or not
+        // sets isLike to null or isLike from DB if it exists or not
         try {
-            is_like = result.rows[0].is_like;
-        } catch (e) {
-            is_like = null;
+            isLike = result.rows[0].is_like;
+        } catch (_) {
+            isLike = null;
         }
 
         // Check if User already disliked videos => returns if true
-        if (result.rows.length > 0 && !is_like) {
+        if (result.rows.length > 0 && !isLike) {
             // Updates LikeCount in Metadata
             const updateCount = `
                 UPDATE video
@@ -55,7 +55,7 @@ async function dislike(videoID: number, userID: number) {
         }
 
         // Check if dislike-entry has to be created in DB
-        if (is_like === null) { // Entry has to be created
+        if (isLike === null) { // Entry has to be created
             // SQL query for User to dislike Video
             const insertLV = `
                 INSERT INTO Like_Video (user_id, video_id, is_like)
@@ -64,7 +64,7 @@ async function dislike(videoID: number, userID: number) {
 
             // Insert gets executed
             await client.query(insertLV, [userID, videoID]);
-        } else if (is_like) { // Entry has to be updated from like to dislike
+        } else if (isLike) { // Entry has to be updated from like to dislike
             // LV Entry gets updated
             const updateLV = `
                 UPDATE Like_Video
@@ -85,14 +85,14 @@ async function dislike(videoID: number, userID: number) {
             WHERE video_id = $3;
         `;
 
-        var updateLikes = is_like === null ? 0 : -1;
+        var updateLikes = isLike === null ? 0 : -1;
         updateDislikes = 1;
 
         await client.query(updateCount, [updateLikes, updateDislikes, videoID]);
 
         return true;
     } catch (err: any) {
-        return NextError.error(err, HttpError.BadRequest);
+        return NextError.Error(err, HttpError.BadRequest);
     } finally {
         client.release();
     }
@@ -116,13 +116,13 @@ export async function POST(req: NextRequest) {
         const { videoID } = await req.json();
 
         if (videoID === null) {
-            return NextError.error("No Video ID", HttpError.BadRequest);
+            return NextError.Error("No Video ID", HttpError.BadRequest);
         }
 
         const userID = user.user_id;
 
         if (userID === null) {
-            return NextError.error("No User ID", HttpError.BadRequest);
+            return NextError.Error("No User ID", HttpError.BadRequest);
         }
 
         const result = await dislike(Number(videoID), Number(userID));
@@ -132,6 +132,6 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ result }, { status: 200 });
     } catch (err) {
         console.error(err);
-        return NextError.error(err + "", HttpError.BadRequest);
+        return NextError.Error(err + "", HttpError.BadRequest);
     }
 }

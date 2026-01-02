@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET environment variable is not set. Please set it before starting the application.');
 }
-const JWT_SECRET = process.env.JWT_SECRET;
+const jwtSecret = process.env.JWT_SECRET;
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -21,15 +21,15 @@ export async function OPTIONS() {
 
 export async function POST(req: Request) {
     try {
-        const { user_email, password } = await req.json();
+        const { user_email: userEmail, password } = await req.json();
 
-        if (!user_email || !password) {
+        if (!userEmail || !password) {
             return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
         }
 
         const result = await connectionPool.query(`SELECT user_id, user_email, hashed_password
                                                    FROM "User"
-                                                   WHERE user_email = $1`, [user_email]);
+                                                   WHERE user_email = $1`, [userEmail]);
 
         if (result.rowCount === 0) {
             return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         }
 
         // === Create JWT ===
-        const token = jwt.sign({ user_id: user.user_id, email: user.user_email }, JWT_SECRET, { expiresIn: "7d" });
+        const token = jwt.sign({ user_id: user.user_id, email: user.user_email }, jwtSecret, { expiresIn: "7d" });
 
         const response = NextResponse.json({
             message: "Login successful",

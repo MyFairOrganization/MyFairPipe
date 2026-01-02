@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const jwtSecret = process.env.JWT_SECRET!;
 
 export const config = {
     matcher: ["/video/delete", "/video/update", "/video/delete", "/thumbnail/activate", "/thumbnail/delete", "/thumbnail/upload", "/subtitles/delete", "/subtitles/upload",],
@@ -31,7 +31,7 @@ export default async function proxy(req: NextRequest) {
         }
 
         try {
-            jwt.verify(cookie, JWT_SECRET);
+            jwt.verify(cookie, jwtSecret);
         } catch {
             return NextResponse.json({ error: "Invalid token" }, { status: 401 });
         }

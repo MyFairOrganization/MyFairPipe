@@ -29,13 +29,13 @@ export async function DELETE(req: NextRequest) {
 
         const { searchParams } = new URL(req.url);
 
-        const thumbnail_id = searchParams.get("id");
+        const thumbnailId = searchParams.get("id");
 
         // -------------------------------
         // Request validation
         // -------------------------------
-        if (!thumbnail_id) {
-            return NextError.error("Missing id", HttpError.BadRequest);
+        if (!thumbnailId) {
+            return NextError.Error("Missing id", HttpError.BadRequest);
         }
 
         // -------------------------------
@@ -52,11 +52,11 @@ export async function DELETE(req: NextRequest) {
                          JOIN Photo p ON p.photo_id = t.photo_id
                          JOIN video v ON v.video_id = t.video_id
                 WHERE t.thumbnail_id = $1
-            `, [thumbnail_id]);
+            `, [thumbnailId]);
 
             if (result.rowCount === 0) {
                 await client.query("ROLLBACK");
-                return NextError.error("Thumbnail not found", HttpError.NotFound);
+                return NextError.Error("Thumbnail not found", HttpError.NotFound);
             }
 
             const { path, uploader } = result.rows[0];
@@ -64,7 +64,7 @@ export async function DELETE(req: NextRequest) {
             // Check if user owns the video
             if (uploader !== user.id) {
                 await client.query("ROLLBACK");
-                return NextError.error("You don't have permission to delete this thumbnail", HttpError.Forbidden);
+                return NextError.Error("You don't have permission to delete this thumbnail", HttpError.Forbidden);
             }
 
             try {
@@ -72,14 +72,14 @@ export async function DELETE(req: NextRequest) {
             } catch (err) {
                 await client.query("ROLLBACK");
                 console.error("MinIO delete failed:", err);
-                return NextError.error("Could not delete file from storage", HttpError.InternalServerError);
+                return NextError.Error("Could not delete file from storage", HttpError.InternalServerError);
             }
 
             await client.query(`
                 DELETE
                 FROM Thumbnail
                 WHERE thumbnail_id = $1
-            `, [thumbnail_id]);
+            `, [thumbnailId]);
 
             await client.query("COMMIT");
 
@@ -88,7 +88,7 @@ export async function DELETE(req: NextRequest) {
         } catch (dbErr) {
             await client.query("ROLLBACK");
             console.error("Database transaction error:", dbErr);
-            return NextError.error("Database write failed", HttpError.InternalServerError);
+            return NextError.Error("Database write failed", HttpError.InternalServerError);
         } finally {
             client.release();
         }
@@ -96,6 +96,6 @@ export async function DELETE(req: NextRequest) {
     } catch (err) {
         console.error("Request handling error:", err);
         const message = err instanceof Error ? err.message : "Server error";
-        return NextError.error(message, HttpError.InternalServerError);
+        return NextError.Error(message, HttpError.InternalServerError);
     }
 }

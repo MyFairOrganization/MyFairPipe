@@ -19,34 +19,34 @@ export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
 
-        const THUMBNAIL_ID = searchParams.get("id") as string;
+        const thumbnailId = searchParams.get("id") as string;
 
         // -------------------------------
         // Request validation
         // -------------------------------
-        if (!THUMBNAIL_ID) {
-            return NextError.error("Missing id", HttpError.BadRequest);
+        if (!thumbnailId) {
+            return NextError.Error("Missing id", HttpError.BadRequest);
         }
 
         // -------------------------------
         // Database Transaction
         // -------------------------------
         client = await connectionPool.connect();
-        const RESULT = await client.query(`
+        const result = await client.query(`
             SELECT t.thumbnail_id, p.photo_id, p.path
             FROM Thumbnail t
                      JOIN Photo p ON p.photo_id = t.photo_id
             WHERE t.thumbnail_id = $1
-        `, [THUMBNAIL_ID]);
+        `, [thumbnailId]);
 
-        if (RESULT.rowCount === 0) {
-            return NextError.error("No Thumbnail found", HttpError.NotFound);
+        if (result.rowCount === 0) {
+            return NextError.Error("No Thumbnail found", HttpError.NotFound);
         }
 
-        return NextResponse.json(RESULT.rows[0], { status: 200 });
+        return NextResponse.json(result.rows[0], { status: 200 });
     } catch (err: any) {
         console.error("Database error: ", err);
-        return NextError.error(err || "Server error.", HttpError.InternalServerError);
+        return NextError.Error(err || "Server error.", HttpError.InternalServerError);
     } finally {
         if (client) client.release();
     }

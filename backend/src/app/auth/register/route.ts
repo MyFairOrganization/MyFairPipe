@@ -15,9 +15,9 @@ export async function OPTIONS() {
 
 export async function POST(req: Request) {
     try {
-        const { user_email, username, password } = await req.json();
+        const { user_email: userEmail, username, password } = await req.json();
 
-        if (!user_email || !username || !password) {
+        if (!userEmail || !username || !password) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
@@ -28,17 +28,17 @@ export async function POST(req: Request) {
         const existing = await connectionPool.query(`SELECT user_id
                                                      FROM "User"
                                                      WHERE user_email = $1
-                                                        OR username = $2`, [user_email, username]);
+                                                        OR username = $2`, [userEmail, username]);
 
         if (existing.rowCount && existing.rowCount > 0) {
             return NextResponse.json({ error: "User already exists" }, { status: 409 });
         }
 
-        const hashed_password = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const result = await connectionPool.query(`INSERT INTO "User" (user_email, hashed_password, username, displayname)
                                                    VALUES ($1, $2, $3, $3)
-                                                   RETURNING user_id, user_email, username`, [user_email, hashed_password, username]);
+                                                   RETURNING user_id, user_email, username`, [userEmail, hashedPassword, username]);
 
         return NextResponse.json({ message: "User registered successfully", user: result.rows[0] }, { status: 201 });
     } catch (err) {

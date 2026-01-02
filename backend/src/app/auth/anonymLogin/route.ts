@@ -21,15 +21,15 @@ export async function POST(req: Request) {
         var id = getID.rowCount! + 1;
         const password = `anonymPass`;
         var username = await bcrypt.hash(`anonym${id}`, 1);
-        const user_email = `${username}@anonym.com`;
+        const userEmail = `${username}@anonym.com`;
 
-        const hashed_password = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         while (true) {
             const existing = await connectionPool.query(`SELECT user_id
                                                          FROM "User"
                                                          WHERE user_email = $1
-                                                            OR username = $2`, [user_email, username]);
+                                                            OR username = $2`, [userEmail, username]);
 
             if (existing.rowCount && existing.rowCount > 0) {
                 id += 1;
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
         const result = await connectionPool.query(`INSERT INTO "User" (user_email, hashed_password, username, displayname, anonym)
                                                    VALUES ($1, $2, $3, $3, TRUE)
-                                                   RETURNING user_id, hashed_password, user_email, username`, [user_email, hashed_password, username]);
+                                                   RETURNING user_id, hashed_password, user_email, username`, [userEmail, hashedPassword, username]);
 
         return NextResponse.json({
             message: "User registered successfully",

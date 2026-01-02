@@ -71,17 +71,17 @@ export default class NextError {
         [HttpError.HTTPVersionNotSupported]: 505,
     };
 
-    public static error(message: string, error: HttpError | number = HttpError.InternalServerError) {
+    public static Error(message: string, error: HttpError | number = HttpError.InternalServerError) {
         let status: number;
         let errorName: string;
         if (typeof error === 'number') {
             status = error;
 
-            let error_int = Object.keys(NextError.STATUS_CODE_MAP).find(key => {
+            let errorInt = Object.keys(NextError.STATUS_CODE_MAP).find(key => {
                 return NextError.STATUS_CODE_MAP[key as HttpError] === status;
             });
-            if (error_int) {
-                errorName = error_int;
+            if (errorInt) {
+                errorName = errorInt;
             } else {
                 errorName = error.toString();
             }
