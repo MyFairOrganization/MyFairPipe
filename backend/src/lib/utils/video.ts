@@ -5,7 +5,9 @@ export function getMp4Duration(buffer: Buffer): Promise<number> {
         const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
 
         const mp4boxFile = MP4Box.createFile();
-        mp4boxFile.onError = (e) => reject(e);
+        mp4boxFile.onError = (e) => {
+            return reject(e);
+        };
 
         mp4boxFile.onReady = (info) => {
             const seconds = info.duration / info.timescale;

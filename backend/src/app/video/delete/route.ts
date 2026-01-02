@@ -1,9 +1,9 @@
-import {NextRequest, NextResponse} from "next/server";
-import {connectionPool} from "@/lib/services/postgres";
-import {deleteFolder, objectExists, videoBucket} from "@/lib/services/minio";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser} from "@/lib/auth/getUser";
-import {QueryResult} from "pg";
+import { NextRequest, NextResponse } from "next/server";
+import { connectionPool } from "@/lib/services/postgres";
+import { deleteFolder, objectExists, videoBucket } from "@/lib/services/minio";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
+import { QueryResult } from "pg";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -24,7 +24,7 @@ export async function DELETE(req: NextRequest) {
         const user = getUser(req);
 
         if (!user) {
-            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
         const formData = await req.formData();
@@ -59,7 +59,7 @@ export async function DELETE(req: NextRequest) {
                 return NextError.error("Video not found or you don't have permission to delete it", HttpError.NotFound);
             }
 
-            let {path} = ownershipResult.rows[0];
+            let { path } = ownershipResult.rows[0];
             path = path.split("/").slice(2).join("/");
 
             if (!await objectExists(videoBucket, path)) {
@@ -82,7 +82,7 @@ export async function DELETE(req: NextRequest) {
                 console.error("MinIO delete failed:", err);
             }
 
-            return NextResponse.json({success: true}, {status: 200});
+            return NextResponse.json({ success: true }, { status: 200 });
 
         } catch (dbErr) {
             await client.query("ROLLBACK");

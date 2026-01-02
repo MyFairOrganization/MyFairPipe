@@ -1,8 +1,8 @@
-import {NextRequest, NextResponse} from "next/server";
-import {connectionPool} from "@/lib/services/postgres";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {QueryResult} from "pg";
-import {getUser} from "@/lib/auth/getUser";
+import { NextRequest, NextResponse } from "next/server";
+import { connectionPool } from "@/lib/services/postgres";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { QueryResult } from "pg";
+import { getUser } from "@/lib/auth/getUser";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest) {
         const user = getUser(req);
 
         if (!user) {
-            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
         const formData = await req.formData();
@@ -97,7 +97,7 @@ export async function PATCH(req: NextRequest) {
                 return NextError.error("Video not found", HttpError.NotFound);
             }
 
-            return NextResponse.json({success: true}, {status: 200});
+            return NextResponse.json({ success: true }, { status: 200 });
 
         } catch (err) {
             await client.query("ROLLBACK");

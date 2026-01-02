@@ -1,4 +1,4 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 
 export enum HttpError {
     BadRequest = "Bad Request",
@@ -77,7 +77,9 @@ export default class NextError {
         if (typeof error === 'number') {
             status = error;
 
-            let error_int = Object.keys(NextError.STATUS_CODE_MAP).find(key => NextError.STATUS_CODE_MAP[key as HttpError] === status);
+            let error_int = Object.keys(NextError.STATUS_CODE_MAP).find(key => {
+                return NextError.STATUS_CODE_MAP[key as HttpError] === status;
+            });
             if (error_int) {
                 errorName = error_int;
             } else {
@@ -89,7 +91,7 @@ export default class NextError {
             errorName = error;
         }
 
-        return NextResponse.json({error: errorName, message, status}, {status});
+        return NextResponse.json({ error: errorName, message, status }, { status });
     }
 }
 

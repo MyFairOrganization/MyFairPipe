@@ -1,5 +1,5 @@
-import {NextResponse} from "next/server";
-import {connectionPool} from "@/lib/services/postgres";
+import { NextResponse } from "next/server";
+import { connectionPool } from "@/lib/services/postgres";
 import bcrypt from "bcrypt";
 
 export async function OPTIONS() {
@@ -19,9 +19,9 @@ export async function POST(req: Request) {
                                                   FROM "User"`);
 
         var id = getID.rowCount! + 1;
-        const password = `anonymPass`
+        const password = `anonymPass`;
         var username = await bcrypt.hash(`anonym${id}`, 1);
-        const user_email = `${username}@anonym.com`
+        const user_email = `${username}@anonym.com`;
 
         const hashed_password = await bcrypt.hash(password, 10);
 
@@ -47,9 +47,9 @@ export async function POST(req: Request) {
             message: "User registered successfully",
             user: result.rows[0],
             password: password
-        }, {status: 201});
+        }, { status: 201 });
     } catch (err) {
         console.error(err);
-        return NextResponse.json({error: "Server error"}, {status: 500});
+        return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
 }

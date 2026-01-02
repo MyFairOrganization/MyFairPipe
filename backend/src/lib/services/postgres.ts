@@ -1,4 +1,4 @@
-import {Pool} from 'pg';
+import { Pool } from 'pg';
 
 const user = process.env.POSTGRES_USER;
 const host = process.env.POSTGRES_HOST || 'postgres';

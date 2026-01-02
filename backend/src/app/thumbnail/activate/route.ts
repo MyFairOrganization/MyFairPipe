@@ -1,8 +1,8 @@
-import {NextRequest, NextResponse} from "next/server";
-import {connectionPool} from "@/lib/services/postgres";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser} from "@/lib/auth/getUser";
-import {QueryResult} from "pg";
+import { NextRequest, NextResponse } from "next/server";
+import { connectionPool } from "@/lib/services/postgres";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
+import { QueryResult } from "pg";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -23,10 +23,10 @@ export async function PATCH(req: NextRequest) {
         const user = getUser(req);
 
         if (!user) {
-            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
-        const {searchParams} = new URL(req.url);
+        const { searchParams } = new URL(req.url);
 
         const thumbnail_id = searchParams.get("id");
 
@@ -58,7 +58,7 @@ export async function PATCH(req: NextRequest) {
                 return NextError.error("Thumbnail not found", HttpError.NotFound);
             }
 
-            const {video_id, uploader} = resultVideo.rows[0];
+            const { video_id, uploader } = resultVideo.rows[0];
 
             // Check if user owns the video
             if (uploader !== user.id) {
@@ -89,7 +89,7 @@ export async function PATCH(req: NextRequest) {
 
             await client.query("COMMIT");
 
-            return NextResponse.json({success: true}, {status: 200});
+            return NextResponse.json({ success: true }, { status: 200 });
 
         } catch (dbErr) {
             await client.query("ROLLBACK");

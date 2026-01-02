@@ -1,4 +1,4 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -18,5 +18,5 @@ export async function OPTIONS() {
  * @openapi
  */
 export async function GET() {
-    return NextResponse.json({message: "API is running"});
+    return NextResponse.json({ message: "API is running" });
 }

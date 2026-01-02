@@ -1,7 +1,7 @@
-import {connectionPool} from "@/lib/services/postgres";
-import {redis} from "@/lib/services/redis";
-import {NextResponse} from "next/server";
-import NextError, {HttpError} from "@/lib/utils/error";
+import { connectionPool } from "@/lib/services/postgres";
+import { redis } from "@/lib/services/redis";
+import { NextResponse } from "next/server";
+import NextError, { HttpError } from "@/lib/utils/error";
 
 interface Video {
     video_id: number;
@@ -26,7 +26,9 @@ async function cacheVideos(videos: Video[]): Promise<void> {
     await redis.del(KEY);
 
     if (videos.length > 0) {
-        await redis.rpush(KEY, ...videos.map(v => v.video_id.toString()));
+        await redis.rpush(KEY, ...videos.map(v => {
+            return v.video_id.toString();
+        }));
     }
 }
 
@@ -46,7 +48,7 @@ export async function GET() {
         const RESULT = await loadVideosFromPostgres();
         await cacheVideos(RESULT);
 
-        return NextResponse.json({result: RESULT}, {status: 200});
+        return NextResponse.json({ result: RESULT }, { status: 200 });
     } catch (err) {
         console.error(err);
         return NextError.error(err + "", HttpError.BadRequest);

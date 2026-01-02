@@ -1,9 +1,9 @@
-import {NextRequest, NextResponse} from "next/server";
-import {listFilesInFolder, objectExists, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser} from "@/lib/auth/getUser";
-import {connectionPool} from "@/lib/services/postgres";
-import {QueryResult} from "pg";
+import { NextRequest, NextResponse } from "next/server";
+import { listFilesInFolder, objectExists, uploadFileToMinio, videoBucket } from "@/lib/services/minio";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
+import { connectionPool } from "@/lib/services/postgres";
+import { QueryResult } from "pg";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         const user = getUser(req);
 
         if (!user) {
-            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
         const formData = await req.formData();
@@ -85,7 +85,9 @@ export async function POST(req: NextRequest) {
         // -------------------------------
         const subtitleFiles = await listFilesInFolder(videoBucket, `${videoId}/subtitles`);
 
-        const existingSubtitle = subtitleFiles.find(f => f.includes(`_${language_short}.vtt`));
+        const existingSubtitle = subtitleFiles.find(f => {
+            return f.includes(`_${language_short}.vtt`);
+        });
 
         const buffer = Buffer.from(await file.arrayBuffer());
         let subtitleId: string;
@@ -100,7 +102,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Upload VTT
-        const subtitlePath = `${videoId}/subtitles/${filename}`
+        const subtitlePath = `${videoId}/subtitles/${filename}`;
 
         await uploadFileToMinio(`${videoId}/subtitles/${filename}`, videoBucket, buffer, "text/vtt");
 
@@ -110,48 +112,48 @@ export async function POST(req: NextRequest) {
                                 subtitle_code     = '${language_short}'
                             WHERE video_id = ${videoId}`);
 
-// 		// Upload subtitle playlist
-// 		const content = `#EXTM3U
-// #EXT-X-VERSION:3
-// #EXTINF:9999999,
-// ${filename}
-// #EXT-X-ENDLIST`;
-//
-// 		const sub_playlist_path = `${videoId}/subtitles/${filename.replace(".vtt", ".m3u8")}`;
-// 		await uploadFileToMinio(sub_playlist_path, videoBucket, Buffer.from(content), "application/vnd.apple.mpegurl");
-//
-// 		// Update master playlist
-// 		const masterPlaylistPath = `${videoId}/master.m3u8`;
-// 		const stream = await minioClient.getObject(videoBucket, masterPlaylistPath);
-// 		const masterContent = await streamToString(stream);
-//
-// 		if (!masterContent.trim()) {
-// 			return NextError.error("Master playlist is empty", HttpError.InternalServerError);
-// 		}
-//
-// 		const lines = masterContent.split(/\r?\n/);
-//
-// 		const subtitleLine = `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="${language}",DEFAULT="NO",AUTOSELECT="NO",LANGUAGE="${language_short}",URI="subtitles/subs_${language_short}.m3u8"`;
-//
-// 		let found = false;
-// 		const updatedLines = lines.map(line => {
-// 			if (line.startsWith('#EXT-X-MEDIA:TYPE=SUBTITLES') && line.includes(`LANGUAGE="${language_short}"`)) {
-// 				found = true;
-// 				return subtitleLine;
-// 			}
-// 			return line;
-// 		});
-//
-// 		if (!found) {
-// 			const index = updatedLines.findIndex(l => l.startsWith("#EXT-X-STREAM-INF"));
-// 			updatedLines.splice(index !== -1 ? index : updatedLines.length, 0, subtitleLine);
-// 		}
-//
-// 		const newContent = updatedLines.join("\n");
-//
-// 		await uploadFileToMinio(masterPlaylistPath, videoBucket, Buffer.from(newContent, "utf-8"), "application/vnd.apple.mpegurl");
+        // 		// Upload subtitle playlist
+        // 		const content = `#EXTM3U
+        // #EXT-X-VERSION:3
+        // #EXTINF:9999999,
+        // ${filename}
+        // #EXT-X-ENDLIST`;
+        //
+        // 		const sub_playlist_path = `${videoId}/subtitles/${filename.replace(".vtt", ".m3u8")}`;
+        // 		await uploadFileToMinio(sub_playlist_path, videoBucket, Buffer.from(content), "application/vnd.apple.mpegurl");
+        //
+        // 		// Update master playlist
+        // 		const masterPlaylistPath = `${videoId}/master.m3u8`;
+        // 		const stream = await minioClient.getObject(videoBucket, masterPlaylistPath);
+        // 		const masterContent = await streamToString(stream);
+        //
+        // 		if (!masterContent.trim()) {
+        // 			return NextError.error("Master playlist is empty", HttpError.InternalServerError);
+        // 		}
+        //
+        // 		const lines = masterContent.split(/\r?\n/);
+        //
+        // 		const subtitleLine = `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="${language}",DEFAULT="NO",AUTOSELECT="NO",LANGUAGE="${language_short}",URI="subtitles/subs_${language_short}.m3u8"`;
+        //
+        // 		let found = false;
+        // 		const updatedLines = lines.map(line => {
+        // 			if (line.startsWith('#EXT-X-MEDIA:TYPE=SUBTITLES') && line.includes(`LANGUAGE="${language_short}"`)) {
+        // 				found = true;
+        // 				return subtitleLine;
+        // 			}
+        // 			return line;
+        // 		});
+        //
+        // 		if (!found) {
+        // 			const index = updatedLines.findIndex(l => l.startsWith("#EXT-X-STREAM-INF"));
+        // 			updatedLines.splice(index !== -1 ? index : updatedLines.length, 0, subtitleLine);
+        // 		}
+        //
+        // 		const newContent = updatedLines.join("\n");
+        //
+        // 		await uploadFileToMinio(masterPlaylistPath, videoBucket, Buffer.from(newContent, "utf-8"), "application/vnd.apple.mpegurl");
 
-        return NextResponse.json({success: true, subtitle_id: subtitleId, filename}, {status: 200});
+        return NextResponse.json({ success: true, subtitle_id: subtitleId, filename }, { status: 200 });
 
     } catch (err: any) {
         console.error("Upload/update subtitle error:", err);

@@ -65,12 +65,10 @@ let ex = [...next,
                 },
 
                 /* Konstanten → UPPER_CASE */
-                // {
-                // selector: "variable",
-                // modifiers: ["const"],
-                // format: ["UPPER_CASE"]
-                // }
-            ],
+                {
+                    selector: "variable", modifiers: ["const"], format: ["camelCase"]
+                    // format: ["UPPER_CASE"]
+                }],
 
             /* =========================
                DATEINAMEN

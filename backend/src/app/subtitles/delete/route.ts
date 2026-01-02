@@ -1,9 +1,9 @@
-import {NextRequest, NextResponse} from "next/server";
-import {listFilesInFolder, minioClient, streamToString, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser} from "@/lib/auth/getUser";
-import {connectionPool} from "@/lib/services/postgres";
-import {QueryResult} from "pg";
+import { NextRequest, NextResponse } from "next/server";
+import { listFilesInFolder, minioClient, streamToString, uploadFileToMinio, videoBucket } from "@/lib/services/minio";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
+import { connectionPool } from "@/lib/services/postgres";
+import { QueryResult } from "pg";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -22,7 +22,7 @@ export async function DELETE(req: NextRequest) {
         const user = getUser(req);
 
         if (!user) {
-            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
         const formData = await req.formData();
@@ -75,7 +75,9 @@ export async function DELETE(req: NextRequest) {
         }
 
         // Delete all matching files (VTT and M3U8)
-        await Promise.all(filesToDelete.map(file => minioClient.removeObject(videoBucket, file)));
+        await Promise.all(filesToDelete.map(file => {
+            return minioClient.removeObject(videoBucket, file);
+        }));
 
         // -------------------------------
         // Update master playlist
@@ -101,7 +103,7 @@ export async function DELETE(req: NextRequest) {
             console.error("Failed to update master playlist:", playlistErr);
         }
 
-        return NextResponse.json({success: true}, {status: 200});
+        return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (err) {
         console.error("Delete subtitle error:", err);

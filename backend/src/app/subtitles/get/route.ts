@@ -1,6 +1,6 @@
-import {NextResponse} from "next/server";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {countFilesInFolder, listFilesInFolder, videoBucket} from "@/lib/services/minio";
+import { NextResponse } from "next/server";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { countFilesInFolder, listFilesInFolder, videoBucket } from "@/lib/services/minio";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     let client;
 
     try {
-        const {searchParams} = new URL(req.url);
+        const { searchParams } = new URL(req.url);
 
         const video_id = searchParams.get("id") as string;
 
@@ -41,11 +41,11 @@ export async function GET(req: Request) {
             if (!languages.includes(language)) {
                 languages.push(language);
             }
-        })
+        });
 
         return NextResponse.json({
             count: count / 2, languages: languages, files
-        }, {status: 200});
+        }, { status: 200 });
     } catch (err: any) {
         console.error("Minio error: ", err);
         return NextError.error(err || "Server error.", HttpError.InternalServerError);

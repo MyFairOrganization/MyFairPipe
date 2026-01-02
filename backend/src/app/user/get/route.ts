@@ -1,6 +1,6 @@
-import {NextRequest, NextResponse} from "next/server";
-import {connectionPool} from "@/lib/services/postgres";
-import {getUser} from "@/lib/auth/getUser";
+import { NextRequest, NextResponse } from "next/server";
+import { connectionPool } from "@/lib/services/postgres";
+import { getUser } from "@/lib/auth/getUser";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -14,7 +14,7 @@ export async function OPTIONS() {
 }
 
 export async function GET(req: NextRequest) {
-    const {searchParams} = new URL(req.url);
+    const { searchParams } = new URL(req.url);
     const idParam = searchParams.get("id");
 
     let userId: number | null = null;
@@ -22,13 +22,13 @@ export async function GET(req: NextRequest) {
     if (idParam) {
         const parsedId = Number(idParam);
         if (isNaN(parsedId)) {
-            return NextResponse.json({error: "Invalid user id"}, {status: 400});
+            return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
         }
         userId = parsedId;
     } else {
         const sessionUser = getUser(req);
         if (!sessionUser) {
-            return NextResponse.json({error: "Unauthorized"}, {status: 401});
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
         userId = sessionUser.user_id;
     }
@@ -47,12 +47,12 @@ export async function GET(req: NextRequest) {
         `, [userId]);
 
         if (result.rowCount === 0) {
-            return NextResponse.json({error: "User not found"}, {status: 404});
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        return NextResponse.json({user: result.rows[0]}, {status: 200});
+        return NextResponse.json({ user: result.rows[0] }, { status: 200 });
     } catch (err) {
         console.error(err);
-        return NextResponse.json({error: "Server error"}, {status: 500});
+        return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
 }

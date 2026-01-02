@@ -1,9 +1,9 @@
-import {NextRequest, NextResponse} from "next/server";
-import {countFilesInFolder, objectExists, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
-import {connectionPool} from "@/lib/services/postgres";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser} from "@/lib/auth/getUser";
-import {QueryResult} from "pg";
+import { NextRequest, NextResponse } from "next/server";
+import { countFilesInFolder, objectExists, uploadFileToMinio, videoBucket } from "@/lib/services/minio";
+import { connectionPool } from "@/lib/services/postgres";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
+import { QueryResult } from "pg";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
         const user = getUser(req);
 
         if (!user) {
-            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
         const formData = await req.formData();
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
             `, [id, videoId]);
 
             await client.query("COMMIT");
-            return NextResponse.json({id: id, success: true}, {status: 200});
+            return NextResponse.json({ id: id, success: true }, { status: 200 });
 
         } catch (err) {
             await client.query("ROLLBACK");

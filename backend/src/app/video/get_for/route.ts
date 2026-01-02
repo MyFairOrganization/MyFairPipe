@@ -1,6 +1,6 @@
-import {NextResponse} from "next/server";
-import {connectionPool} from "@/lib/services/postgres";
-import NextError, {HttpError} from "@/lib/utils/error";
+import { NextResponse } from "next/server";
+import { connectionPool } from "@/lib/services/postgres";
+import NextError, { HttpError } from "@/lib/utils/error";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     let client;
 
     try {
-        const {searchParams} = new URL(req.url);
+        const { searchParams } = new URL(req.url);
 
         const userId = searchParams.get("id");
 
@@ -53,7 +53,7 @@ export async function GET(req: Request) {
             return NextError.error("Video not found", 404);
         }
 
-        return NextResponse.json(result.rows, {status: 200});
+        return NextResponse.json(result.rows, { status: 200 });
 
     } catch (err: any) {
         console.error("Database error: ", err);

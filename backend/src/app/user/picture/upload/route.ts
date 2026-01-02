@@ -1,8 +1,8 @@
-import {NextRequest, NextResponse} from "next/server";
-import {createBucketIfNeeded, photoBucket, uploadFileToMinio} from "@/lib/services/minio";
-import {connectionPool} from "@/lib/services/postgres";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser} from "@/lib/auth/getUser";
+import { NextRequest, NextResponse } from "next/server";
+import { createBucketIfNeeded, photoBucket, uploadFileToMinio } from "@/lib/services/minio";
+import { connectionPool } from "@/lib/services/postgres";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -18,7 +18,7 @@ export async function OPTIONS() {
 export async function POST(req: NextRequest) {
     const user = getUser(req);
     if (!user) {
-        return NextResponse.json({error: "Not authenticated"}, {status: 401});
+        return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const formData = await req.formData();
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     await client.query("BEGIN");
 
     const amount = await client.query(`SELECT *
-                                       FROM photo;`)
+                                       FROM photo;`);
 
     const photoId = amount.rowCount! + 1;
     const extension = file.name.split(".").pop() || "png";
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
         await client.query("COMMIT");
 
-        return NextResponse.json({success: true}, {status: 200});
+        return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (err) {
         await client.query("ROLLBACK");

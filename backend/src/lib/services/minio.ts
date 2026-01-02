@@ -1,4 +1,4 @@
-import * as Minio from 'minio'
+import * as Minio from 'minio';
 
 export const uploadBucket = "upload";
 export const videoBucket = "video";
@@ -15,7 +15,7 @@ export const minioClient = new Minio.Client({
     useSSL: false,
     accessKey: process.env.MINIO_ACCESS_KEY || "minioadmin",
     secretKey: process.env.MINIO_SECRET_KEY || "minioadmin",
-})
+});
 
 
 export async function createBucketIfNeeded(bucket: string) {
@@ -24,7 +24,7 @@ export async function createBucketIfNeeded(bucket: string) {
         await minioClient.makeBucket(bucket, "us-east-1");
         await minioClient.setBucketPolicy(bucket, JSON.stringify({
             Version: "2012-10-17", Statement: [{
-                Effect: "Allow", Principal: {AWS: "*"}, Action: ["s3:GetObject"], Resource: [`arn:aws:s3:::${bucket}/*`]
+                Effect: "Allow", Principal: { AWS: "*" }, Action: ["s3:GetObject"], Resource: [`arn:aws:s3:::${bucket}/*`]
             }]
         }));
     }
@@ -68,7 +68,9 @@ export async function deleteFolder(bucket: string, folder: string) {
         if (obj.name) objectsToDelete.push(obj.name);
     }
 
-    await Promise.all(objectsToDelete.map(name => minioClient.removeObject(bucket, name)));
+    await Promise.all(objectsToDelete.map(name => {
+        return minioClient.removeObject(bucket, name);
+    }));
 }
 
 // @ts-ignore
@@ -76,8 +78,12 @@ export async function streamToString(stream): Promise<string> {
     return new Promise((resolve, reject) => {
         let data = "";
         // @ts-ignore
-        stream.on("data", chunk => (data += chunk.toString()));
-        stream.on("end", () => resolve(data));
+        stream.on("data", chunk => {
+            return (data += chunk.toString());
+        });
+        stream.on("end", () => {
+            return resolve(data);
+        });
         stream.on("error", reject);
     });
 }

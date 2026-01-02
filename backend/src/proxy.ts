@@ -1,4 +1,4 @@
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -27,13 +27,13 @@ export default async function proxy(req: NextRequest) {
         const cookie = req.cookies.get("session")?.value;
 
         if (!cookie) {
-            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
         try {
             jwt.verify(cookie, JWT_SECRET);
         } catch {
-            return NextResponse.json({error: "Invalid token"}, {status: 401});
+            return NextResponse.json({ error: "Invalid token" }, { status: 401 });
         }
     }
 

@@ -1,7 +1,7 @@
-import {connectionPool} from "@/lib/services/postgres";
-import {NextRequest, NextResponse} from "next/server";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser} from "@/lib/auth/getUser";
+import { connectionPool } from "@/lib/services/postgres";
+import { NextRequest, NextResponse } from "next/server";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
 
 async function like(videoID: number, userID: number) {
     const client = await connectionPool.connect();
@@ -53,7 +53,7 @@ async function like(videoID: number, userID: number) {
             // Insert gets executed
             await client.query(deleteLV, [userID, videoID]);
 
-            await client.query("COMMIT")
+            await client.query("COMMIT");
 
             return false;
         }
@@ -104,7 +104,7 @@ async function like(videoID: number, userID: number) {
 
         return true;
     } catch (err: any) {
-        return NextError.error(err, HttpError.BadRequest)
+        return NextError.error(err, HttpError.BadRequest);
     } finally {
         client.release();
     }
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     try {
         const user = getUser(req);
 
-        const {videoID} = await req.json();
+        const { videoID } = await req.json();
 
         if (videoID === null) {
             return NextError.error("No Video ID", HttpError.BadRequest);
@@ -139,9 +139,9 @@ export async function POST(req: NextRequest) {
 
         const result = await like(Number(videoID), Number(userID));
         if (result instanceof NextResponse) {
-            return result
+            return result;
         }
-        return NextResponse.json({result}, {status: 200});
+        return NextResponse.json({ result }, { status: 200 });
     } catch (err) {
         console.error(err);
         return NextError.error(err + "", HttpError.BadRequest);
