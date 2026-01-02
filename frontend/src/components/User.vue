@@ -17,7 +17,7 @@ const router = useRouter()
 const route = useRoute()
 
 watch(
-    () => route.fullPath,
+    () => {return route.fullPath},
     () => {
         loadProfile()
         loadProfilePicture()

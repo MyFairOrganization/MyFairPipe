@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const PROPS = defineProps({
+const props = defineProps({
     msg: String,
     nothing: Boolean,
     loading: Boolean,
@@ -7,12 +7,12 @@ const PROPS = defineProps({
 </script>
 
 <template>
-    <div v-if="PROPS.loading" class="loading-screen">
+    <div v-if="props.loading" class="loading-screen">
         <div class="loader"/>
-        <h2>{{ PROPS.msg }}</h2>
+        <h2>{{ props.msg }}</h2>
     </div>
 
-    <div v-else-if="PROPS.nothing" class="loading-screen">
+    <div v-else-if="props.nothing" class="loading-screen">
         <h2>Nothing yet</h2>
     </div>
 </template>

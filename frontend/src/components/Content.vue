@@ -5,7 +5,7 @@ import {h} from 'vue';
  * CDN PATH
  * @type {string}
  */
-export const CDN_PATH = 'http://cdn.myfairpipe.com/video/%PATH';
+export const cdnPath = 'http://cdn.myfairpipe.com/video/%PATH';
 
 /**
  * Function to get all Videos uploaded from User: userID
@@ -14,14 +14,14 @@ export const CDN_PATH = 'http://cdn.myfairpipe.com/video/%PATH';
  * @constructor
  */
 async function GetVideosForUser(userID) {
-    const PARAMS = new URLSearchParams();
-    PARAMS.append('id', userID);
+    const params = new URLSearchParams();
+    params.append('id', userID);
 
     try {
-        const RESPONSE = await fetch(`http://api.myfairpipe.com/video/get_for?${PARAMS}`);
+        const res = await fetch(`http://api.myfairpipe.com/video/get_for?${params}`);
 
-        if (RESPONSE.ok) {
-            return await RESPONSE.json();
+        if (res.ok) {
+            return await res.json();
         }
     } catch (e) {
         console.error(e);
@@ -36,16 +36,16 @@ async function GetVideosForUser(userID) {
  * @constructor
  */
 async function GetVideos(limit, offset) {
-    const PARAMS = new URLSearchParams();
-    PARAMS.append('limit', limit);
-    PARAMS.append('offset', offset);
+    const params = new URLSearchParams();
+    params.append('limit', limit);
+    params.append('offset', offset);
 
     try {
-        const RESPONSE = await fetch(`http://api.myfairpipe.com/sorting/get?${PARAMS}`);
+        const res = await fetch(`http://api.myfairpipe.com/sorting/get?${params}`);
 
-        if (RESPONSE.ok) {
-            const DATA = await RESPONSE.json();
-            return DATA.cachedVids;
+        if (res.ok) {
+            const data = await res.json();
+            return data.cachedVids;
         }
     } catch (e) {
         console.error(e);
@@ -61,38 +61,38 @@ async function GetVideos(limit, offset) {
  * @constructor
  */
 export async function GetIMGs(limit = 0, offset = 0, userID = undefined) {
-    var ids
+    let ids
     if (userID === undefined) {
         ids = await GetVideos(limit, offset);
     } else {
         ids = await GetVideosForUser(userID);
     }
 
-    const RESULT = [];
+    const result = [];
 
     if (ids !== undefined) {
         for (let id of ids) {
             if (id instanceof Object) {
                 id = id.video_id;
             }
-            const PARAMS = new URLSearchParams();
-            PARAMS.append('id', id);
+            const params = new URLSearchParams();
+            params.append('id', id);
 
-            const DETAILS = await fetch(`http://api.myfairpipe.com/video/get?${PARAMS}`);
-            const DATA = await DETAILS.json();
+            const datails = await fetch(`http://api.myfairpipe.com/video/get?${params}`);
+            const data = await datails.json();
 
-            const THUMBNAIL_PATH = DATA.thumbnail_path;
-            const TITLE = DATA.title;
+            const thumbnailPath = data.thumbnail_path;
+            const title = data.title;
 
-            RESULT.push({
+            result.push({
                 id,
-                title: TITLE,
-                src: CDN_PATH.replace('%PATH', String(THUMBNAIL_PATH)),
+                title: title,
+                src: cdnPath.replace('%PATH', String(thumbnailPath)),
             })
         }
     }
 
-    return RESULT;
+    return result;
 }
 
 /**
@@ -116,11 +116,11 @@ export function CreateVID(path, subtitles, subtitleLanguage, subtitleCode) {
             },
             [
                 h('source', {
-                    src: CDN_PATH.replace('%PATH', path),
+                    src: cdnPath.replace('%PATH', path),
                     type: 'video/mp4',
                 }),
                 h('track', {
-                    src: CDN_PATH.replace('%PATH', subtitles),
+                    src: cdnPath.replace('%PATH', subtitles),
                     type: 'text/vtt',
                     kind: 'subtitles',
                     label: subtitleLanguage,

@@ -1,69 +1,70 @@
 <script lang="ts" setup>
-import {useRoute, useRouter} from 'vue-router'
+import {useRoute} from 'vue-router'
 import {CreateVID, GetIMGs} from '@/components/Content.vue'
 import {onMounted, ref} from 'vue'
 import Thumbnail from '@/components/Thumbnail.vue'
 import Loader from '@/components/Loader.vue'
 
-const ROUTER = useRouter()
-const ROUTE = useRoute()
-const PATH = ref('')
-const PROPS = {id: ROUTE.query.id as string}
-const TITLE = ref('')
-const DESCRIPTION = ref('')
-const SUBTITLES = ref('')
-const SUBTITLE_LANGUAGE = ref('')
-const LIKED = ref(false)
-const LIKES = ref('0')
-const DISLIKED = ref(false)
-const DISLIKES = ref('0')
-const THUMBNAILS = ref([])
-const LOADING = ref(true)
+const route = useRoute()
+const path = ref('')
+const props = {id: route.query.id as string}
+const title = ref('')
+const description = ref('')
+const subtitles = ref('')
+const subtitleLanguage = ref('')
+const liked = ref(false)
+const likes = ref('0')
+const disliked = ref(false)
+const dislikes = ref('0')
+const thumbnails = ref([])
+const loading = ref(true)
 
 onMounted(async () => {
     await getLiked()
     await getDetails()
-    THUMBNAILS.value = await GetIMGs(30, 0)
-    LOADING.value = false
+    thumbnails.value = await GetIMGs(30, 0)
+    loading.value = false
 })
 
 async function getDetails() {
-    const PARAMS = new URLSearchParams()
-    PARAMS.append('id', PROPS.id)
+    const params = new URLSearchParams()
+    params.append('id', props.id)
 
-    const VIDEOREQ = await fetch(`http://api.myfairpipe.com/video/get?${PARAMS}`)
-    const SUBTITLEREQ = await fetch(`http://api.myfairpipe.com/subtitles/get?${PARAMS}`)
-    const VIDEODATA = await VIDEOREQ.json()
-    const SUBTITLEDATA = await SUBTITLEREQ.json()
+    const videoReq = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
+    const subtitleReq = await fetch(`http://api.myfairpipe.com/subtitles/get?${params}`)
+    const videoData = await videoReq.json()
+    const subtitleData = await subtitleReq.json()
 
-    var subtitlePath = SUBTITLEDATA.files
-    subtitlePath = subtitlePath.filter((subtitles: string) => subtitles.endsWith('.vtt'))
+    let subtitlePath = subtitleData.files
+    subtitlePath = subtitlePath.filter((subtitles: string) => {
+        return subtitles.endsWith('.vtt')
+    })
 
-    TITLE.value = VIDEODATA.title
-    DESCRIPTION.value = VIDEODATA.description
-    PATH.value = VIDEODATA.minio_path
-    SUBTITLES.value = subtitlePath
-    SUBTITLE_LANGUAGE.value = SUBTITLEDATA.languages[0]
+    title.value = videoData.title
+    description.value = videoData.description
+    path.value = videoData.minio_path
+    subtitles.value = subtitlePath
+    subtitleLanguage.value = subtitleData.languages[0]
 }
 
 async function getLiked() {
-    const BODY = JSON.stringify({
-        videoID: PROPS.id,
+    const body = JSON.stringify({
+        videoID: props.id,
     })
 
     try {
-        const RES = await fetch(`http://api.myfairpipe.com/like_dislike/get`, {
+        const res = await fetch(`http://api.myfairpipe.com/like_dislike/get`, {
             method: 'POST',
-            body: BODY,
+            body: body,
             credentials: 'include',
         })
 
-        if (RES.ok) {
-            const DATA = await RES.json()
-            LIKED.value = DATA.result?.liked
-            LIKES.value = DATA.result.likes
-            DISLIKED.value = DATA.result?.disliked
-            DISLIKES.value = DATA.result.dislikes
+        if (res.ok) {
+            const data = await res.json()
+            liked.value = data.result?.liked
+            likes.value = data.result.likes
+            disliked.value = data.result?.disliked
+            dislikes.value = data.result.dislikes
         }
     } catch (e) {
         console.error(e)
@@ -71,21 +72,21 @@ async function getLiked() {
 }
 
 async function like() {
-    const BODY = JSON.stringify({
-        videoID: PROPS.id,
+    const body = JSON.stringify({
+        videoID: props.id,
     })
 
     try {
-        const RES = await fetch(`http://api.myfairpipe.com/like_dislike/like`, {
+        const res = await fetch(`http://api.myfairpipe.com/like_dislike/like`, {
             method: 'POST',
-            body: BODY,
+            body: body,
             credentials: 'include',
         })
 
-        if (RES.ok) {
-            const DATA = await RES.json()
-            LIKED.value = Boolean(DATA.result)
-            DISLIKED.value = false
+        if (res.ok) {
+            const data = await res.json()
+            liked.value = Boolean(data.result)
+            disliked.value = false
         }
     } catch (e) {
         console.error(e)
@@ -95,21 +96,21 @@ async function like() {
 }
 
 async function dislike() {
-    const BODY = JSON.stringify({
-        videoID: PROPS.id,
+    const body = JSON.stringify({
+        videoID: props.id,
     })
 
     try {
-        const RES = await fetch(`http://api.myfairpipe.com/like_dislike/dislike`, {
+        const res = await fetch(`http://api.myfairpipe.com/like_dislike/dislike`, {
             method: 'POST',
-            body: BODY,
+            body: body,
             credentials: 'include',
         })
 
-        if (RES.ok) {
-            const DATA = await RES.json()
-            DISLIKED.value = Boolean(DATA.result)
-            LIKED.value = false
+        if (res.ok) {
+            const data = await res.json()
+            disliked.value = Boolean(data.result)
+            liked.value = false
         }
     } catch (e) {
         console.error(e)
@@ -120,44 +121,44 @@ async function dislike() {
 </script>
 
 <template>
-    <Loader :loading="LOADING" :msg-else="THUMBNAILS.length === 0" msg="Loading Video"/>
+    <Loader :loading="loading" :msg-else="thumbnails.length === 0" msg="Loading Video"/>
 
-    <div v-if="!LOADING" class="layout">
+    <div v-if="!loading" class="layout">
         <div id="leftSide">
             <div class="player">
-                <component :is="CreateVID(PATH, SUBTITLES, SUBTITLE_LANGUAGE, SUBTITLE_LANGUAGE)"/>
+                <component :is="CreateVID(path, subtitles, subtitleLanguage, subtitleLanguage)"/>
                 <div>
                     <div id="underVideo">
-                        <h2>{{ TITLE }}</h2>
+                        <h2>{{ title }}</h2>
                         <div class="interactivePanel">
                             <div>
                                 <input
                                     id="like"
-                                    :src="LIKED ? '/liked.svg' : '/like.svg'"
+                                    :src="liked ? '/liked.svg' : '/like.svg'"
                                     class="interactive"
                                     type="image"
                                     v-on:click="like()"
                                 />
-                                <p class="information">likes: {{ LIKES }}</p>
+                                <p class="information">likes: {{ likes }}</p>
                             </div>
                             <div>
                                 <input
                                     id="dislike"
-                                    :src="DISLIKED ? '/disliked.svg' : '/dislike.svg'"
+                                    :src="disliked ? '/disliked.svg' : '/dislike.svg'"
                                     class="interactive"
                                     type="image"
                                     v-on:click="dislike()"
                                 />
-                                <p class="information">dislikes: {{ DISLIKES }}</p>
+                                <p class="information">dislikes: {{ dislikes }}</p>
                             </div>
                         </div>
                     </div>
-                    <p>{{ DESCRIPTION }}</p>
+                    <p>{{ description }}</p>
                 </div>
             </div>
         </div>
 
-        <Thumbnail v-if="!LOADING" :thumbnails="THUMBNAILS"/>
+        <Thumbnail v-if="!loading" :thumbnails="thumbnails"/>
     </div>
 </template>
 

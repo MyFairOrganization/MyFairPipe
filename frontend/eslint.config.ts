@@ -1,22 +1,126 @@
-import {globalIgnores} from 'eslint/config'
-import {defineConfigWithVueTs, vueTsConfigs} from '@vue/eslint-config-typescript'
-import pluginVue from 'eslint-plugin-vue'
-import pluginVitest from '@vitest/eslint-plugin'
-import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+import {globalIgnores} from 'eslint/config';
+import {defineConfigWithVueTs, vueTsConfigs} from '@vue/eslint-config-typescript';
+import pluginVue from 'eslint-plugin-vue';
+import pluginVitest from '@vitest/eslint-plugin';
+import skipFormatting from '@vue/eslint-config-prettier/skip-formatting';
 
-// To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
-// import { configureVueProject } from '@vue/eslint-config-typescript'
-// configureVueProject({ scriptLangs: ['ts', 'tsx'] })
-// More info at https://github.com/vuejs/eslint-config-typescript/#advanced-setup
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import unicorn from 'eslint-plugin-unicorn';
 
 export default defineConfigWithVueTs({
         name: 'app/files-to-lint', files: ['**/*.{ts,mts,tsx,vue}'],
+
+        languageOptions: {
+            parser: tsParser, parserOptions: {
+                sourceType: 'module'
+            }
+        },
+
+        plugins: {
+            '@typescript-eslint': tseslint, unicorn
+        },
+
+        rules: {
+            /* =========================
+               FORMATIERUNG
+               ========================= */
+
+            indent: ['error', 4],
+            semi: ['error', 'always'],
+            'brace-style': ['error', '1tbs'],
+            'object-curly-spacing': ['error', 'always'],
+
+            /* Arrow-Funktionen immer mit Block */
+            'arrow-body-style': ['error', 'always'],
+
+            /* =========================
+               BENENNUNG
+               ========================= */
+
+            '@typescript-eslint/naming-convention': ['error',
+
+                /* Klassen → PascalCase */
+                {
+                    selector: 'class', format: ['PascalCase']
+                },
+
+                /* Interfaces → IName */
+                {
+                    selector: 'interface', format: ['PascalCase'], custom: {
+                        regex: '^I[A-Z]', match: true
+                    }
+                },
+
+                /* Statische Methoden → PascalCase */
+                {
+                    selector: 'method', modifiers: ['static'], format: ['PascalCase']
+                },
+
+                /* Objekt-Methoden → camelCase */
+                {
+                    selector: 'method', format: ['camelCase']
+                },
+
+                /* Variablen → camelCase */
+                {
+                    selector: 'variable', format: ['camelCase']
+                },
+
+                /* Konstanten → camelCase (wie Backend) */
+                {
+                    selector: 'variable', modifiers: ['const'], format: ['camelCase']
+                }],
+
+            /* =========================
+               DATEINAMEN
+               ========================= */
+
+            'unicorn/filename-case': ['error', {
+                case: 'pascalCase'
+            }],
+
+
+            /* =========================
+               LOOPS
+               ========================= */
+
+            'no-restricted-syntax': ['error', {
+                selector: "CallExpression[callee.property.name='forEach']",
+                message: 'Use for..of or classic for-loop instead.'
+            }],
+
+            /* =========================
+               SONSTIGES
+               ========================= */
+
+            'no-console': 'off',
+            '@typescript-eslint/no-unused-vars': ['error']
+        }
     },
+
+    /* =========================
+       IGNORES
+       ========================= */
 
     globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
 
+    /* =========================
+       VUE + TS BASIS
+       ========================= */
+
     pluginVue.configs['flat/essential'], vueTsConfigs.recommended,
 
+    /* =========================
+       TESTS (Vitest)
+       ========================= */
+
     {
-        ...pluginVitest.configs.recommended, files: ['src/**/__tests__/*'],
-    }, skipFormatting,)
+        ...pluginVitest.configs.recommended, files: ['src/**/__tests__/*']
+    },
+
+    /* =========================
+       PRETTIER DEAKTIVIERUNG
+       ========================= */
+
+    skipFormatting);

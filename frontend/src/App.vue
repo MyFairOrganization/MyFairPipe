@@ -8,7 +8,7 @@ const anonym = ref(false)
 const username = ref('')
 
 watch(
-    () => route.fullPath,
+    () => {return route.fullPath},
     async () => {
         loggedIn.value = await checkLoggedIn()
 

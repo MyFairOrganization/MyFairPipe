@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
-import {language} from '@vue/eslint-config-prettier'
 
 const username = ref('')
 const title = ref('')
@@ -11,7 +10,7 @@ const videoFile = ref<File | null>(null)
 const thumbnailFile = ref<File | null>(null)
 const subtitleFile = ref<File | null>(null)
 const language = ref<string | null>(null)
-const language_short = ref<string | null>(null)
+const languageShort = ref<string | null>(null)
 const videoURL = ref<string | null>(null)
 const thumbnailURL = ref<string | null>(null)
 const uploading = ref(false)
@@ -19,15 +18,7 @@ const uploadProgress = ref(0)
 const uploadError = ref<string | null>(null)
 const router = useRouter()
 
-const MAX_FILE_SIZE = 4 * 1024 * 1024 * 1024
-
-function upload() {
-    router.push('/upload')
-}
-
-function edit() {
-    router.push('/edituser')
-}
+const maxFileSize = 4 * 1024 * 1024 * 1024
 
 onMounted(async () => {
     const req = await fetch(`http://api.myfairpipe.com/user/get`, {
@@ -81,7 +72,7 @@ async function uploadVideo() {
         formData.append('subtitles', 'false');
     }
 
-    var finalData
+    let finalData
 
     const promise = await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest()
@@ -110,8 +101,8 @@ async function uploadVideo() {
             finalData = data;
         })
 
-        xhr.addEventListener('error', () => reject(new Error('Upload failed')))
-        xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')))
+        xhr.addEventListener('error', () => {return reject(new Error('Upload failed'))})
+        xhr.addEventListener('abort', () => {return reject(new Error('Upload cancelled'))})
 
         xhr.open('POST', 'http://api.myfairpipe.com/video/upload')
         xhr.withCredentials = true
@@ -129,7 +120,7 @@ async function uploadThumbnail(id: number) {
     formData.append('file', thumbnailFile.value)
     formData.append('id', String(id))
 
-    var finalData
+    let finalData
 
     const promise = new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest()
@@ -151,8 +142,8 @@ async function uploadThumbnail(id: number) {
             finalData = data
         })
 
-        xhr.addEventListener('error', () => reject(new Error('Thumbnail upload failed')))
-        xhr.addEventListener('abort', () => reject(new Error('Thumbnail upload cancelled')))
+        xhr.addEventListener('error', () => {return reject(new Error('Thumbnail upload failed'))})
+        xhr.addEventListener('abort', () => {return reject(new Error('Thumbnail upload cancelled'))})
 
         xhr.open('POST', 'http://api.myfairpipe.com/thumbnail/upload')
         xhr.withCredentials = true
@@ -164,12 +155,12 @@ async function uploadThumbnail(id: number) {
 }
 
 async function uploadSubtitle(id: number) {
-    if (!subtitleFile.value || !language.value || !language_short.value) return
+    if (!subtitleFile.value || !language.value || !languageShort.value) return
     const formData = new FormData()
     formData.append('file', subtitleFile.value)
     formData.append('id', String(id))
     formData.append('language', language.value)
-    formData.append('language_short', language_short.value)
+    formData.append('language_short', languageShort.value)
 
     const res = await fetch('http://api.myfairpipe.com/subtitles/upload', {
         method: 'POST',
@@ -177,7 +168,6 @@ async function uploadSubtitle(id: number) {
         credentials: 'include',
     })
     if (!res.ok) throw new Error('Subtitle upload failed')
-    const data = await res.json()
 }
 
 // --- Main Form Submission ---
@@ -198,14 +188,14 @@ async function submitForm() {
         return
     }
 
-    if (videoFile.value.size > MAX_FILE_SIZE) {
+    if (videoFile.value.size > maxFileSize) {
         const sizeMB = Math.round(videoFile.value.size / (1024 * 1024))
-        const maxMB = Math.round(MAX_FILE_SIZE / (1024 * 1024))
+        const maxMB = Math.round(maxFileSize / (1024 * 1024))
         uploadError.value = `File too large (${sizeMB}MB). Maximum size is ${maxMB}MB`
         return
     }
 
-    if (subtitleFile.value && (!language.value || !language_short.value)) {
+    if (subtitleFile.value && (!language.value || !languageShort.value)) {
         uploadError.value = 'Please set Subtitle language and/or ISO 639 code'
     }
 
@@ -298,7 +288,7 @@ async function submitForm() {
             <input id="language" v-model="language" placeholder="Language"/><br/>
             <input
                 id="language_short"
-                v-model="language_short"
+                v-model="languageShort"
                 placeholder="ISO 639 language code"
             /><br/><br/>
 
