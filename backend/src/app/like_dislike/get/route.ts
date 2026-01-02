@@ -1,7 +1,7 @@
-import { connectionPool } from "@/lib/services/postgres";
-import { NextRequest, NextResponse } from "next/server";
-import NextError, { HttpError } from "@/lib/utils/error";
-import { getUser } from "@/lib/auth/getUser";
+import {connectionPool} from "@/lib/services/postgres";
+import {NextRequest, NextResponse} from "next/server";
+import NextError, {HttpError} from "@/lib/utils/error";
+import {getUser} from "@/lib/auth/getUser";
 
 async function getstatus(videoID: number, userID = 1) {
     const client = await connectionPool.connect();
@@ -29,9 +29,9 @@ async function getstatus(videoID: number, userID = 1) {
         if (userID) {
             result = await client.query(isLikeQuery, [userID, videoID]);
         }
-        var liked = false;
+        var liked: boolean;
         var likes = 0;
-        var disliked = false;
+        var disliked: boolean;
         var dislikes = 0;
 
         if (result?.rows[0] == undefined) {
@@ -43,13 +43,13 @@ async function getstatus(videoID: number, userID = 1) {
                 dislikes = amount.rows[0].dislikes;
             }
         } else {
-            const isLike = result.rows[0].is_like;
+            const isLike = result!.rows[0].is_like;
             liked = isLike;
-            likes = result.rows[0].likes;
+            likes = result!.rows[0].likes;
             disliked = !isLike;
-            dislikes = result.rows[0].dislikes;
+            dislikes = result!.rows[0].dislikes;
         }
-        return { liked, disliked, likes, dislikes };
+        return {liked, disliked, likes, dislikes};
     } catch (err) {
         console.error(err);
     } finally {
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     try {
         const user = getUser(req);
 
-        const { videoID } = await req.json();
+        const {videoID} = await req.json();
 
         if (videoID === null) {
             return NextError.Error("No Video ID", HttpError.BadRequest);
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
         const userID = user?.user_id;
 
         const result = await getstatus(Number(videoID), Number(userID));
-        return NextResponse.json({ result }, { status: 200 });
+        return NextResponse.json({result}, {status: 200});
     } catch (err) {
         console.error(err);
         return NextError.Error(err + "", HttpError.BadRequest);
