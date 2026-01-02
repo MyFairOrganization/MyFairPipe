@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import {ref, onMounted, watch} from 'vue'
+import {ref, onMounted} from 'vue'
 import {useRouter} from 'vue-router'
-import Thumbnail from "./Thumbnail.vue"
-import { getIMGs } from "./Content.vue"
 
 /**
  * Vue router.
@@ -31,9 +29,6 @@ onMounted(async () => {
 
   loadProfile();
   loadProfilePicture();
-
-  THUMBNAILS.value = await GetIMGs(10, 0);
-  LOADING.value = false;
 })
 
 /**
@@ -143,12 +138,6 @@ async function uploadPfp() {
 function back() {
   ROUTER.push('/user');
 }
-
-/**
- * Constants for Videos and loading.
- */
-const THUMBNAILS = ref([]);
-const LOADING = ref(true);
 </script>
 
 <template>
