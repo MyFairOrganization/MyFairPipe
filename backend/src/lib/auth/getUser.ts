@@ -1,5 +1,5 @@
-import {NextRequest} from "next/server";
-import {verifyToken} from "./verifyToken";
+import { NextRequest } from "next/server";
+import { verifyToken } from "./verifyToken";
 
 export function getUser(req: NextRequest) {
     const token = req.cookies.get("session")?.value;

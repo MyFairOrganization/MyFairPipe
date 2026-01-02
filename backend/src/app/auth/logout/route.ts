@@ -1,4 +1,4 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -12,15 +12,11 @@ export async function OPTIONS() {
 }
 
 export async function POST() {
-    const res = NextResponse.json({message: "Logged out"});
+    const res = NextResponse.json({ message: "Logged out" });
 
     res.cookies.set("session", "", {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",      // Cross-Site erlaubt
-        domain: ".myfairpipe.com",
-        path: "/",
-        expires: new Date(0), // cookie löschen
+        httpOnly: true, secure: false, sameSite: "lax",      // Cross-Site erlaubt
+        domain: ".myfairpipe.com", path: "/", expires: new Date(0), // cookie löschen
     });
 
     return res;

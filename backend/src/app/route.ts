@@ -1,14 +1,14 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function OPTIONS() {
-	return new NextResponse(null, {
-		status: 204, headers: {
-			"Access-Control-Allow-Origin": "http://myfairpipe.com",
-			"Access-Control-Allow-Credentials": "true",
-			"Access-Control-Allow-Methods": "GET, OPTIONS",
-			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
-		},
-	});
+    return new NextResponse(null, {
+        status: 204, headers: {
+            "Access-Control-Allow-Origin": "http://myfairpipe.com",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        },
+    });
 }
 
 /**
@@ -18,5 +18,5 @@ export async function OPTIONS() {
  * @openapi
  */
 export async function GET() {
-	return NextResponse.json({message: "API is running"});
+    return NextResponse.json({ message: "API is running" });
 }

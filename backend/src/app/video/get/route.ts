@@ -1,38 +1,38 @@
 import { NextResponse } from "next/server";
-import {connectionPool} from "@/lib/services/postgres";
-import NextError, {HttpError} from "@/lib/utils/error";
+import { connectionPool } from "@/lib/services/postgres";
+import NextError, { HttpError } from "@/lib/utils/error";
 
 export async function OPTIONS() {
-	return new NextResponse(null, {
-		status: 204, headers: {
-			"Access-Control-Allow-Origin": "http://myfairpipe.com",
-			"Access-Control-Allow-Credentials": "true",
-			"Access-Control-Allow-Methods": "GET, OPTIONS",
-			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
-		},
-	});
+    return new NextResponse(null, {
+        status: 204, headers: {
+            "Access-Control-Allow-Origin": "http://myfairpipe.com",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        },
+    });
 }
 
 export async function GET(req: Request) {
-	let client;
+    let client;
 
-	try {
-		const {searchParams} = new URL(req.url);
+    try {
+        const { searchParams } = new URL(req.url);
 
-		const videoId = searchParams.get("id");
+        const videoId = searchParams.get("id");
 
-		// -------------------------------
-		// Request validation
-		// -------------------------------
-		if (!videoId) {
-			return NextError.error("Missing id", 400);
-		}
+        // -------------------------------
+        // Request validation
+        // -------------------------------
+        if (!videoId) {
+            return NextError.Error("Missing id", 400);
+        }
 
-		// -------------------------------
-		// Database Transaction
-		// -------------------------------
-		client = await connectionPool.connect();
-		const result = await client.query(`
+        // -------------------------------
+        // Database Transaction
+        // -------------------------------
+        client = await connectionPool.connect();
+        const result = await client.query(`
             SELECT v.video_id,
                    v.title,
                    v.description,
@@ -53,16 +53,16 @@ export async function GET(req: Request) {
                      LEFT JOIN "User" u ON u.user_id = v.uploader
             WHERE v.video_id = $1`, [videoId]);
 
-		if (result.rowCount === 0) {
-			return NextError.error("Video not found", 404);
-		}
+        if (result.rowCount === 0) {
+            return NextError.Error("Video not found", 404);
+        }
 
-		return NextResponse.json(result.rows[0], {status: 200});
+        return NextResponse.json(result.rows[0], { status: 200 });
 
-	} catch (err: any) {
-		console.error("Database error: ", err);
-		return NextError.error(err || "Server error.", HttpError.InternalServerError);
-	} finally {
-		if (client) client.release();
-	}
+    } catch (err: any) {
+        console.error("Database error: ", err);
+        return NextError.Error(err || "Server error.", HttpError.InternalServerError);
+    } finally {
+        if (client) client.release();
+    }
 }

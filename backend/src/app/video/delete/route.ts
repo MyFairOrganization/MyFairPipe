@@ -1,9 +1,9 @@
-import {NextRequest, NextResponse} from "next/server";
-import {connectionPool} from "@/lib/services/postgres";
-import {deleteFolder, objectExists, videoBucket} from "@/lib/services/minio";
-import NextError, {HttpError} from "@/lib/utils/error";
-import {getUser} from "@/lib/auth/getUser";
-import {QueryResult} from "pg";
+import { NextRequest, NextResponse } from "next/server";
+import { connectionPool } from "@/lib/services/postgres";
+import { deleteFolder, objectExists, videoBucket } from "@/lib/services/minio";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
+import { QueryResult } from "pg";
 
 export async function OPTIONS() {
     return new NextResponse(null, {
@@ -24,7 +24,7 @@ export async function DELETE(req: NextRequest) {
         const user = getUser(req);
 
         if (!user) {
-            return NextResponse.json({error: "Not authenticated"}, {status: 401});
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
         }
 
         const formData = await req.formData();
@@ -35,7 +35,7 @@ export async function DELETE(req: NextRequest) {
         // Request validation
         // -------------------------------
         if (!videoId) {
-            return NextError.error("Missing id", HttpError.BadRequest);
+            return NextError.Error("Missing id", HttpError.BadRequest);
         }
 
         // -------------------------------
@@ -50,25 +50,28 @@ export async function DELETE(req: NextRequest) {
             const ownershipResult: QueryResult = await client.query(`
                 SELECT v.video_id, v.path
                 FROM video v
-                WHERE v.video_id = $1 AND v.uploader = $2
+                WHERE v.video_id = $1
+                  AND v.uploader = $2
             `, [videoId, user.id]);
 
             if (ownershipResult.rowCount === 0) {
                 await client.query("ROLLBACK");
-                return NextError.error("Video not found or you don't have permission to delete it", HttpError.NotFound);
+                return NextError.Error("Video not found or you don't have permission to delete it", HttpError.NotFound);
             }
 
-            let {path} = ownershipResult.rows[0];
+            let { path } = ownershipResult.rows[0];
             path = path.split("/").slice(2).join("/");
 
             if (!await objectExists(videoBucket, path)) {
                 await client.query("ROLLBACK");
-                return NextError.error("Video not found or not fully uploaded yet!", HttpError.NotFound);
+                return NextError.Error("Video not found or not fully uploaded yet!", HttpError.NotFound);
             }
 
             await client.query(`
-                DELETE FROM video
-                WHERE video_id = $1 AND uploader = $2
+                DELETE
+                FROM video
+                WHERE video_id = $1
+                  AND uploader = $2
             `, [videoId, user.id]);
 
             await client.query("COMMIT");
@@ -79,12 +82,12 @@ export async function DELETE(req: NextRequest) {
                 console.error("MinIO delete failed:", err);
             }
 
-            return NextResponse.json({success: true}, {status: 200});
+            return NextResponse.json({ success: true }, { status: 200 });
 
         } catch (dbErr) {
             await client.query("ROLLBACK");
             console.error("Database transaction error:", dbErr);
-            return NextError.error("Database write failed", HttpError.InternalServerError);
+            return NextError.Error("Database write failed", HttpError.InternalServerError);
         } finally {
             client.release();
         }
@@ -92,6 +95,6 @@ export async function DELETE(req: NextRequest) {
     } catch (err) {
         console.error("Request handling error:", err);
         const message = err instanceof Error ? err.message : "Server error";
-        return NextError.error(message, HttpError.InternalServerError);
+        return NextError.Error(message, HttpError.InternalServerError);
     }
 }
