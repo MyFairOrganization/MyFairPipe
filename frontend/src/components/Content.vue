@@ -1,11 +1,13 @@
 <script lang="ts">
-import {h} from 'vue';
+import { h, onBeforeUnmount, ref } from "vue";
+import Hls from 'hls.js'
 
 /**
  * CDN PATH
  * @type {string}
  */
 export const cdnPath = 'http://cdn.myfairpipe.com/video/%PATH';
+const videoPath = 'http://cdn.myfairpipe.com%PATH';
 
 /**
  * Function to get all Videos uploaded from User: userID
@@ -104,16 +106,22 @@ export async function GetIMGs(limit = 0, offset = 0, userID = undefined) {
  * @returns {VNode}
  * @constructor
  */
-export function CreateVID(path, subtitles, subtitleLanguage, subtitleCode) {
-    var type = path.split('.')[1]
+export function CreateVID(path: string, subtitles: string, subtitleLanguage: string, subtitleCode: string) {
+    var type = path.split('.').pop()
 
     console.log(type)
 
-    if (type === 'mp4' || type === 'mkv') {
+    if (type.toLowerCase() === 'mp4' || type.toLowerCase() === 'mkv') {
         type = 'video/mp4'
-    } else if (type === 'mov') {
+    } else if (type.toLowerCase() === 'mov') {
         type = 'video/quicktime'
     }
+
+    const veryHigh = cdnPath.replace('%PATH', '/video/70/1080p/1080p.mp4');
+    const high = cdnPath.replace('%PATH', '/video/70/720p/720p.mp4');
+    const low = cdnPath.replace('%PATH', '/video/70/480p/480p.mp4');
+    const veryLow = cdnPath.replace('%PATH', '/video/70/360p/360p.mp4');
+
 
     return h('div', {class: 'video-block'}, [
         h(
@@ -140,4 +148,80 @@ export function CreateVID(path, subtitles, subtitleLanguage, subtitleCode) {
         ),
     ])
 }
+
+export function CreateVIDHLS(
+    hlsPath: string,
+    subtitles: string,
+    subtitleLanguage: string,
+    subtitleCode: string,
+) {
+    let hls: Hls | null = null
+    let showError = ref(false)
+
+    hlsPath = videoPath.replace('%PATH', hlsPath)
+
+    return h(
+        'div',
+        { class: 'video-block' },
+        [
+            h('video', {
+                class: 'video',
+                controls: true,
+                crossorigin: 'anonymous',
+
+                onVnodeMounted(vnode) {
+                    const video = vnode.el as HTMLVideoElement
+                    if (!video) {
+                        return h('p', 'Video is not available');
+                    }
+
+                    video.muted = false;
+                    video.volume = 1.0;
+
+                    // Add error event listener
+                    video.addEventListener('error', () => {
+                        showError.value = true
+                    })
+
+                    if (Hls.isSupported()) {
+                        hls = new Hls({
+                            startPosition: 0,
+                        })
+                        try {
+                            hls.attachMedia(video);
+                            hls.loadSource(hlsPath);
+                        } catch (e) {
+                            return h('p', 'Video is not available');
+                        }
+
+                        // Add HLS error handling
+                        hls.on(Hls.Events.ERROR, (event, data) => {
+                            if (data.fatal) {
+                                showError.value = true
+                            }
+                        })
+                    }
+                    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        video.src = hlsPath
+                    }
+                },
+
+                onVnodeBeforeUnmount() {
+                    hls?.destroy();
+                    hls = null;
+                },
+            }, [
+                h('track', {
+                    src: cdnPath.replace('%PATH', subtitles),
+                    kind: 'subtitles',
+                    srclang: subtitleCode,
+                    label: subtitleLanguage,
+                    default: true,
+                }),
+            ]),
+            showError.value ? h('p', 'This video is not available') : null
+        ].filter(Boolean),
+    )
+}
+
 </script>

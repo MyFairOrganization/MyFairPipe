@@ -220,14 +220,12 @@ async function loadProfilePicture() {
 #videos {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
+    width: 80%;
+    margin-right: 10%;
+    margin-left: 14%;
 }
 
 #thumbnails {
-    display: flex;
-    justify-content: center;
+    width: 100%;
 }
 </style>

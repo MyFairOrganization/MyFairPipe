@@ -127,14 +127,6 @@ def main():
 		ffmpeg.input(local_srt).output(local_vtt, format="webvtt").run(quiet=True, overwrite_output=True)
 		logging.info(f"VTT file prepared at {local_vtt}")
 
-		local_subs_m3u8 = os.path.join(tmp_dir, "subs_en.m3u8")
-		with open(local_subs_m3u8, "w", encoding="utf-8") as f:
-			f.write("#EXTM3U\n")
-			f.write("#EXT-X-VERSION:3\n")
-			f.write("#EXTINF:9999999,\n")
-			f.write(f"{os.path.basename(local_vtt)}\n")
-			f.write("#EXT-X-ENDLIST\n")
-
 		subs_prefix = f"{JOB_ID}/subtitles"
 		minio.fput_object(result_bucket, f"{subs_prefix}/subs_en.vtt", local_vtt)
 		minio.fput_object(result_bucket, f"{subs_prefix}/subs_en.m3u8", local_subs_m3u8)
@@ -153,7 +145,7 @@ def main():
 		subtitle_entry = (
 			'#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="English",'
 			'DEFAULT=YES,AUTOSELECT=YES,LANGUAGE="en",'
-			f'URI="{subs_prefix}/subs_en.m3u8"\n'
+			f'URI="subtitles/subs_en.m3u8"\n'
 		)
 
 		with open(master_local, "r+", encoding="utf-8") as f:

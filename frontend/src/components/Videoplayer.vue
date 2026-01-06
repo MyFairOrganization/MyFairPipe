@@ -1,122 +1,123 @@
 <script lang="ts" setup>
-import {useRoute} from 'vue-router'
-import {CreateVID, GetIMGs} from '@/components/Content.vue'
-import {onMounted, ref} from 'vue'
-import Thumbnail from '@/components/Thumbnail.vue'
-import Loader from '@/components/Loader.vue'
+import {useRoute} from 'vue-router';
+import {  CreateVIDHLS, GetIMGs } from "@/components/Content.vue";
+import {onMounted, ref} from 'vue';
+import Thumbnail from '@/components/Thumbnail.vue';
+import Loader from '@/components/Loader.vue';
 
-const route = useRoute()
-const path = ref('')
-const props = {id: route.query.id as string}
-const title = ref('')
-const description = ref('')
-const subtitles = ref('')
-const subtitleLanguage = ref('')
-const liked = ref(false)
-const likes = ref('0')
-const disliked = ref(false)
-const dislikes = ref('0')
-const thumbnails = ref([])
-const loading = ref(true)
+const route = useRoute();
+const path = ref('');
+const props = {id: route.query.id as string};
+const title = ref('');
+const description = ref('');
+const subtitles = ref('');
+const subtitleLanguage = ref('');
+const liked = ref(false);
+const likes = ref('0');
+const disliked = ref(false);
+const dislikes = ref('0');
+const thumbnails = ref([]);
+const loading = ref(true);
+const error = ref(false)
 
 onMounted(async () => {
-    await getLiked()
-    await getDetails()
-    thumbnails.value = await GetIMGs(30, 0)
-    loading.value = false
-})
+    await getLiked();
+    await getDetails();
+    thumbnails.value = await GetIMGs(30, 0);
+    loading.value = false;
+});
 
 async function getDetails() {
-    const params = new URLSearchParams()
-    params.append('id', props.id)
+    const params = new URLSearchParams();
+    params.append('id', props.id);
 
-    const videoReq = await fetch(`http://api.myfairpipe.com/video/get?${params}`)
-    const subtitleReq = await fetch(`http://api.myfairpipe.com/subtitles/get?${params}`)
-    const videoData = await videoReq.json()
-    const subtitleData = await subtitleReq.json()
+    const videoReq = await fetch(`http://api.myfairpipe.com/video/get?${params}`);
+    const subtitleReq = await fetch(`http://api.myfairpipe.com/subtitles/get?${params}`);
+    const videoData = await videoReq.json();
+    const subtitleData = await subtitleReq.json();
 
-    let subtitlePath = subtitleData.files
+    let subtitlePath = subtitleData.files;
     subtitlePath = subtitlePath.filter((subtitles: string) => {
-        return subtitles.endsWith('.vtt')
+        return subtitles.endsWith('.vtt');
     })
 
-    title.value = videoData.title
-    description.value = videoData.description
-    path.value = videoData.minio_path
-    subtitles.value = subtitlePath
-    subtitleLanguage.value = subtitleData.languages[0]
+    title.value = videoData.title;
+    description.value = videoData.description;
+    path.value = videoData.path;
+    subtitles.value = subtitlePath;
+    subtitleLanguage.value = subtitleData.languages[0];
 }
 
 async function getLiked() {
     const body = JSON.stringify({
         videoID: props.id,
-    })
+    });
 
     try {
         const res = await fetch(`http://api.myfairpipe.com/like_dislike/get`, {
             method: 'POST',
             body: body,
             credentials: 'include',
-        })
+        });
 
         if (res.ok) {
-            const data = await res.json()
-            liked.value = data.result?.liked
-            likes.value = data.result.likes
-            disliked.value = data.result?.disliked
-            dislikes.value = data.result.dislikes
+            const data = await res.json();
+            liked.value = data.result?.liked;
+            likes.value = data.result.likes;
+            disliked.value = data.result?.disliked;
+            dislikes.value = data.result.dislikes;
         }
     } catch (e) {
-        console.error(e)
+        console.error(e);
     }
 }
 
 async function like() {
     const body = JSON.stringify({
         videoID: props.id,
-    })
+    });
 
     try {
         const res = await fetch(`http://api.myfairpipe.com/like_dislike/like`, {
             method: 'POST',
             body: body,
             credentials: 'include',
-        })
+        });
 
         if (res.ok) {
-            const data = await res.json()
-            liked.value = Boolean(data.result)
-            disliked.value = false
+            const data = await res.json();
+            liked.value = Boolean(data.result);
+            disliked.value = false;
         }
     } catch (e) {
-        console.error(e)
+        console.error(e);
     }
 
-    getLiked()
+    getLiked();
 }
 
 async function dislike() {
     const body = JSON.stringify({
         videoID: props.id,
-    })
+    });
 
     try {
         const res = await fetch(`http://api.myfairpipe.com/like_dislike/dislike`, {
             method: 'POST',
             body: body,
             credentials: 'include',
-        })
+        });
 
         if (res.ok) {
-            const data = await res.json()
-            disliked.value = Boolean(data.result)
-            liked.value = false
+            const data = await res.json();
+            disliked.value = Boolean(data.result);
+            liked.value = false;
         }
     } catch (e) {
-        console.error(e)
+        console.error(e);
     }
 
-    getLiked()
+    getLiked();
 }
 </script>
 
@@ -126,7 +127,7 @@ async function dislike() {
     <div v-if="!loading" class="layout">
         <div id="leftSide">
             <div class="player">
-                <component :is="CreateVID(path, subtitles, subtitleLanguage, subtitleLanguage)"/>
+                <component :is="CreateVIDHLS(path, subtitles, subtitleLanguage, subtitleLanguage)"/>
                 <div>
                     <div id="underVideo">
                         <h2>{{ title }}</h2>

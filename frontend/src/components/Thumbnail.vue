@@ -49,9 +49,4 @@ function goToPlayer(id) {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-#videos {
-    display: flex;
-    justify-content: space-between;
-}
 </style>

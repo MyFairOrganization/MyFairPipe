@@ -1,80 +1,97 @@
 <template>
-    <div class="video-container">
-        <video
-            ref="videoPlayer"
-            :height="height"
-            :width="width"
-            class="video-player"
-            controls
-            preload="auto"
-        >
-            <source :src="fullVideoUrl" :type="videoType"/>
-            Your browser does not support the video tag.
-        </video>
-    </div>
+    <component :is="CreateVIDHLS(<string>hlsPath, <string>subtitles, <string>subtitleLanguage, <string>subtitleCode)" />
 </template>
 
-<script lang="ts">
-export default {
-    name: 'VideoPlayer',
-    props: {
-        videoPath: {
-            type: String,
-            required: true,
-        },
-        width: {
-            type: [String, Number],
-            default: 640,
-        },
-        height: {
-            type: [String, Number],
-            default: 360,
-        },
-        autoplay: {
-            type: Boolean,
-            default: false,
-        },
-        controls: {
-            type: Boolean,
-            default: true,
-        },
-    },
-    data() {
-        return {
-            cdnBase: 'http://cdn.myfairpipe.com/video/',
-        }
-    },
-    computed: {
-        fullVideoUrl() {
-            return `${this.cdnBase}${this.videoPath}`
-        },
-        videoType() {
-            const extension = this.videoPath.split('.').pop().toLowerCase()
-            const mimeTypes = {
-                mp4: 'video/mp4',
-                mov: 'video/quicktime',
-                mkv: 'video/x-matroska',
-            }
-            return mimeTypes[extension] || 'video/mp4'
-        },
-    },
-    mounted() {
-        if (this.autoplay) {
-            this.$refs.videoPlayer.autoplay = true
-        }
-    },
+<script setup lang="ts">
+import Hls from 'hls.js'
+import { h } from "vue";
+
+const props = defineProps({
+    hlsPath: String,
+    subtitles: String,
+    subtitleLanguage: String,
+    subtitleCode: String,
+})
+
+export const cdnPath = 'http://cdn.myfairpipe.com/video/%PATH';
+const videoPath = 'http://cdn.myfairpipe.com%PATH';
+
+/* props */
+export function CreateVIDHLS(
+    hlsPath: string,
+    subtitles: string,
+    subtitleLanguage: string,
+    subtitleCode: string,
+) {
+    let hls: Hls | null = null
+
+    hlsPath = videoPath.replace('%PATH', hlsPath)
+
+    return h(
+        'div',
+        { class: 'video-block' },
+        [
+            h('video', {
+                class: 'video',
+                controls: true,
+                preload: 'metadata',
+                crossorigin: 'anonymous',
+
+                onVnodeMounted(vnode) {
+                    const video = vnode.el as HTMLVideoElement
+                    if (!video) return
+
+                    // Initialize audio state early
+                    video.muted = false
+                    video.volume = 1.0
+
+                    // Safari (native HLS)
+                    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        video.src = hlsPath
+
+                        // Safari sometimes needs this after metadata
+                        video.addEventListener('loadedmetadata', () => {
+                            video.muted = false
+                            video.volume = 1.0
+                        }, { once: true })
+                    }
+                    // hls.js browsers
+                    else if (Hls.isSupported()) {
+                        hls = new Hls({
+                            enableWorker: true,
+                            capLevelToPlayerSize: true,
+                        })
+
+                        hls.attachMedia(video)
+                        hls.loadSource(hlsPath)
+
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                            // 🔑 unlock audio
+                            video.muted = false
+                            video.volume = 1.0
+
+                            // 🔑 ensure an audio track is selected
+                            if (hls && hls.audioTracks && hls.audioTracks.length > 0) {
+                                hls.audioTrack = 0
+                            }
+                        })
+                    }
+                },
+
+                onVnodeBeforeUnmount() {
+                    hls?.destroy()
+                    hls = null
+                },
+            }, [
+                h('track', {
+                    src: cdnPath.replace('%PATH', subtitles),
+                    kind: 'subtitles',
+                    srclang: subtitleCode,
+                    label: subtitleLanguage,
+                    default: true,
+                }),
+            ]),
+        ],
+    )
 }
 </script>
-
-<style scoped>
-.video-container {
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-.video-player {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-</style>

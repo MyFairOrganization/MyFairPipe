@@ -30,14 +30,14 @@ onMounted(async () => {
 #videos {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    width: 100%;
-    max-width: 1400px;
+    width: 80%;
+    margin-right: 10%;
+    margin-left: 14%;
 }
 
 #feed {
     margin-top: 50px;
     margin-bottom: 50px;
-    display: flex;
-    justify-content: space-around;
+    width: 100%;
 }
 </style>
