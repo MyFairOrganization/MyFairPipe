@@ -1,0 +1,154 @@
+import { NextRequest, NextResponse } from "next/server";
+import { countFilesInFolder, objectExists, uploadFileToMinio, videoBucket } from "@/lib/services/minio";
+import { connectionPool } from "@/lib/services/postgres";
+import NextError, { HttpError } from "@/lib/utils/error";
+import { getUser } from "@/lib/auth/getUser";
+import { QueryResult } from "pg";
+import { GET as GetUserData } from "@/app/user/get/route";
+
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204, headers: {
+            "Access-Control-Allow-Origin": "https://myfairpipe.com",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
+        },
+    });
+}
+
+export async function POST(req: NextRequest) {
+    let client;
+
+    try {
+        // ====== getUser using new cookie-based getUser.ts ======
+        const user = getUser(req);
+
+        const test = await GetUserData(req);
+        const data = await test.json();
+
+        if (!user || data.user.anonym) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+        }
+
+        const formData = await req.formData();
+
+        const videoId = formData.get("id") as string;
+        const file = formData.get("file") as File;
+        var videoPath: string;
+
+        // -------------------------------
+        // Request validation
+        // -------------------------------
+        if (!videoId) {
+            return NextError.Error("No video given", HttpError.BadRequest);
+        }
+
+        if (!file) {
+            return NextError.Error("No file uploaded", HttpError.BadRequest);
+        }
+
+        if (!file.type.startsWith("image/")) {
+            return NextError.Error("Only image files are allowed", HttpError.BadRequest);
+        }
+
+        // -------------------------------
+        // Database ownership check
+        // -------------------------------
+        client = await connectionPool.connect();
+
+        try {
+            const ownershipResult: QueryResult = await client.query(`
+                SELECT v.video_id, v.minio_path
+                FROM video v
+                WHERE v.video_id = $1
+                  AND v.uploader = $2
+            `, [videoId, user.user_id]);
+
+            if (ownershipResult.rowCount === 0) {
+                return NextError.Error("Video not found or you don't have permission to add thumbnails", HttpError.NotFound);
+            }
+
+            videoPath = ownershipResult.rows[0].minio_path;
+        } finally {
+            client.release();
+        }
+
+        // -------------------------------
+        // MinIO validation
+        // -------------------------------
+        const exists = await objectExists(videoBucket, videoPath);
+
+
+        if (!exists) {
+            return NextError.Error("Video isn't uploaded yet.", HttpError.BadRequest);
+        }
+
+        const thumbnailsExisting = await countFilesInFolder(videoBucket, `${videoId}/thumbnails`);
+
+        if (thumbnailsExisting >= 5) {
+            return NextError.Error("Only 5 thumbnails are allowed at the same time", HttpError.BadRequest);
+        }
+
+        // -------------------------------
+        // Prepare Client for Database
+        // -------------------------------
+        client = await connectionPool.connect();
+
+        await client.query("BEGIN");
+
+        const rows = await client.query(`SELECT *
+                                         FROM photo;`);
+
+        // -------------------------------
+        // Prepare file
+        // -------------------------------
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const id = rows.rowCount ? rows.rowCount + 1 : 1;
+        const extension = file.name.split(".").pop() || "png";
+        const filename = `${id}.${extension}`;
+
+        // -------------------------------
+        // Upload file to MinIO
+        // -------------------------------
+        await uploadFileToMinio(`${videoId}/thumbnails/${filename}`, videoBucket, buffer, file.type);
+
+        // -------------------------------
+        // Database Transaction
+        // -------------------------------
+        client = await connectionPool.connect();
+        try {
+            await client.query(`
+                INSERT INTO photo (photo_id, path)
+                VALUES ($1, $2)
+            `, [id, `${videoId}/thumbnails/${filename}`]);
+
+            await client.query(`
+                INSERT INTO Thumbnail (thumbnail_id, photo_id, video_id, is_active)
+                VALUES ($1, $2, $3, $4)
+            `, [id, id, videoId, false]);
+
+            await client.query(`
+                UPDATE video
+                SET thumbnail_id = $1
+                WHERE video_id = $2
+            `, [id, videoId]);
+
+            await client.query("COMMIT");
+            return NextResponse.json({ id: id, success: true }, { status: 200 });
+
+        } catch (err) {
+            await client.query("ROLLBACK");
+            console.error("Database error:", err);
+            return NextError.Error("Database write failed.", HttpError.InternalServerError);
+
+        } finally {
+            client.release();
+        }
+
+    } catch (err: any) {
+        console.error("Upload processing error:", err);
+        const message = err instanceof Error ? err.message : "Server error.";
+        return NextError.Error(message, HttpError.InternalServerError);
+    }
+}
