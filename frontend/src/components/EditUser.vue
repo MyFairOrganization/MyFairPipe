@@ -19,7 +19,7 @@ const pfpFile = ref<File | null>(null);
  * Executed after site loaded.
  */
 onMounted(async () => {
-    const req = await fetch(`http://api.myfairpipe.com/user/get`, {
+    const req = await fetch(`https://api.myfairpipe.com/user/get`, {
         credentials: 'include',
     });
     const user = await req.json();
@@ -36,7 +36,7 @@ onMounted(async () => {
  */
 function loadProfile() {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://api.myfairpipe.com/user/get', true);
+    xhr.open('GET', 'https://api.myfairpipe.com/user/get', true);
     xhr.withCredentials = true;
 
     xhr.onload = () => {
@@ -55,7 +55,7 @@ function loadProfile() {
  */
 function loadProfilePicture() {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://api.myfairpipe.com/user/picture/get', true);
+    xhr.open('GET', 'https://api.myfairpipe.com/user/picture/get', true);
     xhr.withCredentials = true;
 
     xhr.onload = () => {
@@ -79,7 +79,7 @@ function loadProfilePicture() {
 function applyChanges() {
     uploadPfp();
     const xhr = new XMLHttpRequest();
-    xhr.open('PATCH', 'http://api.myfairpipe.com/user/update', true);
+    xhr.open('PATCH', 'https://api.myfairpipe.com/user/update', true);
     xhr.withCredentials = true;
 
     const formData = new FormData();
@@ -114,7 +114,7 @@ function handleFileUpload(event: Event) {
  */
 async function uploadPfp() {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://api.myfairpipe.com/user/picture/upload', true);
+    xhr.open('POST', 'https://api.myfairpipe.com/user/picture/upload', true);
     xhr.withCredentials = true;
 
     const formData = new FormData();

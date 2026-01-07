@@ -22,7 +22,7 @@ const register = () => {
     errorMessage.value = '';
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://api.myfairpipe.com/auth/register', true);
+    xhr.open('POST', 'https://api.myfairpipe.com/auth/register', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept', 'application/json');
 

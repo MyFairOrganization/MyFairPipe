@@ -13,7 +13,7 @@ watch(
         loggedIn.value = await checkLoggedIn()
 
         if (!loggedIn.value && !anonym.value) {
-            const register = await fetch('http://api.myfairpipe.com/auth/anonymLogin', {
+            const register = await fetch('https://api.myfairpipe.com/auth/anonymLogin', {
                 method: 'POST',
                 credentials: 'include',
             })
@@ -25,7 +25,7 @@ watch(
                 password: data.password,
             })
 
-            await fetch('http://api.myfairpipe.com/auth/login', {
+            await fetch('https://api.myfairpipe.com/auth/login', {
                 method: 'POST',
                 body: body,
                 credentials: 'include',
@@ -35,7 +35,7 @@ watch(
 )
 
 async function checkLoggedIn() {
-    const req = await fetch('http://api.myfairpipe.com/user/get', {
+    const req = await fetch('https://api.myfairpipe.com/user/get', {
         credentials: 'include',
     })
 

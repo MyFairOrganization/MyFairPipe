@@ -31,8 +31,8 @@ async function getDetails() {
     const params = new URLSearchParams();
     params.append('id', props.id);
 
-    const videoReq = await fetch(`http://api.myfairpipe.com/video/get?${params}`);
-    const subtitleReq = await fetch(`http://api.myfairpipe.com/subtitles/get?${params}`);
+    const videoReq = await fetch(`https://api.myfairpipe.com/video/get?${params}`);
+    const subtitleReq = await fetch(`https://api.myfairpipe.com/subtitles/get?${params}`);
     const videoData = await videoReq.json();
     const subtitleData = await subtitleReq.json();
 
@@ -54,7 +54,7 @@ async function getLiked() {
     });
 
     try {
-        const res = await fetch(`http://api.myfairpipe.com/like_dislike/get`, {
+        const res = await fetch(`https://api.myfairpipe.com/like_dislike/get`, {
             method: 'POST',
             body: body,
             credentials: 'include',
@@ -78,7 +78,7 @@ async function like() {
     });
 
     try {
-        const res = await fetch(`http://api.myfairpipe.com/like_dislike/like`, {
+        const res = await fetch(`https://api.myfairpipe.com/like_dislike/like`, {
             method: 'POST',
             body: body,
             credentials: 'include',
@@ -102,7 +102,7 @@ async function dislike() {
     });
 
     try {
-        const res = await fetch(`http://api.myfairpipe.com/like_dislike/dislike`, {
+        const res = await fetch(`https://api.myfairpipe.com/like_dislike/dislike`, {
             method: 'POST',
             body: body,
             credentials: 'include',

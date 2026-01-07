@@ -33,7 +33,7 @@ function edit() {
 }
 
 async function logout() {
-    await fetch(`http://api.myfairpipe.com/auth/logout`, {
+    await fetch(`https://api.myfairpipe.com/auth/logout`, {
         method: 'POST',
         credentials: 'include',
     })
@@ -45,7 +45,7 @@ const thumbnails = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
-    const req = await fetch(`http://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+    const req = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
         credentials: 'include',
         cache: 'no-store',
     })
@@ -73,7 +73,7 @@ onMounted(async () => {
 
 async function loadProfile() {
     try {
-        const res = await fetch(`http://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+        const res = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
             method: 'GET',
             credentials: 'include',
             cache: 'no-store',
@@ -94,7 +94,7 @@ async function loadProfile() {
 
 async function loadProfilePicture() {
     try {
-        const res = await fetch('http://api.myfairpipe.com/user/picture/get', {
+        const res = await fetch('https://api.myfairpipe.com/user/picture/get', {
             method: 'GET',
             credentials: 'include',
             cache: 'no-store',
