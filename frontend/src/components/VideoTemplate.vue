@@ -13,8 +13,8 @@ const props = defineProps({
     subtitleCode: String,
 })
 
-export const cdnPath = 'http://cdn.myfairpipe.com/video/%PATH';
-const videoPath = 'http://cdn.myfairpipe.com%PATH';
+export const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
+const videoPath = 'https://cdn.myfairpipe.com%PATH';
 
 /* props */
 export function CreateVIDHLS(

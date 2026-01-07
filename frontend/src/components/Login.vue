@@ -21,7 +21,7 @@ const login = () => {
     errorMessage.value = ''
 
     const xhr = new XMLHttpRequest()
-    xhr.open('POST', 'http://api.myfairpipe.com/auth/login', true)
+    xhr.open('POST', 'https://api.myfairpipe.com/auth/login', true)
 
     xhr.setRequestHeader('Content-Type', 'application/json')
     xhr.setRequestHeader('Accept', 'application/json')
