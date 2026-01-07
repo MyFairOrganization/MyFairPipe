@@ -52,6 +52,7 @@ services:
     container_name: nginx_dev
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - vuejs-dev
       - nextjs-dev
