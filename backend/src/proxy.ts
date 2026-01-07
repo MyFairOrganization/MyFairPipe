@@ -12,7 +12,7 @@ export default async function proxy(req: NextRequest) {
 		return new NextResponse(null, {
 			status: 204,
 			headers: {
-				'Access-Control-Allow-Origin': 'http://myfairpipe.com',
+				'Access-Control-Allow-Origin': 'https://myfairpipe.com',
 				'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
 				'Access-Control-Allow-Headers': 'Content-Type,Authorization,Cookie',
 				'Access-Control-Allow-Credentials': 'true',

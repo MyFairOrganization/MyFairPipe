@@ -1,6 +1,6 @@
 async function updateCache() {
 	try {
-		const res = await fetch("http://api.myfairpipe.com/sorting/upload");
+		const res = await fetch("https://api.myfairpipe.com/sorting/upload");
 
 		if (res.ok) {
 			console.log(`Cache updated at ${new Date().toISOString()}`);
