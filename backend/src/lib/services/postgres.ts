@@ -1,4 +1,4 @@
-import {Pool} from 'pg';
+import { Pool } from 'pg';
 
 const user = process.env.POSTGRES_USER;
 const host = process.env.POSTGRES_HOST || 'postgres';
@@ -9,10 +9,5 @@ const password = process.env.POSTGRES_PASSWORD;
 const url = "postgres://" + user + ":" + password + "@" + host + ":" + port + "/" + database;
 
 export const connectionPool = new Pool({
-	connectionString: url,
-	user: user,
-	host: host,
-	database: database,
-	password: password,
-	port: port,
+    connectionString: url, user: user, host: host, database: database, password: password, port: port,
 });

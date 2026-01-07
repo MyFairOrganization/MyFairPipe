@@ -15,7 +15,7 @@ ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
 SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
 JOB_ID = os.getenv("JOB_ID")
 OBJECT_KEY = os.getenv("OBJECT_KEY")
-BUCKET = "videos"
+BUCKET = "video"
 
 ENABLED_RENDITIONS = os.getenv("RENDITIONS", "360p,480p,720p,1080p").split(",")
 
@@ -69,15 +69,36 @@ def get_video_info(src: str) -> Dict:
 		video_stream = next(
 			(s for s in probe["streams"] if s["codec_type"] == "video"), None
 		)
+		audio_stream = next(
+			(s for s in probe["streams"] if s["codec_type"] == "audio"), None
+		)
+
+		info = {
+			"width": 0,
+			"height": 0,
+			"duration": 0,
+			"has_audio": False,
+			"audio_codec": None,
+		}
+
 		if video_stream:
-			return {
-				"width": int(video_stream["width"]),
-				"height": int(video_stream["height"]),
-				"duration": float(probe["format"].get("duration", 0)),
-			}
+			info["width"] = int(video_stream["width"])
+			info["height"] = int(video_stream["height"])
+			info["duration"] = float(probe["format"].get("duration", 0))
+
+		if audio_stream:
+			info["has_audio"] = True
+			info["audio_codec"] = audio_stream.get("codec_name")
+			logging.info(f"Audio detected: codec={info['audio_codec']}, "
+			           f"channels={audio_stream.get('channels')}, "
+			           f"sample_rate={audio_stream.get('sample_rate')}")
+		else:
+			logging.warning("NO AUDIO STREAM DETECTED in source file!")
+
+		return info
 	except Exception as e:
 		logging.warning(f"Could not probe video: {e}")
-	return {"width": 0, "height": 0, "duration": 0}
+	return {"width": 0, "height": 0, "duration": 0, "has_audio": False, "audio_codec": None}
 
 
 def filter_renditions_by_source(
@@ -100,23 +121,35 @@ def generate_mp4_rendition(src: str, dst: str, size: str, bitrate: str) -> None:
 	"""Generate one MP4 rendition with H.264/AAC."""
 	width, height = map(int, size.split(":"))
 
+	# Explicitly handle video and audio streams separately
+	input_stream = ffmpeg.input(src)
+	video = input_stream.video.filter("scale", width, height)
+	audio = input_stream.audio
+
 	stream = (
-		ffmpeg.input(src)
-		.filter("scale", width, height)
-		.output(
+		ffmpeg.output(
+			video,
+			audio,
 			dst,
 			vcodec="libx264",
 			preset="faster",
 			video_bitrate=bitrate,
 			acodec="aac",
 			audio_bitrate="128k",
+			ar=48000,  # Audio sample rate
+			ac=2,       # Stereo audio
 			movflags="+faststart",
 		)
 		.overwrite_output()
 	)
 
 	logging.info(f"Running ffmpeg MP4 rendition: {dst}")
-	ffmpeg.run(stream, capture_stdout=True, capture_stderr=True)
+	try:
+		out, err = ffmpeg.run(stream, capture_stdout=True, capture_stderr=True)
+		logging.info(f"FFmpeg stderr (last 500 chars): {err.decode('utf-8')[-500:]}")
+	except ffmpeg.Error as e:
+		logging.error(f"FFmpeg error: {e.stderr.decode('utf-8')}")
+		raise
 
 
 def generate_hls_rendition(
@@ -128,16 +161,25 @@ def generate_hls_rendition(
 	playlist_file = os.path.join(output_dir, f"{label}.m3u8")
 	segment_pattern = os.path.join(output_dir, f"{label}_%03d.ts")
 
+	# Build the command with explicit audio handling
+	input_stream = ffmpeg.input(src)
+
+	# Split and process video and audio separately
+	video = input_stream.video.filter("scale", width, height)
+	audio = input_stream.audio
+
 	stream = (
-		ffmpeg.input(src)
-		.filter("scale", width, height)
-		.output(
+		ffmpeg.output(
+			video,
+			audio,
 			playlist_file,
 			vcodec="libx264",
 			preset="faster",
 			video_bitrate=bitrate,
 			acodec="aac",
 			audio_bitrate="128k",
+			ar=48000,  # Audio sample rate
+			ac=2,       # Stereo audio
 			format="hls",
 			hls_time=HLS_SEGMENT_TIME,
 			hls_playlist_type=HLS_PLAYLIST_TYPE,
@@ -148,7 +190,12 @@ def generate_hls_rendition(
 	)
 
 	logging.info(f"Running ffmpeg HLS rendition: {label}")
-	ffmpeg.run(stream, capture_stdout=True, capture_stderr=True)
+	try:
+		out, err = ffmpeg.run(stream, capture_stdout=True, capture_stderr=True)
+		logging.info(f"FFmpeg output for {label}: {err.decode('utf-8')[-500:]}")
+	except ffmpeg.Error as e:
+		logging.error(f"FFmpeg error for {label}: {e.stderr.decode('utf-8')}")
+		raise
 
 	return playlist_file, output_dir
 
@@ -171,7 +218,7 @@ def create_master_playlist(
 				f'#EXT-X-STREAM-INF:BANDWIDTH={bitrate_num},'
 				f'RESOLUTION={width}x{height}\n'
 			)
-			f.write(f"{label}.m3u8\n")
+			f.write(f"{label}/{label}.m3u8\n")
 
 	logging.info(f"Created master playlist: {master_file}")
 	return master_file
@@ -199,17 +246,13 @@ def upload_hls_files(
 			minio.fput_object(BUCKET, object_path, playlist_file)
 
 		# Upload all TS segments for this rendition
-		for root, _, files in os.walk(output_dir):
-			for file in files:
-				if file.startswith(f"{label}_") and file.endswith(".ts"):
-					local_path = os.path.join(root, file)
-					# Rename segment to match pattern: 1080p-000.ts
-					segment_num = file.replace(f"{label}_", "").replace(".ts", "")
-					new_filename = f"{label}-{segment_num}.ts"
-					object_path = os.path.join(base_name, label, new_filename)
+		for file in os.listdir(output_dir):
+			if file.startswith(f"{label}_") and file.endswith(".ts"):
+				local_path = os.path.join(output_dir, file)
+				segment_object_path = os.path.join(base_name, label, file)
 
-					logging.info(f"Uploading segment -> {BUCKET}/{object_path}")
-					minio.fput_object(BUCKET, object_path, local_path)
+				logging.info(f"Uploading segment -> {BUCKET}/{segment_object_path}")
+				minio.fput_object(BUCKET, segment_object_path, local_path)
 
 
 def main():

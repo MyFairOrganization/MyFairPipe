@@ -15,11 +15,8 @@ export async function POST() {
     const res = NextResponse.json({ message: "Logged out" });
 
     res.cookies.set("session", "", {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        path: "/",
-        expires: new Date(0), // cookie löschen
+        httpOnly: true, secure: false, sameSite: "lax",      // Cross-Site erlaubt
+        domain: ".myfairpipe.com", path: "/", expires: new Date(0), // cookie löschen
     });
 
     return res;

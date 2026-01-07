@@ -34,6 +34,7 @@ services:
       - minio_data:/data
     networks:
       - external-network
+      - internal-network
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
       interval: 10s

@@ -121,6 +121,8 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_USER}
       MINIO_SECRET_KEY: ${MINIO_PASSWORD}
       DOCKER_HOST: unix:///var/run/docker.sock
+    networks:
+      - internal-network
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -148,6 +150,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+    networks:
+      - internal-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./Pipes/Resolution/manager.py:/app/manager.py:ro

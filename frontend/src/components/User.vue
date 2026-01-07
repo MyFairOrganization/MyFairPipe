@@ -1,68 +1,153 @@
-<script setup lang="ts">
-import { getIMGs } from "./Content.vue";
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
-import Thumbnail from "./Thumbnail.vue";
+<script lang="ts" setup>
+import {GetIMGs} from './Content.vue'
+import {onMounted, ref, watch} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import Thumbnail from './Thumbnail.vue'
+import Upload from './Upload.vue'
+import Loader from '@/components/Loader.vue'
 
-const username = ref('')
-const router = useRouter();
+const userPage = ref(true)
+const uploadPage = ref(false)
+const editPage = ref(false)
+
+const userName = ref('User Name')
+const userDescription = ref('This is a brief user description.')
+const userImage = ref('')
+const router = useRouter()
+const route = useRoute()
+
+watch(
+    () => {return route.fullPath},
+    () => {
+        loadProfile()
+        loadProfilePicture()
+    },
+)
 
 function upload() {
-    router.push("/upload");
+    router.push('/upload')
 }
 
 function edit() {
-    router.push("/edituser");
+    router.push('/edituser')
 }
 
-const thumbnails = ref([]);
-const loading = ref(true);
+async function logout() {
+    await fetch(`http://api.myfairpipe.com/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+    })
+
+    router.push('/home')
+}
+
+const thumbnails = ref([])
+const loading = ref(true)
 
 onMounted(async () => {
-    const req = await fetch(`http://api.myfairpipe.com/user/get`, {
-        credentials: "include"
-    });
-    const user = await req.json();
+    const req = await fetch(`http://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+        credentials: 'include',
+        cache: 'no-store',
+    })
+    const user = await req.json()
     if (user.user.anonym) {
-        router.push("/home");
+        router.push('/home')
     } else {
-        username.value = user.user.username
+        const path = router.currentRoute._value.fullPath
+        if (path === '/user') {
+            userPage.value = true
+            uploadPage.value = false
+            editPage.value = false
+        } else if (path === '/upload') {
+            userPage.value = false
+            uploadPage.value = true
+            editPage.value = false
+        }
 
-        console.log(user);
+        await Promise.all([loadProfile(), loadProfilePicture()])
 
-        thumbnails.value = await getIMGs(10, 0, user.user.user_id);
+        thumbnails.value = await GetIMGs(10, 0, user.user.user_id);
         loading.value = false;
     }
-});
+})
 
+async function loadProfile() {
+    try {
+        const res = await fetch(`http://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+        })
 
+        if (!res.ok) {
+            console.error('Failed to load profile:', res.status)
+            return
+        }
+
+        const data = await res.json()
+        userName.value = data.user.displayname
+        userDescription.value = data.user.bio
+    } catch (err) {
+        console.error('Network error while loading profile:', err)
+    }
+}
+
+async function loadProfilePicture() {
+    try {
+        const res = await fetch('http://api.myfairpipe.com/user/picture/get', {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+        })
+
+        if (!res.ok) {
+            console.error('Failed to load profile picture:', res.status)
+            userImage.value = '/pfpExample.png'
+            return
+        }
+
+        const data = await res.json()
+
+        if (data.photo_url) {
+            // Cache-Buster für CDN/Browser
+            userImage.value = `${data.photo_url}?v=${Date.now()}`
+        } else {
+            userImage.value = '/pfpExample.png'
+        }
+    } catch (err) {
+        console.error('Network error while loading profile picture:', err)
+        userImage.value = '/pfpExample.png'
+    }
+}
 </script>
 
 <template>
     <div class="container">
-        <img class="pfp" src="/pfpExample.png"></img>
+        <img :src="userImage" alt="Profile Picture" class="pfp"/>
         <div class="user">
             <div class="left">
-                <h1>{{ username }}</h1>
-                <p id="descr">This is a brief user description.</p>
-                <button id="b1">Channel information</button>
+                <h1>{{ userName }}</h1>
+                <p id="descr">
+                    {{ userDescription }}
+                </p>
             </div>
 
             <div class="right">
-                <button class="btn" @click="upload">Upload Video</button>
+                <button v-if="!uploadPage" class="btn" @click="upload">Upload Video</button>
                 <button class="btn" @click="edit">Edit Account</button>
+                <button class="btn" @click="logout()">Logout</button>
             </div>
         </div>
     </div>
-    <hr class="line">
-    <div id="thumbnails">
-        <div id="feed">
-            <div v-if="loading">Loading thumbnails...</div>
+    <hr class="line"/>
 
-            <Thumbnail v-else :thumbnails="thumbnails" />
-        </div>
+    <div v-if="userPage" id="thumbnails">
+        <Loader :loading="loading" :nothing="thumbnails.length === 0" msg="Loading Videos"/>
+
+        <Thumbnail v-if="!loading" :thumbnails="thumbnails"/>
     </div>
 
+    <component :is="Upload" v-if="uploadPage"/>
 </template>
 
 <style scoped>
@@ -73,10 +158,15 @@ onMounted(async () => {
     object-fit: cover;
 }
 
+.thumbnail {
+    width: 75%;
+}
+
 .container {
     display: flex;
     align-items: center;
     gap: 20px;
+    margin-top: 50px;
     margin-bottom: 50px;
     margin-left: 7em;
 }
@@ -87,7 +177,7 @@ onMounted(async () => {
     align-items: center;
     width: 900px;
     height: 250px;
-    background-color: #98C1D9;
+    background-color: #98c1d9;
     padding: 20px 30px;
     border-radius: 10px;
     gap: 20px;
@@ -104,16 +194,6 @@ onMounted(async () => {
     margin: 10px 0;
 }
 
-#b1 {
-    margin-top: 5px;
-    padding: 10px 20px;
-    background-color: transparent;
-    color: #293241;
-    border: 1px solid #293241;
-    border-radius: 20px;
-    cursor: pointer;
-}
-
 .right {
     display: flex;
     flex-direction: column;
@@ -122,7 +202,7 @@ onMounted(async () => {
 
 .btn {
     padding: 10px 20px;
-    background-color: #3D5A80;
+    background-color: #3d5a80;
     color: white;
     border: none;
     border-radius: 10px;
@@ -137,17 +217,15 @@ onMounted(async () => {
     margin-bottom: 50px;
 }
 
+#videos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 80%;
+    margin-right: 10%;
+    margin-left: 14%;
+}
+
 #thumbnails {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    width: 100%;
 }
-
-.thumbnail img {
-    width: 150px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 5px;
-}
-
 </style>
