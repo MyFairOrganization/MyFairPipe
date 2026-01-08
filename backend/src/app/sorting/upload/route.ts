@@ -9,9 +9,8 @@ interface Video {
 
 async function loadVideosFromPostgres(): Promise<Video[]> {
 	const query = `
-    SELECT v.video_id, (((vd.likes * 2 + vd.views * 0.1 - vd.dislikes * 3) + 1) * (1 + RANDOM())) - 1 AS score
-    FROM video_details vd
-    JOIN video v on vd.video_id = v.video_id
+    SELECT v.video_id, (((v.likes * 2 + v.views * 0.1 - v.dislikes * 3) + 1) * (1 + RANDOM())) - 1 AS score
+    FROM video v
     ORDER BY score DESC
   `;
 
