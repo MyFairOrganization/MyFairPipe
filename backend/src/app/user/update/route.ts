@@ -56,7 +56,7 @@ export async function PATCH(req: NextRequest) {
 
         const result = await client.query(
             `
-            UPDATE "user"
+            UPDATE "User"
             SET ${fields.join(", ")}
             WHERE user_id = $${idx}
             `,
