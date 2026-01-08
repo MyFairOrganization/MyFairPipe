@@ -1,6 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
 import {listFilesInFolder, minioClient, streamToString, uploadFileToMinio, videoBucket} from "@/lib/services/minio";
-import {checkUUID} from "@/lib/utils/util";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
 import {connectionPool} from "@/lib/services/postgres";
@@ -35,15 +34,11 @@ export async function DELETE(req: NextRequest) {
 		// Request validation
 		// -------------------------------
 		if (!videoId) {
-			return NextError.error("Missing id", HttpError.BadRequest);
-		}
-
-		if (!checkUUID(videoId)) {
-			return NextError.error("Invalid video id format", HttpError.BadRequest);
+			return NextError.Error("Missing id", HttpError.BadRequest);
 		}
 
 		if (!language) {
-			return NextError.error("Missing language", HttpError.BadRequest);
+			return NextError.Error("Missing language", HttpError.BadRequest);
 		}
 
 		// -------------------------------
@@ -59,7 +54,7 @@ export async function DELETE(req: NextRequest) {
 			`, [videoId, user.id]);
 
 			if (ownershipResult.rowCount === 0) {
-				return NextError.error("Video not found or you don't have permission to delete subtitles", HttpError.NotFound);
+				return NextError.Error("Video not found or you don't have permission to delete subtitles", HttpError.NotFound);
 			}
 		} finally {
 			client.release();
@@ -76,7 +71,7 @@ export async function DELETE(req: NextRequest) {
 		});
 
 		if (filesToDelete.length === 0) {
-			return NextError.error("Subtitle not found for this language", HttpError.NotFound);
+			return NextError.Error("Subtitle not found for this language", HttpError.NotFound);
 		}
 
 		// Delete all matching files (VTT and M3U8)
@@ -111,6 +106,6 @@ export async function DELETE(req: NextRequest) {
 	} catch (err) {
 		console.error("Delete subtitle error:", err);
 		const message = err instanceof Error ? err.message : "Server error";
-		return NextError.error(message, HttpError.InternalServerError);
+		return NextError.Error(message, HttpError.InternalServerError);
 	}
 }

@@ -1,7 +1,6 @@
 import {NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {checkUUID} from "@/lib/utils/util";
 
 export async function OPTIONS() {
 	return new NextResponse(null, {
@@ -26,11 +25,7 @@ export async function GET(req: Request) {
 		// Request validation
 		// -------------------------------
 		if (!thumbnail_id) {
-			return NextError.error("Missing id", HttpError.BadRequest);
-		}
-
-		if (!checkUUID(thumbnail_id)) {
-			return NextError.error("Invalid video id format", HttpError.BadRequest);
+			return NextError.Error("Missing id", HttpError.BadRequest);
 		}
 
 		// -------------------------------
@@ -45,13 +40,13 @@ export async function GET(req: Request) {
 		`, [thumbnail_id]);
 
 		if (result.rowCount === 0) {
-			return NextError.error("No Thumbnail found", HttpError.NotFound);
+			return NextError.Error("No Thumbnail found", HttpError.NotFound);
 		}
 
 		return NextResponse.json(result.rows[0], {status: 200});
 	} catch (err: any) {
 		console.error("Database error: ", err);
-		return NextError.error(err || "Server error.", HttpError.InternalServerError);
+		return NextError.Error(err || "Server error.", HttpError.InternalServerError);
 	} finally {
 		if (client) client.release();
 	}

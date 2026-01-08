@@ -1,7 +1,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import {minioClient, videoBucket} from "@/lib/services/minio";
-import {checkUUID} from "@/lib/utils/util";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
@@ -36,11 +35,7 @@ export async function DELETE(req: NextRequest) {
 		// Request validation
 		// -------------------------------
 		if (!thumbnail_id) {
-			return NextError.error("Missing id", HttpError.BadRequest);
-		}
-
-		if (!checkUUID(thumbnail_id)) {
-			return NextError.error("Invalid thumbnail id format", HttpError.BadRequest);
+			return NextError.Error("Missing id", HttpError.BadRequest);
 		}
 
 		// -------------------------------
@@ -61,7 +56,7 @@ export async function DELETE(req: NextRequest) {
 
 			if (result.rowCount === 0) {
 				await client.query("ROLLBACK");
-				return NextError.error("Thumbnail not found", HttpError.NotFound);
+				return NextError.Error("Thumbnail not found", HttpError.NotFound);
 			}
 
 			const {path, uploader} = result.rows[0];
@@ -69,7 +64,7 @@ export async function DELETE(req: NextRequest) {
 			// Check if user owns the video
 			if (uploader !== user.id) {
 				await client.query("ROLLBACK");
-				return NextError.error("You don't have permission to delete this thumbnail", HttpError.Forbidden);
+				return NextError.Error("You don't have permission to delete this thumbnail", HttpError.Forbidden);
 			}
 
 			try {
@@ -77,7 +72,7 @@ export async function DELETE(req: NextRequest) {
 			} catch (err) {
 				await client.query("ROLLBACK");
 				console.error("MinIO delete failed:", err);
-				return NextError.error("Could not delete file from storage", HttpError.InternalServerError);
+				return NextError.Error("Could not delete file from storage", HttpError.InternalServerError);
 			}
 
 			await client.query(`
@@ -93,7 +88,7 @@ export async function DELETE(req: NextRequest) {
 		} catch (dbErr) {
 			await client.query("ROLLBACK");
 			console.error("Database transaction error:", dbErr);
-			return NextError.error("Database write failed", HttpError.InternalServerError);
+			return NextError.Error("Database write failed", HttpError.InternalServerError);
 		} finally {
 			client.release();
 		}
@@ -101,6 +96,6 @@ export async function DELETE(req: NextRequest) {
 	} catch (err) {
 		console.error("Request handling error:", err);
 		const message = err instanceof Error ? err.message : "Server error";
-		return NextError.error(message, HttpError.InternalServerError);
+		return NextError.Error(message, HttpError.InternalServerError);
 	}
 }

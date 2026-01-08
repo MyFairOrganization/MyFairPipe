@@ -87,7 +87,7 @@ async function dislike(videoID: number, userID: number) {
 
     return true;
   } catch (err) {
-    return NextError.error(err, HttpError.BadRequest)
+    return NextError.Error(err, HttpError.BadRequest)
   } finally {
     client.release();
   }
@@ -113,13 +113,13 @@ export async function POST(req: NextRequest) {
     const {videoID} = await req.json();
 
     if (videoID === null) {
-      return NextError.error("No Video ID", HttpError.BadRequest);
+      return NextError.Error("No Video ID", HttpError.BadRequest);
     }
 
     const userID = user.user_id;
 
     if (userID === null) {
-      return NextError.error("No User ID", HttpError.BadRequest);
+      return NextError.Error("No User ID", HttpError.BadRequest);
     }
 
     const result = await dislike(Number(videoID), Number(userID));
@@ -129,6 +129,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ result }, {status: 200});
   } catch (err) {
     console.error(err);
-    return NextError.error(err + "", HttpError.BadRequest);
+    return NextError.Error(err + "", HttpError.BadRequest);
   }
 }

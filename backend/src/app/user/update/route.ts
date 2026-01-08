@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest) {
         const bio = formData.get("bio") as string | null;
 
         if (!displayName && !bio) {
-            return NextError.error(
+            return NextError.Error(
                 "At least one field must be updated",
                 HttpError.BadRequest
             );
@@ -66,7 +66,7 @@ export async function PATCH(req: NextRequest) {
         await client.query("COMMIT");
 
         if (result.rowCount === 0) {
-            return NextError.error("User not found", HttpError.NotFound);
+            return NextError.Error("User not found", HttpError.NotFound);
         }
 
         return NextResponse.json({ success: true }, { status: 200 });
@@ -74,7 +74,7 @@ export async function PATCH(req: NextRequest) {
     } catch (err) {
         if (client) await client.query("ROLLBACK");
         console.error(err);
-        return NextError.error("Profile update failed", HttpError.InternalServerError);
+        return NextError.Error("Profile update failed", HttpError.InternalServerError);
     } finally {
         client?.release();
     }
