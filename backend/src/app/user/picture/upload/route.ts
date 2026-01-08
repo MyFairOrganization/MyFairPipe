@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         return NextError.Error("No file uploaded", HttpError.BadRequest);
     }
 
-    if (!file.type.startsWith("image/")) {
+    if (!file.type?.startsWith("image/")) {
         return NextError.Error("Only image files are allowed", HttpError.BadRequest);
     }
 

@@ -65,10 +65,6 @@ export async function PATCH(req: NextRequest) {
 
         await client.query("COMMIT");
 
-        if (result.rowCount === 0) {
-            return NextError.Error("User not found", HttpError.NotFound);
-        }
-
         return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (err) {
