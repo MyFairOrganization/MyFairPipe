@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 		const {videoID} = await req.json();
 
 		if (videoID === null) {
-			return NextError.error("No Video ID", HttpError.BadRequest);
+			return NextError.Error("No Video ID", HttpError.BadRequest);
 		}
 
 		const userID = user?.user_id;
@@ -92,6 +92,6 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json({ result }, {status: 200});
 	} catch (err) {
 		console.error(err);
-		return NextError.error(err + "", HttpError.BadRequest);
+		return NextError.Error(err + "", HttpError.BadRequest);
 	}
 }

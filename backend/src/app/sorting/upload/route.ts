@@ -49,6 +49,6 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json({ result }, { status: 200 });
 	} catch (err) {
 		console.error(err);
-		return NextError.error(err + "", HttpError.BadRequest);
+		return NextError.Error(err + "", HttpError.BadRequest);
 	}
 }

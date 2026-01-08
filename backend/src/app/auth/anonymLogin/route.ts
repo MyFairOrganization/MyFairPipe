@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 			`SELECT * FROM "User"`
 		);
 
-		var id = getID.rowCount + 1;
+		var id = getID.rowCount! + 1;
 		const password = `anonymPass`
 		var username = await bcrypt.hash(`anonym${id}`, 1);
 		const user_email = `${username}@anonym.com`

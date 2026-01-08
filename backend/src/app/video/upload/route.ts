@@ -39,15 +39,15 @@ export async function POST(req: NextRequest) {
 		// Request validation
 		// -------------------------------
 		if (!file) {
-			return NextError.error("No files uploaded.", HttpError.BadRequest);
+			return NextError.Error("No files uploaded.", HttpError.BadRequest);
 		}
 
 		if (!title || !description) {
-			return NextError.error("Title and description are required.", HttpError.BadRequest);
+			return NextError.Error("Title and description are required.", HttpError.BadRequest);
 		}
 
 		if (!file.type.startsWith("video/")) {
-			return NextError.error("Wrong file type. Only video files are allowed.", HttpError.BadRequest);
+			return NextError.Error("Wrong file type. Only video files are allowed.", HttpError.BadRequest);
 		}
 		// -------------------------------
 		// Prepare Client for Database
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 		// Prepare file
 		// -------------------------------
 		const buffer = Buffer.from(await file.arrayBuffer());
-		const id = rows.rowCount + 1;
+		const id = rows.rowCount! + 1;
 		const extension = file.name.split(".").pop() || "mp4";
 		const filename = `${id}/${id}.${extension}`;
 
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
 			await Promise.all([sendMessage("resolution_jobs", jobMessage), sendMessage("transcribe_jobs", jobMessage),]);
 		} catch (err) {
 			console.error("RabbitMQ send error:", err);
-			return NextError.error("Failed to send RabbitMQ jobs.", HttpError.InternalServerError);
+			return NextError.Error("Failed to send RabbitMQ jobs.", HttpError.InternalServerError);
 		}
 
 		// -------------------------------
@@ -108,13 +108,13 @@ export async function POST(req: NextRequest) {
 		} catch (err) {
 			await client.query("ROLLBACK");
 			console.error("Database error:", err);
-			return NextError.error("Database write failed.", HttpError.InternalServerError);
+			return NextError.Error("Database write failed.", HttpError.InternalServerError);
 		} finally {
 			client.release();
 		}
 	} catch (err: any) {
 		console.error("Upload processing error:", err);
 		const message = err instanceof Error ? err.message : "Server error.";
-		return NextError.error(message, HttpError.InternalServerError);
+		return NextError.Error(message, HttpError.InternalServerError);
 	}
 }

@@ -31,11 +31,11 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File | null;
 
     if (!file) {
-        return NextError.error("No file uploaded", HttpError.BadRequest);
+        return NextError.Error("No file uploaded", HttpError.BadRequest);
     }
 
     if (!file.type.startsWith("image/")) {
-        return NextError.error("Only image files are allowed", HttpError.BadRequest);
+        return NextError.Error("Only image files are allowed", HttpError.BadRequest);
     }
 
     const photoId = randomUUID();
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     } catch (err) {
         await client.query("ROLLBACK");
         console.error(err);
-        return NextError.error("Upload failed", HttpError.InternalServerError);
+        return NextError.Error("Upload failed", HttpError.InternalServerError);
     } finally {
         client.release();
     }

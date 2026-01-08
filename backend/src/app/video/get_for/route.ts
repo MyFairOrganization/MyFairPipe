@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import {connectionPool} from "@/lib/services/postgres";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {checkUUID} from "@/lib/utils/util";
 
 export async function OPTIONS() {
 	return new NextResponse(null, {
@@ -26,7 +25,7 @@ export async function GET(req: Request) {
 		// Request validation
 		// -------------------------------
 		if (!userId) {
-			return NextError.error("Missing id", 400);
+			return NextError.Error("Missing id", 400);
 		}
 
 		// -------------------------------
@@ -51,14 +50,14 @@ export async function GET(req: Request) {
             WHERE v.uploader = $1`, [userId]);
 
 		if (result.rowCount === 0) {
-			return NextError.error("Video not found", 404);
+			return NextError.Error("Video not found", 404);
 		}
 
 		return NextResponse.json(result.rows, {status: 200});
 
 	} catch (err: any) {
 		console.error("Database error: ", err);
-		return NextError.error(err || "Server error.", HttpError.InternalServerError);
+		return NextError.Error(err || "Server error.", HttpError.InternalServerError);
 	} finally {
 		if (client) client.release();
 	}

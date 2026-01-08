@@ -9,7 +9,6 @@ import {
 } from "@/lib/services/minio";
 import {randomUUID} from "crypto";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {checkUUID} from "@/lib/utils/util";
 import {getUser} from "@/lib/auth/getUser";
 import {connectionPool} from "@/lib/services/postgres";
 import {QueryResult} from "pg";
@@ -44,20 +43,20 @@ export async function POST(req: NextRequest) {
 		// -------------------------------
 		// Validation
 		// -------------------------------
-		if (!videoId || !checkUUID(videoId)) {
-			return NextError.error("Invalid video id", HttpError.BadRequest);
+		if (!videoId) {
+			return NextError.Error("Invalid video id", HttpError.BadRequest);
 		}
 
 		if (!file) {
-			return NextError.error("No file uploaded", HttpError.BadRequest);
+			return NextError.Error("No file uploaded", HttpError.BadRequest);
 		}
 
 		if (!file.name.endsWith(".vtt") && file.type !== "text/vtt") {
-			return NextError.error("Only VTT subtitle files are allowed", HttpError.BadRequest);
+			return NextError.Error("Only VTT subtitle files are allowed", HttpError.BadRequest);
 		}
 
 		if (!language || !language_short || !language.match(/^[a-zA-Z]+(-[a-zA-Z]+)?$/)) {
-			return NextError.error("Invalid language", HttpError.BadRequest);
+			return NextError.Error("Invalid language", HttpError.BadRequest);
 		}
 
 		// -------------------------------
@@ -73,7 +72,7 @@ export async function POST(req: NextRequest) {
 			`, [videoId, user.id]);
 
 			if (ownershipResult.rowCount === 0) {
-				return NextError.error("Video not found or you don't have permission to add subtitles", HttpError.NotFound);
+				return NextError.Error("Video not found or you don't have permission to add subtitles", HttpError.NotFound);
 			}
 		} finally {
 			client.release();
@@ -84,7 +83,7 @@ export async function POST(req: NextRequest) {
 		// -------------------------------
 		const videoExists = await objectExists(videoBucket, `${videoId}/master.m3u8`);
 		if (!videoExists) {
-			return NextError.error("Video isn't uploaded yet.", HttpError.BadRequest);
+			return NextError.Error("Video isn't uploaded yet.", HttpError.BadRequest);
 		}
 
 		// -------------------------------
@@ -125,7 +124,7 @@ ${filename}
 		const masterContent = await streamToString(stream);
 
 		if (!masterContent.trim()) {
-			return NextError.error("Master playlist is empty", HttpError.InternalServerError);
+			return NextError.Error("Master playlist is empty", HttpError.InternalServerError);
 		}
 
 		const lines = masterContent.split(/\r?\n/);
@@ -155,6 +154,6 @@ ${filename}
 	} catch (err: any) {
 		console.error("Upload/update subtitle error:", err);
 		const message = err instanceof Error ? err.message : "Server error.";
-		return NextError.error(message, HttpError.InternalServerError);
+		return NextError.Error(message, HttpError.InternalServerError);
 	}
 }

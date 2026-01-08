@@ -1,6 +1,5 @@
 import {NextResponse} from "next/server";
 import NextError, {HttpError} from "@/lib/utils/error";
-import {checkUUID} from "@/lib/utils/util";
 import {countFilesInFolder, listFilesInFolder, videoBucket} from "@/lib/services/minio";
 
 export async function OPTIONS() {
@@ -26,11 +25,7 @@ export async function GET(req: Request) {
 		// Request validation
 		// -------------------------------
 		if (!video_id) {
-			return NextError.error("Missing id", HttpError.BadRequest);
-		}
-
-		if (!checkUUID(video_id)) {
-			return NextError.error("Invalid video id format", HttpError.BadRequest);
+			return NextError.Error("Missing id", HttpError.BadRequest);
 		}
 
 		// -------------------------------
@@ -53,6 +48,6 @@ export async function GET(req: Request) {
 		}, {status: 200});
 	} catch (err: any) {
 		console.error("Minio error: ", err);
-		return NextError.error(err || "Server error.", HttpError.InternalServerError);
+		return NextError.Error(err || "Server error.", HttpError.InternalServerError);
 	}
 }
