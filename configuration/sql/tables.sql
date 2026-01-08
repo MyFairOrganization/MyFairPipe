@@ -25,9 +25,7 @@ CREATE TABLE Thumbnail
 (
     thumbnail_id SERIAL PRIMARY KEY,
     photo_id     INTEGER REFERENCES Photo (photo_id) ON DELETE CASCADE,
-    video_id     INT,
-    is_active    BOOLEAN,
-    FOREIGN KEY (video_id) REFERENCES video (video_id)
+    is_active    BOOLEAN
 );
 
 -- User table
