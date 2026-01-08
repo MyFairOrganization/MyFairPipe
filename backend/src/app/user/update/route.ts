@@ -58,7 +58,7 @@ export async function PATCH(req: NextRequest) {
             `
             UPDATE "user"
             SET ${fields.join(", ")}
-            WHERE id = $${idx}
+            WHERE user_id = $${idx}
             `,
             values
         );
