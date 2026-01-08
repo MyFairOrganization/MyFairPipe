@@ -228,22 +228,3 @@ COMMENT ON TABLE Watch_History IS 'Tracks which users watched which videos and f
 COMMENT ON TABLE Like_Video IS 'Tracks user likes/dislikes on videos';
 COMMENT ON TABLE Like_Comment IS 'Tracks user likes/dislikes on comments';
 COMMENT ON TABLE Subscriber IS 'User subscription relationships';
-
-SELECT *
-FROM video;
-select *
-FROM photo;
-SELECT *
-FROM Thumbnail;
-SELECT *
-FROM profile_picture;
-SELECT *
-FROM "User";
-
-SELECT ph.path
-FROM "User" u
-         LEFT JOIN profile_picture p
-                   ON p.profile_picture_id = u.picture_id
-         LEFT JOIN photo ph
-                   ON ph.photo_id = p.photo_id
-WHERE u.user_id = 4;
