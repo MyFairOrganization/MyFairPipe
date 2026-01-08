@@ -4,7 +4,6 @@ import {
     uploadFileToMinio,
     photoBucket
 } from "@/lib/services/minio";
-import { randomUUID } from "crypto";
 import { connectionPool } from "@/lib/services/postgres";
 import NextError, { HttpError } from "@/lib/utils/error";
 import { getUser } from "@/lib/auth/getUser";
@@ -38,8 +37,22 @@ export async function POST(req: NextRequest) {
         return NextError.Error("Only image files are allowed", HttpError.BadRequest);
     }
 
-    const photoId = randomUUID();
-    const profilePictureId = randomUUID();
+    const client = await connectionPool.connect();
+
+    var idSelect;
+
+    try {
+        await client.query("BEGIN");
+
+        idSelect = await client.query("SELECT * FROM photo;");
+    } catch (err) {
+        await client.query("ROLLBACK");
+        console.error(err);
+        return NextError.Error("Upload failed", HttpError.InternalServerError);
+    }
+
+    const photoId = idSelect.rowCount + 1;
+    const profilePictureId = idSelect.rowCount + 1;
     const extension = file.name.split(".").pop() || "png";
     const filename = `${photoId}.${extension}`;
 
@@ -48,12 +61,7 @@ export async function POST(req: NextRequest) {
     await createBucketIfNeeded(photoBucket);
     await uploadFileToMinio(filename, photoBucket, buffer, file.type);
 
-    const client = await connectionPool.connect();
-
-    try {
-        await client.query("BEGIN");
-
-        await client.query(
+    try {await client.query(
             `
             INSERT INTO photo (photo_id, path)
             VALUES ($1, $2)
