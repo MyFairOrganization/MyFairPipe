@@ -12,6 +12,6 @@ export default defineConfig({
             '@': fileURLToPath(new URL('./src', import.meta.url))
         },
     }, server: {
-        allowedHosts: ['myfairpipe.com']
+        allowedHosts: ['myfairpipe.com', 'www.myfairpipe.com']
     }
 })
