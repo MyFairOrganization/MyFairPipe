@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest) {
         let idx = 1;
 
         if (displayName) {
-            fields.push(`display_name = $${idx++}`);
+            fields.push(`displayname = $${idx++}`);
             values.push(displayName);
         }
 
