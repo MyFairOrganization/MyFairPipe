@@ -4,7 +4,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Photo table (base table for Profile Picture and Thumbnail)
-DROP TABLE Photo CASCADE;
+DROP TABLE IF EXISTS Photo CASCADE;
 CREATE TABLE Photo
 (
     photo_id SERIAL PRIMARY KEY,
@@ -12,7 +12,7 @@ CREATE TABLE Photo
 );
 
 -- Profile Picture table (inherits from Photo concept)
-DROP TABLE Profile_Picture CASCADE;
+DROP TABLE IF EXISTS Profile_Picture CASCADE;
 CREATE TABLE Profile_Picture
 (
     profile_picture_id SERIAL PRIMARY KEY,
@@ -20,7 +20,7 @@ CREATE TABLE Profile_Picture
 );
 
 -- Thumbnail table (inherits from Photo concept)
-DROP TABLE Thumbnail CASCADE;
+DROP TABLE IF EXISTS Thumbnail CASCADE;
 CREATE TABLE Thumbnail
 (
     thumbnail_id SERIAL PRIMARY KEY,
@@ -29,7 +29,7 @@ CREATE TABLE Thumbnail
 );
 
 -- User table
-DROP TABLE "User" CASCADE;
+DROP TABLE IF EXISTS "User" CASCADE;
 CREATE TABLE "User"
 (
     user_id         SERIAL PRIMARY KEY,
@@ -44,7 +44,7 @@ CREATE TABLE "User"
 );
 
 -- Anonymous User table
-DROP TABLE Anonym_User CASCADE;
+DROP TABLE IF EXISTS Anonym_User CASCADE;
 CREATE TABLE Anonym_User
 (
     temp_id     SERIAL PRIMARY KEY,
@@ -53,7 +53,7 @@ CREATE TABLE Anonym_User
 );
 
 -- Metadata table
-DROP TABLE Metadata CASCADE;
+DROP TABLE IF EXISTS Metadata CASCADE;
 CREATE TABLE Metadata
 (
     metadata_id SERIAL PRIMARY KEY,
@@ -62,7 +62,7 @@ CREATE TABLE Metadata
 );
 
 -- Video table
-DROP TABLE Video CASCADE;
+DROP TABLE IF EXISTS Video CASCADE;
 CREATE TABLE Video
 (
     video_id          SERIAL PRIMARY KEY,
@@ -84,7 +84,7 @@ CREATE TABLE Video
 );
 
 -- Category table
-DROP TABLE Category CASCADE;
+DROP TABLE IF EXISTS Category CASCADE;
 CREATE TABLE Category
 (
     category_id SERIAL PRIMARY KEY,
@@ -92,7 +92,7 @@ CREATE TABLE Category
 );
 
 -- Tags table
-DROP TABLE Tags CASCADE;
+DROP TABLE IF EXISTS Tags CASCADE;
 CREATE TABLE Tags
 (
     tag_id SERIAL PRIMARY KEY,
@@ -100,7 +100,7 @@ CREATE TABLE Tags
 );
 
 -- Metadata_Category junction table
-DROP TABLE Metadata_Category CASCADE;
+DROP TABLE IF EXISTS Metadata_Category CASCADE;
 CREATE TABLE Metadata_Category
 (
     category_id INTEGER REFERENCES Category (category_id) ON DELETE CASCADE,
@@ -109,7 +109,7 @@ CREATE TABLE Metadata_Category
 );
 
 -- Tags_Category junction table
-DROP TABLE Tags_Category CASCADE;
+DROP TABLE IF EXISTS Tags_Category CASCADE;
 CREATE TABLE Tags_Category
 (
     tag_id      INTEGER REFERENCES Tags (tag_id) ON DELETE CASCADE,
@@ -118,7 +118,7 @@ CREATE TABLE Tags_Category
 );
 
 -- Subscriber junction table (self-referencing User table)
-DROP TABLE Subscriber CASCADE;
+DROP TABLE IF EXISTS Subscriber CASCADE;
 CREATE TABLE Subscriber
 (
     user_id       INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
@@ -128,7 +128,7 @@ CREATE TABLE Subscriber
 );
 
 -- Watch_History junction table
-DROP TABLE Watch_History CASCADE;
+DROP TABLE IF EXISTS Watch_History CASCADE;
 CREATE TABLE Watch_History
 (
     user_id   INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
@@ -138,7 +138,7 @@ CREATE TABLE Watch_History
 );
 
 -- Like_Video junction table
-DROP TABLE Like_Video CASCADE;
+DROP TABLE IF EXISTS Like_Video CASCADE;
 CREATE TABLE Like_Video
 (
     user_id  INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
@@ -148,7 +148,7 @@ CREATE TABLE Like_Video
 );
 
 -- Comment table
-DROP TABLE Comment CASCADE;
+DROP TABLE IF EXISTS Comment CASCADE;
 CREATE TABLE Comment
 (
     comment_id SERIAL PRIMARY KEY,
@@ -160,7 +160,7 @@ CREATE TABLE Comment
 );
 
 -- Like_Comment junction table
-DROP TABLE Like_Comment CASCADE;
+DROP TABLE IF EXISTS Like_Comment CASCADE;
 CREATE TABLE Like_Comment
 (
     user_id    INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
