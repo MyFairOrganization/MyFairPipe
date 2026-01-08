@@ -184,37 +184,6 @@ CREATE INDEX idx_like_video_video ON Like_Video (video_id);
 CREATE INDEX idx_subscriber_user ON Subscriber (user_id);
 CREATE INDEX idx_subscriber_subscriber ON Subscriber (subscriber_id);
 
--- Views for common queries
-
--- View for video details with metadata
-CREATE VIEW Video_Details AS
-SELECT v.video_id,
-       v.title,
-       v.description,
-       v.duration,
-       v.views,
-       v.is_age_restricted,
-       v.tested,
-       u.username    AS uploader_username,
-       u.displayname AS uploader_displayname,
-       v.likes,
-       v.dislikes
-FROM Video v
-         LEFT JOIN "User" u ON v.uploader = u.user_id;
-
--- View for user statistics
-CREATE VIEW User_Statistics AS
-SELECT u.user_id,
-       u.username,
-       u.displayname,
-       COUNT(DISTINCT v.video_id)      AS total_videos,
-       COUNT(DISTINCT s.subscriber_id) AS total_subscribers,
-       COALESCE(SUM(v.views), 0)       AS total_views
-FROM "User" u
-         LEFT JOIN Video v ON u.user_id = v.uploader
-         LEFT JOIN Subscriber s ON u.user_id = s.user_id
-GROUP BY u.user_id, u.username, u.displayname;
-
 COMMENT ON TABLE "User" IS 'Registered users of the platform';
 COMMENT ON TABLE Anonym_User IS 'Anonymous/temporary users with session-based access';
 COMMENT ON TABLE Video IS 'Video content uploaded by users';
