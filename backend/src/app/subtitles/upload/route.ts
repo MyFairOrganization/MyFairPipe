@@ -7,7 +7,6 @@ import {
 	uploadFileToMinio,
 	videoBucket
 } from "@/lib/services/minio";
-import {randomUUID} from "crypto";
 import NextError, {HttpError} from "@/lib/utils/error";
 import {getUser} from "@/lib/auth/getUser";
 import {connectionPool} from "@/lib/services/postgres";
@@ -63,6 +62,9 @@ export async function POST(req: NextRequest) {
 		// Check ownership
 		// -------------------------------
 		const client = await connectionPool.connect();
+
+        var idSelect;
+
 		try {
 			const ownershipResult: QueryResult = await client.query(`
                 SELECT v.video_id
@@ -74,6 +76,8 @@ export async function POST(req: NextRequest) {
 			if (ownershipResult.rowCount === 0) {
 				return NextError.Error("Video not found or you don't have permission to add subtitles", HttpError.NotFound);
 			}
+
+            idSelect = await client.query(`SELECT * FROM video;`)
 		} finally {
 			client.release();
 		}
@@ -101,7 +105,7 @@ export async function POST(req: NextRequest) {
 			filename = existingSubtitle.split('/').pop()!;
 			subtitleId = filename.replace(".vtt", "").replace("subs_", "");
 		} else {
-			subtitleId = randomUUID();
+			subtitleId = idSelect.rowCount + 1;
 			filename = `subs_${language_short}.vtt`;
 		}
 

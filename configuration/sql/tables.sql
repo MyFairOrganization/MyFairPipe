@@ -4,7 +4,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Photo table (base table for Profile Picture and Thumbnail)
-DROP TABLE Photo CASCADE;
+DROP TABLE IF EXISTS Photo CASCADE;
 CREATE TABLE Photo
 (
     photo_id SERIAL PRIMARY KEY,
@@ -12,7 +12,7 @@ CREATE TABLE Photo
 );
 
 -- Profile Picture table (inherits from Photo concept)
-DROP TABLE Profile_Picture CASCADE;
+DROP TABLE IF EXISTS Profile_Picture CASCADE;
 CREATE TABLE Profile_Picture
 (
     profile_picture_id SERIAL PRIMARY KEY,
@@ -20,18 +20,16 @@ CREATE TABLE Profile_Picture
 );
 
 -- Thumbnail table (inherits from Photo concept)
-DROP TABLE Thumbnail CASCADE;
+DROP TABLE IF EXISTS Thumbnail CASCADE;
 CREATE TABLE Thumbnail
 (
     thumbnail_id SERIAL PRIMARY KEY,
     photo_id     INTEGER REFERENCES Photo (photo_id) ON DELETE CASCADE,
-    video_id     INT,
-    is_active    BOOLEAN,
-    FOREIGN KEY (video_id) REFERENCES video (video_id)
+    is_active    BOOLEAN
 );
 
 -- User table
-DROP TABLE "User" CASCADE;
+DROP TABLE IF EXISTS "User" CASCADE;
 CREATE TABLE "User"
 (
     user_id         SERIAL PRIMARY KEY,
@@ -46,7 +44,7 @@ CREATE TABLE "User"
 );
 
 -- Anonymous User table
-DROP TABLE Anonym_User CASCADE;
+DROP TABLE IF EXISTS Anonym_User CASCADE;
 CREATE TABLE Anonym_User
 (
     temp_id     SERIAL PRIMARY KEY,
@@ -55,7 +53,7 @@ CREATE TABLE Anonym_User
 );
 
 -- Metadata table
-DROP TABLE Metadata CASCADE;
+DROP TABLE IF EXISTS Metadata CASCADE;
 CREATE TABLE Metadata
 (
     metadata_id SERIAL PRIMARY KEY,
@@ -64,7 +62,7 @@ CREATE TABLE Metadata
 );
 
 -- Video table
-DROP TABLE Video CASCADE;
+DROP TABLE IF EXISTS Video CASCADE;
 CREATE TABLE Video
 (
     video_id          SERIAL PRIMARY KEY,
@@ -86,7 +84,7 @@ CREATE TABLE Video
 );
 
 -- Category table
-DROP TABLE Category CASCADE;
+DROP TABLE IF EXISTS Category CASCADE;
 CREATE TABLE Category
 (
     category_id SERIAL PRIMARY KEY,
@@ -94,7 +92,7 @@ CREATE TABLE Category
 );
 
 -- Tags table
-DROP TABLE Tags CASCADE;
+DROP TABLE IF EXISTS Tags CASCADE;
 CREATE TABLE Tags
 (
     tag_id SERIAL PRIMARY KEY,
@@ -102,7 +100,7 @@ CREATE TABLE Tags
 );
 
 -- Metadata_Category junction table
-DROP TABLE Metadata_Category CASCADE;
+DROP TABLE IF EXISTS Metadata_Category CASCADE;
 CREATE TABLE Metadata_Category
 (
     category_id INTEGER REFERENCES Category (category_id) ON DELETE CASCADE,
@@ -111,7 +109,7 @@ CREATE TABLE Metadata_Category
 );
 
 -- Tags_Category junction table
-DROP TABLE Tags_Category CASCADE;
+DROP TABLE IF EXISTS Tags_Category CASCADE;
 CREATE TABLE Tags_Category
 (
     tag_id      INTEGER REFERENCES Tags (tag_id) ON DELETE CASCADE,
@@ -120,7 +118,7 @@ CREATE TABLE Tags_Category
 );
 
 -- Subscriber junction table (self-referencing User table)
-DROP TABLE Subscriber CASCADE;
+DROP TABLE IF EXISTS Subscriber CASCADE;
 CREATE TABLE Subscriber
 (
     user_id       INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
@@ -130,7 +128,7 @@ CREATE TABLE Subscriber
 );
 
 -- Watch_History junction table
-DROP TABLE Watch_History CASCADE;
+DROP TABLE IF EXISTS Watch_History CASCADE;
 CREATE TABLE Watch_History
 (
     user_id   INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
@@ -140,7 +138,7 @@ CREATE TABLE Watch_History
 );
 
 -- Like_Video junction table
-DROP TABLE Like_Video CASCADE;
+DROP TABLE IF EXISTS Like_Video CASCADE;
 CREATE TABLE Like_Video
 (
     user_id  INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
@@ -150,7 +148,7 @@ CREATE TABLE Like_Video
 );
 
 -- Comment table
-DROP TABLE Comment CASCADE;
+DROP TABLE IF EXISTS Comment CASCADE;
 CREATE TABLE Comment
 (
     comment_id SERIAL PRIMARY KEY,
@@ -162,7 +160,7 @@ CREATE TABLE Comment
 );
 
 -- Like_Comment junction table
-DROP TABLE Like_Comment CASCADE;
+DROP TABLE IF EXISTS Like_Comment CASCADE;
 CREATE TABLE Like_Comment
 (
     user_id    INTEGER REFERENCES "User" (user_id) ON DELETE CASCADE,
@@ -186,37 +184,6 @@ CREATE INDEX idx_like_video_video ON Like_Video (video_id);
 CREATE INDEX idx_subscriber_user ON Subscriber (user_id);
 CREATE INDEX idx_subscriber_subscriber ON Subscriber (subscriber_id);
 
--- Views for common queries
-
--- View for video details with metadata
-CREATE VIEW Video_Details AS
-SELECT v.video_id,
-       v.title,
-       v.description,
-       v.duration,
-       v.views,
-       v.is_age_restricted,
-       v.tested,
-       u.username    AS uploader_username,
-       u.displayname AS uploader_displayname,
-       v.likes,
-       v.dislikes
-FROM Video v
-         LEFT JOIN "User" u ON v.uploader = u.user_id;
-
--- View for user statistics
-CREATE VIEW User_Statistics AS
-SELECT u.user_id,
-       u.username,
-       u.displayname,
-       COUNT(DISTINCT v.video_id)      AS total_videos,
-       COUNT(DISTINCT s.subscriber_id) AS total_subscribers,
-       COALESCE(SUM(v.views), 0)       AS total_views
-FROM "User" u
-         LEFT JOIN Video v ON u.user_id = v.uploader
-         LEFT JOIN Subscriber s ON u.user_id = s.user_id
-GROUP BY u.user_id, u.username, u.displayname;
-
 COMMENT ON TABLE "User" IS 'Registered users of the platform';
 COMMENT ON TABLE Anonym_User IS 'Anonymous/temporary users with session-based access';
 COMMENT ON TABLE Video IS 'Video content uploaded by users';
@@ -228,22 +195,3 @@ COMMENT ON TABLE Watch_History IS 'Tracks which users watched which videos and f
 COMMENT ON TABLE Like_Video IS 'Tracks user likes/dislikes on videos';
 COMMENT ON TABLE Like_Comment IS 'Tracks user likes/dislikes on comments';
 COMMENT ON TABLE Subscriber IS 'User subscription relationships';
-
-SELECT *
-FROM video;
-select *
-FROM photo;
-SELECT *
-FROM Thumbnail;
-SELECT *
-FROM profile_picture;
-SELECT *
-FROM "User";
-
-SELECT ph.path
-FROM "User" u
-         LEFT JOIN profile_picture p
-                   ON p.profile_picture_id = u.picture_id
-         LEFT JOIN photo ph
-                   ON ph.photo_id = p.photo_id
-WHERE u.user_id = 4;

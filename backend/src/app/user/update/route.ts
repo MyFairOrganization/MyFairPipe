@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest) {
         let idx = 1;
 
         if (displayName) {
-            fields.push(`display_name = $${idx++}`);
+            fields.push(`displayname = $${idx++}`);
             values.push(displayName);
         }
 
@@ -56,18 +56,14 @@ export async function PATCH(req: NextRequest) {
 
         const result = await client.query(
             `
-            UPDATE "user"
+            UPDATE "User"
             SET ${fields.join(", ")}
-            WHERE id = $${idx}
+            WHERE user_id = $${idx}
             `,
             values
         );
 
         await client.query("COMMIT");
-
-        if (result.rowCount === 0) {
-            return NextError.Error("User not found", HttpError.NotFound);
-        }
 
         return NextResponse.json({ success: true }, { status: 200 });
 

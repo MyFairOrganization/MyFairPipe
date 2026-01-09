@@ -43,7 +43,7 @@ export async function GET(req: Request) {
                    u.user_id AS uploader_id
             FROM video v
                      LEFT JOIN thumbnail t
-                               ON t.video_id = v.video_id AND t.is_active = true
+                               ON v.thumbnail_id = t.thumbnail_id
                      LEFT JOIN photo p
                                ON p.photo_id = t.photo_id
                      LEFT JOIN "User" u ON u.user_id = v.uploader

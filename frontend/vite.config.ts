@@ -17,20 +17,7 @@ export default defineConfig({
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url)),
         },
-    },
-
-    server: {
-        host: true,
-
-        allowedHosts: [
-            'myfairpipe.com',
-            'www.myfairpipe.com',
-        ],
-
-        hmr: {
-            protocol: 'wss',
-            host: 'www.myfairpipe.com',
-            clientPort: 443,
-        },
-    },
+    }, server: {
+        allowedHosts: ['myfairpipe.com', 'www.myfairpipe.com'],
+    }
 })
