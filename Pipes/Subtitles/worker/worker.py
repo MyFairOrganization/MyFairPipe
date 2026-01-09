@@ -15,8 +15,7 @@ ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
 SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
 JOB_ID = os.getenv("JOB_ID")
 OBJECT_KEY = os.getenv("OBJECT_KEY")
-upload_bucket = "upload"
-result_bucket = "video"
+BUCKET = "video"
 
 # --- Logging ---
 logging.basicConfig(
@@ -114,8 +113,8 @@ def main():
 	local_vtt = os.path.join(tmp_dir, f"{JOB_ID}.vtt")
 
 	try:
-		logging.info(f"Downloading {OBJECT_KEY} from bucket {upload_bucket}...")
-		minio.fget_object(upload_bucket, OBJECT_KEY, local_in)
+		logging.info(f"Downloading {OBJECT_KEY} from bucket {BUCKET}...")
+		minio.fget_object(BUCKET, OBJECT_KEY, local_in)
 		logging.info(f"Downloaded to {local_in}")
 
 		logging.info("Running Whisper transcription...")
@@ -128,15 +127,15 @@ def main():
 		logging.info(f"VTT file prepared at {local_vtt}")
 
 		subs_prefix = f"{JOB_ID}/subtitles"
-		minio.fput_object(result_bucket, f"{subs_prefix}/subs_en.vtt", local_vtt)
-		minio.fput_object(result_bucket, f"{subs_prefix}/subs_en.m3u8", local_subs_m3u8)
+		minio.fput_object(BUCKET, f"{subs_prefix}/subs_en.vtt", local_vtt)
+		minio.fput_object(BUCKET, f"{subs_prefix}/subs_en.m3u8", local_subs_m3u8)
 		logging.info("Uploaded VTT and subtitles playlist to MinIO")
 
 		master_local = os.path.join(tmp_dir, "master.m3u8")
 		master_key = f"{JOB_ID}/master.m3u8"
 		while True:
 			try:
-				minio.fget_object(result_bucket, master_key, master_local)
+				minio.fget_object(BUCKET, master_key, master_local)
 				logging.info("Downloaded existing master.m3u8")
 				break
 			except Exception:
@@ -161,8 +160,8 @@ def main():
 				f.truncate()
 				logging.info("Added subtitles entry to master.m3u8")
 
-		minio.fput_object(result_bucket, master_key, master_local)
-		logging.info(f"Uploaded updated master.m3u8 to {result_bucket}/{master_key}")
+		minio.fput_object(BUCKET, master_key, master_local)
+		logging.info(f"Uploaded updated master.m3u8 to {BUCKET}/{master_key}")
 
 	except Exception:
 		logging.exception(f"Job {JOB_ID} failed")
