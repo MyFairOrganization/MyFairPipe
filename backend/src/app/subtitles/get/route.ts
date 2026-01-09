@@ -44,7 +44,7 @@ export async function GET(req: Request) {
 		})
 
 		return NextResponse.json({
-			count: count / 2, languages: languages
+			count: count / 2, languages: languages, files: files
 		}, {status: 200});
 	} catch (err: any) {
 		console.error("Minio error: ", err);

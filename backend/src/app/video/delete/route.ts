@@ -52,7 +52,7 @@ export async function DELETE(req: NextRequest) {
                 FROM video v
                 WHERE v.video_id = $1
                   AND v.uploader = $2
-            `, [videoId, user.id]);
+            `, [videoId, user.user_id]);
 
             if (ownershipResult.rowCount === 0) {
                 await client.query("ROLLBACK");
@@ -72,7 +72,7 @@ export async function DELETE(req: NextRequest) {
                 FROM video
                 WHERE video_id = $1
                   AND uploader = $2
-            `, [videoId, user.id]);
+            `, [videoId, user.user_id]);
 
             await client.query("COMMIT");
 

@@ -52,7 +52,7 @@ export async function PATCH(req: NextRequest) {
             values.push(bio);
         }
 
-        values.push(user.id);
+        values.push(user.user_id);
 
         const result = await client.query(
             `
