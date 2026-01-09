@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 		// -------------------------------
 		// Check if video exists
 		// -------------------------------
-		const videoExists = await objectExists(videoBucket, `${videoId}/master.m3u8`);
+		const videoExists = await objectExists(videoBucket, `${videoId}/${videoId}.*`);
 		if (!videoExists) {
 			return NextError.Error("Video isn't uploaded yet.", HttpError.BadRequest);
 		}

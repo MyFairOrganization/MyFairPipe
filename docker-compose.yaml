@@ -59,6 +59,8 @@ services:
     profiles: [ "dev" ]
     networks:
       - external-network
+    volumes:
+      - /ssl:/ssl
 
   vuejs-dev:
     build:
