@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         // -------------------------------
         // MinIO validation
         // -------------------------------
-        const exists = await objectExists(videoBucket, videoPath);
+        const exists = await objectExists(videoBucket, `${videoId}/${videoId}.*`);
 
 
         if (!exists) {
