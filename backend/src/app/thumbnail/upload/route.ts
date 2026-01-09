@@ -124,9 +124,9 @@ export async function POST(req: NextRequest) {
             `, [id, `${videoId}/thumbnails/${filename}`]);
 
             await client.query(`
-                INSERT INTO Thumbnail (thumbnail_id, photo_id, video_id, is_active)
-                VALUES ($1, $2, $3, $4)
-            `, [id, id, videoId, false]);
+                INSERT INTO Thumbnail (thumbnail_id, photo_id, is_active)
+                VALUES ($1, $2, $3)
+            `, [id, id, false]);
 
             await client.query(`
                 UPDATE video
