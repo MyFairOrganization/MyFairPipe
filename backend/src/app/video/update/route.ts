@@ -57,7 +57,7 @@ export async function PATCH(req: NextRequest) {
                 FROM video v
                 WHERE v.video_id = $1
                   AND v.uploader = $2
-            `, [videoId, user.id]);
+            `, [videoId, user.user_id]);
 
             if (ownershipResult.rowCount === 0) {
                 await client.query("ROLLBACK");
@@ -71,21 +71,21 @@ export async function PATCH(req: NextRequest) {
                         description = $2
                     WHERE video_id = $3
                       AND uploader = $4
-                `, [title, description, videoId, user.id]);
+                `, [title, description, videoId, user.user_id]);
             } else if (title) {
                 result = await client.query(`
                     UPDATE video
                     SET title = $1
                     WHERE video_id = $2
                       AND uploader = $3
-                `, [title, videoId, user.id]);
+                `, [title, videoId, user.user_id]);
             } else if (description) {
                 result = await client.query(`
                     UPDATE video
                     SET description = $1
                     WHERE video_id = $2
                       AND uploader = $3
-                `, [description, videoId, user.id]);
+                `, [description, videoId, user.user_id]);
             } else {
                 await client.query("ROLLBACK");
                 return NextError.Error("At least one field to update is required", HttpError.BadRequest);

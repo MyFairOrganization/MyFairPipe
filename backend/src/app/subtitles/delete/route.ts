@@ -51,7 +51,7 @@ export async function DELETE(req: NextRequest) {
                 FROM video v
                 WHERE v.video_id = $1
                   AND v.uploader = $2
-			`, [videoId, user.id]);
+			`, [videoId, user.user_id]);
 
 			if (ownershipResult.rowCount === 0) {
 				return NextError.Error("Video not found or you don't have permission to delete subtitles", HttpError.NotFound);

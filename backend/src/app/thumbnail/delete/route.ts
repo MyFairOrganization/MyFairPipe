@@ -62,7 +62,7 @@ export async function DELETE(req: NextRequest) {
 			const {path, uploader} = result.rows[0];
 
 			// Check if user owns the video
-			if (uploader !== user.id) {
+			if (uploader !== user.user_id) {
 				await client.query("ROLLBACK");
 				return NextError.Error("You don't have permission to delete this thumbnail", HttpError.Forbidden);
 			}
