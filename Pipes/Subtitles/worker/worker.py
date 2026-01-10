@@ -128,39 +128,40 @@ def main():
 
 		subs_prefix = f"{JOB_ID}/subtitles"
 		minio.fput_object(BUCKET, f"{subs_prefix}/subs_en.vtt", local_vtt)
+		minio.fput_object(BUCKET, f"{subs_prefix}/subs_en.m3u8", local_subs_m3u8)
 		logging.info("Uploaded VTT and subtitles playlist to MinIO")
 
-		#master_local = os.path.join(tmp_dir, "master.m3u8")
-		#master_key = f"{JOB_ID}/master.m3u8"
-		#while True:
-		#	try:
-		#		minio.fget_object(BUCKET, master_key, master_local)
-		#		logging.info("Downloaded existing master.m3u8")
-		#		break
-		#	except Exception:
-		#		pass
-#
-		#subtitle_entry = (
-		#	'#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="English",'
-		#	'DEFAULT=YES,AUTOSELECT=YES,LANGUAGE="en",'
-		#	f'URI="subtitles/subs_en.m3u8"\n'
-		#)
-#
-		#with open(master_local, "r+", encoding="utf-8") as f:
-		#	content = f.read()
-		#	if "TYPE=SUBTITLES" not in content:
-		#		idx = content.find("#EXT-X-STREAM-INF")
-		#		if idx != -1:
-		#			content = content[:idx] + subtitle_entry + content[idx:]
-		#		else:
-		#			content += subtitle_entry
-		#		f.seek(0)
-		#		f.write(content)
-		#		f.truncate()
-		#		logging.info("Added subtitles entry to master.m3u8")
-#
-		#minio.fput_object(BUCKET, master_key, master_local)
-		#logging.info(f"Uploaded updated master.m3u8 to {BUCKET}/{master_key}")
+		master_local = os.path.join(tmp_dir, "master.m3u8")
+		master_key = f"{JOB_ID}/master.m3u8"
+		while True:
+			try:
+				minio.fget_object(BUCKET, master_key, master_local)
+				logging.info("Downloaded existing master.m3u8")
+				break
+			except Exception:
+				pass
+
+		subtitle_entry = (
+			'#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",NAME="English",'
+			'DEFAULT=YES,AUTOSELECT=YES,LANGUAGE="en",'
+			f'URI="subtitles/subs_en.m3u8"\n'
+		)
+
+		with open(master_local, "r+", encoding="utf-8") as f:
+			content = f.read()
+			if "TYPE=SUBTITLES" not in content:
+				idx = content.find("#EXT-X-STREAM-INF")
+				if idx != -1:
+					content = content[:idx] + subtitle_entry + content[idx:]
+				else:
+					content += subtitle_entry
+				f.seek(0)
+				f.write(content)
+				f.truncate()
+				logging.info("Added subtitles entry to master.m3u8")
+
+		minio.fput_object(BUCKET, master_key, master_local)
+		logging.info(f"Uploaded updated master.m3u8 to {BUCKET}/{master_key}")
 
 	except Exception:
 		logging.exception(f"Job {JOB_ID} failed")
