@@ -152,10 +152,9 @@ async function loadProfilePicture() {
 
 <style scoped>
 .pfp {
-    width: 75%;
-    height: 75%;
-    max-width: 250px;
-    max-height: 250px;
+    width: 250px;
+    height: 250px;
+    aspect-ratio: 1/1;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -172,9 +171,9 @@ async function loadProfilePicture() {
 .user {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    width: 900px;
-    height: 250px;
+    justify-items: left;
+    width: fit-content;
+    height: fit-content;
     background-color: #98c1d9;
     padding: 20px 30px;
     border-radius: 10px;
