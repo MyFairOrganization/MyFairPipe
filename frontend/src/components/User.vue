@@ -177,7 +177,7 @@ async function loadProfilePicture() {
     background-color: #98c1d9;
     padding: 20px 30px;
     border-radius: 10px;
-    gap: 20px;
+    gap: 400px;
 }
 
 .left h1 {
@@ -240,11 +240,10 @@ async function loadProfilePicture() {
 
     .user {
         display: flex;
-        flex-direction: column;
         justify-content: space-between;
-        align-items: center;
-        width: 900px;
-        height: 250px;
+        justify-items: left;
+        width: fit-content;
+        height: fit-content;
         background-color: #98c1d9;
         padding: 20px 30px;
         border-radius: 10px;
