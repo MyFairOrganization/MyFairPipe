@@ -164,60 +164,64 @@ async function dislike() {
 </template>
 
 <style scoped>
-.video {
-    width: 90%;
-    height: auto;
-    aspect-ratio: 16 / 9;
-    background-color: #3d5a80;
-}
-
-.thumbnail {
-    width: 20%;
-}
-
 .layout {
-    background: #e0fbfc;
     display: flex;
-    flex-direction: row;
+    gap: 2rem;
     width: 100%;
-    justify-content: space-between;
-    margin-top: 50px;
-    padding-left: 2%;
-    padding-right: 2%;
+    max-width: 1400px;
+    margin: 50px auto;
+    padding: 0 1rem;
 }
 
 #leftSide {
-    width: 60%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
 }
 
 #videos {
-    width: 30%;
+    flex-shrink: 0;
+    width: 300px;
     display: flex;
     flex-direction: column;
-    justify-content: normal;
     gap: 10px;
 }
 
 .player {
     display: flex;
     flex-direction: column;
-    z-index: 1;
-    justify-content: center;
+    width: 100%;
 }
 
 .player video {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
     border-radius: 10px;
-    z-index: 1;
+}
+
+#underVideo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+}
+
+#underVideo h2 {
+    margin: 0;
+    flex: 1;
 }
 
 .interactivePanel {
     display: flex;
-    flex-direction: row;
+    gap: 10px;
+    padding: 6px;
     border-radius: 10px;
     background: #c6f0ff;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
-    spacing: 10px;
-    width: fit-content;
 }
 
 .interactive {
@@ -226,28 +230,45 @@ async function dislike() {
     padding: 6px;
     border-radius: 50%;
     border: 1px solid #d0d0d0;
-    background: #ffffff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    transition: transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease;
+    background: #fff;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .information {
     display: flex;
-    width: fit-content;
-    height: auto;
-    border-radius: 10px;
-    padding: 0 10px 0 10px;
-    justify-content: center;
-    align-content: center;
+    padding: 0 10px;
     background-color: #e0fbfc;
+    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
 }
 
-#underVideo {
-    display: flex;
-    flex-direction: row;
-    width: 90%;
-    justify-content: space-between;
+.player p {
+    margin-top: 1rem;
+    line-height: 1.5;
 }
+
+@media (max-width: 600px) {
+
+    .layout {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #videos {
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    #underVideo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .interactivePanel {
+        align-self: flex-end;
+    }
+}
+
 </style>

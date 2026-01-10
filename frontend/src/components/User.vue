@@ -171,10 +171,10 @@ async function loadProfilePicture() {
 .user {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     background-color: #98c1d9;
     padding: 20px 30px;
     border-radius: 10px;
+    gap: 80px;
 }
 
 
