@@ -21,7 +21,7 @@
 
             <h2>Contact</h2>
             <p>
-                Email: example@email.com
+                Email: contact@myfairpipe.com
             </p>
 
             <h2>Project Information</h2>
