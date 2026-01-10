@@ -58,8 +58,8 @@ async function checkLoggedIn() {
         <nav class="header">
             <div class="row">
                 <div class="left-side">
-                    <img alt="Logo" height="40" src="@/assets/logo.svg"/>
-                    <RouterLink class="navtxt" to="/home">MyFairPipe</RouterLink>
+                    <RouterLink class="navtxt" to="/home"><img alt="Logo" height="40" src="@/assets/logo.svg"/></RouterLink>
+                    <RouterLink class="navtxt brand-text" to="/home">MyFairPipe</RouterLink>
                 </div>
                 <div class="right-side">
                     <RouterLink class="navtxt" to="/home">Home</RouterLink>
@@ -208,5 +208,19 @@ nav a:first-of-type {
     color: white;
     padding: 6px 16px;
     border-radius: 6px;
+}
+
+@media (max-width: 600px) {
+    .brand-text {
+        display: none;
+    }
+
+    .header {
+        padding: 1.5rem 1rem;
+    }
+
+    .navtxt {
+        font-size: 16px;
+    }
 }
 </style>
