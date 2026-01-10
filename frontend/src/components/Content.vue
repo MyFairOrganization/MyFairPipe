@@ -156,9 +156,11 @@ export function CreateVIDHLS(
     subtitleCode: string,
 ) {
     let hls: Hls | null = null
-    let showError = ref(false)
+    const showError = ref(false)
 
     hlsPath = videoPath.replace('%PATH', hlsPath)
+    const dataLevels = document.getElementById('data-levels')
+
 
     return h(
         'div',
@@ -194,9 +196,10 @@ export function CreateVIDHLS(
                             return h('p', 'Video is not available');
                         }
 
-                      hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                        window.alert(data.levels)
-                      });
+                        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                          dataLevels.value = data.levels;
+                          window.alert(data.levels)
+                        });
 
                         // Add HLS error handling
                         hls.on(Hls.Events.ERROR, (event, data) => {
