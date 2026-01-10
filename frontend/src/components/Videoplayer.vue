@@ -265,6 +265,7 @@ async function dislike() {
     #videos {
         width: 100%;
         margin-top: 1rem;
+        margin: 0 auto;
     }
 
     #underVideo {
