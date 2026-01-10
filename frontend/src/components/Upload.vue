@@ -223,17 +223,6 @@ async function submitForm() {
 
 <template>
     <div class="uploadForm">
-        <div v-if="uploadError" class="error-message">
-            {{ uploadError }}
-        </div>
-
-        <div v-if="uploading" class="progress-container">
-            <div class="progress-bar">
-                <div :style="{ width: uploadProgress + '%' }" class="progress-fill"></div>
-            </div>
-            <p>Uploading: {{ uploadProgress }}%</p>
-        </div>
-
         <div class="preview">
             <div v-if="videoURL" class="video-preview">
                 <p>Video to be Uploaded:</p>
@@ -247,50 +236,65 @@ async function submitForm() {
         </div>
 
         <div class="form-container">
-            <label for="title">Title:</label><br/>
+            <label for="title">Title: *</label><br/>
             <input
                 id="title"
                 v-model="title"
                 :disabled="uploading"
                 placeholder="Enter title"
                 type="text"
+                required
             /><br/>
 
-            <label for="description">Description:</label><br/>
+            <label for="description">Description:*</label><br/>
             <textarea
                 id="description"
                 v-model="description"
                 :disabled="uploading"
                 placeholder="Enter description"
+                required
             ></textarea
             ><br/>
 
-            <label for="video">Video Upload:</label><br/>
+            <label for="video">Video Upload: *</label><br/>
             <input
                 id="video"
                 :disabled="uploading"
                 accept="video/*"
                 type="file"
                 @change="handleVideoUpload"
+                required
             /><br/><br/>
 
-            <label for="thumbnail">Thumbnail Upload:</label><br/>
+            <label for="thumbnail">Thumbnail Upload: *</label><br/>
             <input
                 id="thumbnail"
                 accept="image/*"
                 required
                 type="file"
                 @change="handleThumbnailUpload"
+                required
             /><br/><br/>
 
-            <label for="subtitle">Subtitle Upload:</label><br/>
-            <input id="subtitle" accept="text/vtt" type="file" @change="handleSubtitleUpload"/><br/>
-            <input id="language" v-model="language" placeholder="Language"/><br/>
+            <label for="subtitle">Subtitle Upload: </label><br/>
+            <input id="subtitle" v-if="subtitleFile" accept="text/vtt" type="file" @change="handleSubtitleUpload"/><br/>
+            <input id="language" v-if="subtitleFile" v-model="language" placeholder="Language"/><br/>
             <input
                 id="language_short"
                 v-model="languageShort"
                 placeholder="ISO 639 language code"
             /><br/><br/>
+
+            <div v-if="uploadError" class="error-message">
+                {{ uploadError }}
+            </div>
+
+            <div v-if="uploading" class="progress-container">
+                <div class="progress-bar">
+                    <div :style="{ width: uploadProgress + '%' }" class="progress-fill"></div>
+                </div>
+                <p>Uploading: {{ uploadProgress }}%</p>
+            </div>
 
             <button :disabled="uploading" class="upload" @click="submitForm">
                 {{ uploading ? 'Uploading...' : 'Upload' }}
