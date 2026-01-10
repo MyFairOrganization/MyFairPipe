@@ -37,9 +37,9 @@ async function getDetails() {
     const subtitleData = await subtitleReq.json();
 
     let subtitlePath = subtitleData.files;
-    subtitlePath = subtitlePath.filter((subtitles: string) => {
+    subtitlePath = String(subtitlePath.filter((subtitles: string) => {
         return subtitles.endsWith('.vtt');
-    })
+    }));
 
     title.value = videoData.title;
     description.value = videoData.description;
