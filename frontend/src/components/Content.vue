@@ -189,7 +189,9 @@ export function CreateVIDHLS(
                         });
 
                         hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                            window.alert(data.levels);
+                          for (const level of data.levels) {
+                            window.alert(level.height)
+                          }
                         });
 
                         try {
