@@ -23,16 +23,17 @@ onMounted(async () => {
 
 <style>
 .thumbnail {
-    width: 75%;
+    width: 100%;
     border-radius: 15px;
 }
 
 #videos {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+
     width: 80%;
-    margin-right: 10%;
-    margin-left: 14%;
+    margin: 0 auto;
 }
 
 #feed {
@@ -40,4 +41,12 @@ onMounted(async () => {
     margin-bottom: 50px;
     width: 100%;
 }
+
+@media (max-width: 600px) {
+    #videos {
+        grid-template-columns: 1fr;
+        width: 95%;
+    }
+}
+
 </style>
