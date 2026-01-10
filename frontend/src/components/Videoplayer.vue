@@ -18,7 +18,8 @@ const disliked = ref(false);
 const dislikes = ref('0');
 const thumbnails = ref([]);
 const loading = ref(true);
-const error = ref(false)
+const views = ref(0);
+const error = ref(false);
 
 onMounted(async () => {
     await getLiked();
@@ -43,6 +44,7 @@ async function getDetails() {
 
     title.value = videoData.title;
     description.value = videoData.description;
+    views.value = videoData.views;
     path.value = videoData.path;
     subtitles.value = subtitlePath;
     subtitleLanguage.value = subtitleData.languages[0];
@@ -133,25 +135,28 @@ async function dislike() {
                         <h2>{{ title }}</h2>
                         <div class="interactivePanel">
                             <div class="rating">
-                                <input
-                                    id="like"
-                                    :src="liked ? '/liked.svg' : '/like.svg'"
-                                    class="interactive"
-                                    type="image"
-                                    v-on:click="like()"
-                                />
-                                <p class="information">{{ likes }}</p>
+                                <p class="information">views: {{ views }}</p>
                             </div>
-                            <div class="rating">
-                                <input
-                                    id="dislike"
-                                    :src="disliked ? '/disliked.svg' : '/dislike.svg'"
-                                    class="interactive"
-                                    type="image"
-                                    v-on:click="dislike()"
-                                />
-                                <p class="information">{{ dislikes }}</p>
-                            </div>
+                                <div class="rating">
+                                    <input
+                                        id="like"
+                                        :src="liked ? '/liked.svg' : '/like.svg'"
+                                        class="interactive"
+                                        type="image"
+                                        v-on:click="like()"
+                                    />
+                                    <p class="information">{{ likes }}</p>
+                                </div>
+                                <div class="rating">
+                                    <input
+                                        id="dislike"
+                                        :src="disliked ? '/disliked.svg' : '/dislike.svg'"
+                                        class="interactive"
+                                        type="image"
+                                        v-on:click="dislike()"
+                                    />
+                                    <p class="information">{{ dislikes }}</p>
+                                </div>
                         </div>
                     </div>
                     <p>{{ description }}</p>
