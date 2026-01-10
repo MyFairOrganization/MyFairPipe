@@ -159,7 +159,7 @@ export function CreateVIDHLS(
     const showError = ref(false)
 
     hlsPath = videoPath.replace('%PATH', hlsPath)
-    const dataLevels = document.getElementById('data-levels')
+    const dataLevels = document.getElementById('data-levels') as HTMLElement
 
 
     return h(
@@ -197,7 +197,7 @@ export function CreateVIDHLS(
                         }
 
                         hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                          dataLevels.value = data.levels;
+                          dataLevels.textContent = String(data.levels);
                           window.alert(data.levels)
                         });
 
