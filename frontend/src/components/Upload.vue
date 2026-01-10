@@ -273,7 +273,6 @@ async function submitForm() {
                 required
                 type="file"
                 @change="handleThumbnailUpload"
-                required
             /><br/><br/>
 
             <label for="subtitle">Subtitle Upload: </label><br/>
