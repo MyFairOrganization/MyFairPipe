@@ -161,34 +161,31 @@ async function loadProfilePicture() {
 
 .container {
     display: flex;
-    width: 100%;
     align-items: center;
     gap: 20px;
-    margin-top: 50px;
-    margin-bottom: 50px;
-    margin-left: 7em;
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 0 1rem;
 }
 
 .user {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    width: fit-content;
-    height: fit-content;
+    justify-content: space-between;
     background-color: #98c1d9;
     padding: 20px 30px;
     border-radius: 10px;
-    gap: 400px;
 }
+
 
 .left h1 {
     font-weight: bold;
-    font-size: 4em;
+    font-size: clamp(2rem, 4vw, 4rem);
     margin: 0;
 }
 
 #descr {
-    font-size: 1.5em;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
     margin: 10px 0;
 }
 
@@ -230,27 +227,41 @@ async function loadProfilePicture() {
 
 @media (max-width: 600px) {
     .container {
-        display: flex;
         flex-direction: column;
-        width: 100%;
         align-items: center;
+        text-align: center;
         gap: 20px;
-        margin-top: 50px;
-        margin-bottom: 50px;
-        margin-left: 7em;
+        margin: 30px auto;
+        padding: 0 1rem;
     }
 
     .user {
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+    }
+
+    .left {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
         align-items: center;
-        width: fit-content;
-        height: fit-content;
-        background-color: #98c1d9;
-        padding: 20px 30px;
-        border-radius: 10px;
-        gap: 400px;
+    }
+
+    .right {
+        width: 100%;
+        align-items: center;
+    }
+
+    .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .pfp {
+        width: 180px;
+        height: 180px;
     }
 }
 </style>
