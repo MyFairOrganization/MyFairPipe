@@ -240,6 +240,7 @@ async function loadProfilePicture() {
 
     .user {
         display: flex;
+        flex-direction: column;
         justify-content: space-between;
         justify-items: left;
         width: fit-content;
