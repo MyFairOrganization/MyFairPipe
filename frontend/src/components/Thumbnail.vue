@@ -30,12 +30,13 @@ function goToPlayer(id) {
 
 <style>
 .thumbnail {
-    width: 320px;
+    max-width: 320px;
+    width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
     object-fit: contain;
     background-color: #3D5A80;
-    border-radius: 5px;
+    border-radius: 15px;
 }
 
 .image-block:hover {

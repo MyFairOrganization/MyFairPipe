@@ -22,11 +22,6 @@ onMounted(async () => {
 </template>
 
 <style>
-.thumbnail {
-    width: 100%;
-    border-radius: 15px;
-}
-
 #videos {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
