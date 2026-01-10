@@ -36,12 +36,4 @@ onMounted(async () => {
     margin-bottom: 50px;
     width: 100%;
 }
-
-@media (max-width: 600px) {
-    #videos {
-        grid-template-columns: 1fr;
-        width: 95%;
-    }
-}
-
 </style>
