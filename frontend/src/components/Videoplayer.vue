@@ -37,9 +37,9 @@ async function getDetails() {
     const subtitleData = await subtitleReq.json();
 
     let subtitlePath = subtitleData.files;
-    subtitlePath = subtitlePath.filter((subtitles: string) => {
+    subtitlePath = String(subtitlePath.filter((subtitles: string) => {
         return subtitles.endsWith('.vtt');
-    })
+    }));
 
     title.value = videoData.title;
     description.value = videoData.description;
@@ -127,7 +127,13 @@ async function dislike() {
     <div v-if="!loading" class="layout">
         <div id="leftSide">
             <div class="player">
-                <component :is="CreateVIDHLS(path, subtitles, subtitleLanguage, subtitleLanguage)"/>
+                <div class="quality-menu"></div>
+                <CreateVIDHLS
+                    :hlsPath="path"
+                    :subtitles="subtitles"
+                    :subtitleLanguage="subtitleLanguage"
+                    :subtitleCode="subtitleLanguage"
+                />
                 <div>
                     <div id="underVideo">
                         <h2>{{ title }}</h2>
@@ -199,6 +205,7 @@ async function dislike() {
     width: 100%;
     height: auto;
     aspect-ratio: 16/9;
+    background-color: #3D5A80;
     border-radius: 10px;
 }
 
