@@ -194,6 +194,10 @@ export function CreateVIDHLS(
                             return h('p', 'Video is not available');
                         }
 
+                      hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+                        window.alert(data.levels)
+                      });
+
                         // Add HLS error handling
                         hls.on(Hls.Events.ERROR, (event, data) => {
                             if (data.fatal) {

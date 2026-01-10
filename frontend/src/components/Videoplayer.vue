@@ -4,6 +4,7 @@ import {  CreateVIDHLS, GetIMGs } from "@/components/Content.vue";
 import {onMounted, ref} from 'vue';
 import Thumbnail from '@/components/Thumbnail.vue';
 import Loader from '@/components/Loader.vue';
+import videojs from 'video.js'
 
 const route = useRoute();
 const path = ref('');
@@ -119,6 +120,29 @@ async function dislike() {
 
     getLiked();
 }
+
+const options = {
+  plugins: {
+    streamrootHls: {
+      hlsjsConfig: {
+        // Your Hls.js config
+      },
+      // captionConfig: {
+      //     line: -1,
+      //     align: 'center',
+      //     position: 50,
+      //     size: 40,
+      // }
+    },
+    qualityMenu: {
+      useResolutionLabels: true
+    }
+  }
+};
+
+const player = videojs('example-video', options);
+player.qualityMenu();
+player.dvrux();
 </script>
 
 <template>
@@ -127,6 +151,7 @@ async function dislike() {
     <div v-if="!loading" class="layout">
         <div id="leftSide">
             <div class="player">
+              <video id="example-video" width="600" height="300" class="video-js vjs-default-skin" controls autoplay muted>
                 <component :is="CreateVIDHLS(path, subtitles, subtitleLanguage, subtitleLanguage)"/>
                 <div>
                     <div id="underVideo">
@@ -199,6 +224,7 @@ async function dislike() {
     width: 100%;
     height: auto;
     aspect-ratio: 16/9;
+    background-color: #3D5A80;
     border-radius: 10px;
 }
 
