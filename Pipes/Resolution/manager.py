@@ -71,7 +71,7 @@ def start_resolution(job_id: str, object_key: str):
 			network="internal-network",
 			name=container_name,
 			detach=True,
-			remove=True,
+			remove=False,
 		)
 		logging.info(
 			f"Started resolution container {container.id[:12]} "
