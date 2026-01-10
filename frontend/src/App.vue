@@ -163,7 +163,6 @@ nav a:first-of-type {
 
 .content {
     margin-top: 100px;
-    margin-bottom: 150px;
     align-content: space-around;
 }
 
@@ -174,8 +173,6 @@ nav a:first-of-type {
     padding: 2.5rem 2rem;
     left: 0;
     bottom: 0;
-    position: fixed;
-    z-index: 999;
 }
 
 .footer {
