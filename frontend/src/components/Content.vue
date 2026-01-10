@@ -159,6 +159,7 @@ export function CreateVIDHLS(
     const showError = ref(false)
 
     hlsPath = videoPath.replace('%PATH', hlsPath)
+    const qualityMenu = document.querySelector('.quality-menu') as HTMLElement;
 
     return h(
         'div',
@@ -189,9 +190,23 @@ export function CreateVIDHLS(
                         });
 
                         hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                          for (const level of data.levels) {
-                            window.alert(level.height)
-                          }
+                          data.levels.forEach((level, index) => {
+                            const option = document.createElement('div');
+                            option.className = 'quality-option';
+                            option.dataset.quality = String(index);
+
+                            // Format display text based on available metadata
+                            if (level.height) {
+                              option.textContent = `${level.height}p`;
+                              if (level.bitrate) {
+                                option.textContent += ` (${Math.round(level.bitrate / 1000)} kbps)`;
+                              }
+                            } else {
+                              option.textContent = `Level ${index + 1}`;
+                            }
+
+                            qualityMenu.appendChild(option);
+                          });
                         });
 
                         try {
