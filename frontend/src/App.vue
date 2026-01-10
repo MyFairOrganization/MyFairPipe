@@ -173,6 +173,7 @@ nav a:first-of-type {
     padding: 2.5rem 2rem;
     left: 0;
     bottom: 0;
+    position: absolute;
 }
 
 .footer {
