@@ -132,7 +132,7 @@ async function dislike() {
                     <div id="underVideo">
                         <h2>{{ title }}</h2>
                         <div class="interactivePanel">
-                            <div>
+                            <div class="rating">
                                 <input
                                     id="like"
                                     :src="liked ? '/liked.svg' : '/like.svg'"
@@ -140,9 +140,9 @@ async function dislike() {
                                     type="image"
                                     v-on:click="like()"
                                 />
-                                <p class="information">likes: {{ likes }}</p>
+                                <p class="information">{{ likes }}</p>
                             </div>
-                            <div>
+                            <div class="rating">
                                 <input
                                     id="dislike"
                                     :src="disliked ? '/disliked.svg' : '/dislike.svg'"
@@ -150,7 +150,7 @@ async function dislike() {
                                     type="image"
                                     v-on:click="dislike()"
                                 />
-                                <p class="information">dislikes: {{ dislikes }}</p>
+                                <p class="information">{{ dislikes }}</p>
                             </div>
                         </div>
                     </div>
@@ -232,6 +232,12 @@ async function dislike() {
     border: 1px solid #d0d0d0;
     background: #fff;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.rating {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
 }
 
 .information {
