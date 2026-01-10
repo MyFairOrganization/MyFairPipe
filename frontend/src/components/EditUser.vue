@@ -166,7 +166,9 @@ function back() {
     display: flex;
     align-items: flex-start;
     gap: 20px;
-    margin: 100px 5em 30%;
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 0 1rem;
 }
 
 .pfp-container {
@@ -185,31 +187,30 @@ function back() {
 
 .user {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
-    width: 900px;
-    height: 250px;
     background-color: #98c1d9;
     padding: 20px 30px;
     border-radius: 10px;
-    gap: 20px;
+    gap: 80px;
+    width: 100%;
 }
 
 .left {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    flex: 1;
 }
 
 .name-input {
-    font-size: 2em;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: bold;
     padding: 5px;
     width: 100%;
 }
 
 .descr-input {
-    font-size: 1.2em;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
     padding: 5px;
     width: 100%;
     resize: vertical;
@@ -229,5 +230,43 @@ function back() {
     border-radius: 10px;
     cursor: pointer;
     margin: 5px 0;
+}
+
+@media (max-width: 600px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+        margin: 30px auto;
+        padding: 0 1rem;
+    }
+
+    .user {
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+    }
+
+    .left {
+        align-items: center;
+    }
+
+    .right {
+        width: 100%;
+        align-items: center;
+    }
+
+    .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    .pfp {
+        width: 180px;
+        height: 180px;
+    }
 }
 </style>
