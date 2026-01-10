@@ -276,9 +276,10 @@ async function submitForm() {
             /><br/><br/>
 
             <label for="subtitle">Subtitle Upload: </label><br/>
-            <input id="subtitle" v-if="subtitleFile" accept="text/vtt" type="file" @change="handleSubtitleUpload"/><br/>
+            <input id="subtitle" accept="text/vtt" type="file" @change="handleSubtitleUpload"/><br/>
             <input id="language" v-if="subtitleFile" v-model="language" placeholder="Language"/><br/>
             <input
+                v-if="subtitleFile"
                 id="language_short"
                 v-model="languageShort"
                 placeholder="ISO 639 language code"
