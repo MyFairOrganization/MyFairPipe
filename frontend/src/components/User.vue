@@ -161,6 +161,8 @@ async function loadProfilePicture() {
 
 .container {
     display: flex;
+    width: 100%;
+    align-self: center;
     align-items: center;
     gap: 20px;
     margin-top: 50px;
