@@ -159,7 +159,7 @@ export function CreateVIDHLS(
     const showError = ref(false)
 
     hlsPath = videoPath.replace('%PATH', hlsPath)
-    const qualityMenu = document.querySelector('.quality-menu') as HTMLElement;
+    let qualityMenu = [];
 
     return h(
         'div',
@@ -205,7 +205,7 @@ export function CreateVIDHLS(
                               option.textContent = `Level ${index + 1}`;
                             }
 
-                            qualityMenu.appendChild(option);
+                            qualityMenu.push(option);
                           });
                         });
 
@@ -241,6 +241,11 @@ export function CreateVIDHLS(
                     default: true,
                 }),
             ]),
+            h('div', { class: 'quality-menu' },
+              qualityMenu.map(q => {
+                h('div', { class: 'quality-option' }, `${q}p`)
+              })
+            ),
             showError.value ? h('p', 'This video is not available') : null
         ].filter(Boolean),
     )

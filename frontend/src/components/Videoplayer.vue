@@ -127,9 +127,7 @@ async function dislike() {
     <div v-if="!loading" class="layout">
         <div id="leftSide">
             <div class="player">
-              <div class="quality-menu">
-
-              </div>
+              <div class="quality-menu"></div>
               <component :is="CreateVIDHLS(path, subtitles, subtitleLanguage, subtitleLanguage)"/>
                 <div>
                     <div id="underVideo">
