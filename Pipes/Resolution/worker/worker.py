@@ -17,7 +17,7 @@ JOB_ID = os.getenv("JOB_ID")
 OBJECT_KEY = os.getenv("OBJECT_KEY")
 BUCKET = "video"
 
-ENABLED_RENDITIONS = os.getenv("RENDITIONS", "360p,480p,720p,1080p").split(",")
+ENABLED_RENDITIONS = os.getenv("RENDITIONS", "360p,1080p").split(",")
 
 # HLS settings
 HLS_ENABLED = os.getenv("HLS_ENABLED", "true").lower() == "true"
