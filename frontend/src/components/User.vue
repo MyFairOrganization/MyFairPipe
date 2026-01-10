@@ -162,7 +162,6 @@ async function loadProfilePicture() {
 .container {
     display: flex;
     width: 100%;
-    align-self: center;
     align-items: center;
     gap: 20px;
     margin-top: 50px;
@@ -173,7 +172,7 @@ async function loadProfilePicture() {
 .user {
     display: flex;
     justify-content: space-between;
-    justify-items: left;
+    align-items: center;
     width: fit-content;
     height: fit-content;
     background-color: #98c1d9;
@@ -233,6 +232,7 @@ async function loadProfilePicture() {
     .container {
         display: flex;
         flex-direction: column;
+        width: 100%;
         align-items: center;
         gap: 20px;
         margin-top: 50px;
@@ -244,13 +244,13 @@ async function loadProfilePicture() {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        justify-items: left;
+        align-items: center;
         width: fit-content;
         height: fit-content;
         background-color: #98c1d9;
         padding: 20px 30px;
         border-radius: 10px;
-        gap: 20px;
+        gap: 400px;
     }
 }
 </style>
