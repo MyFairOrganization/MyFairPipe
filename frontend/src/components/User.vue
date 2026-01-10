@@ -152,14 +152,12 @@ async function loadProfilePicture() {
 
 <style scoped>
 .pfp {
-    width: 250px;
-    height: 250px;
+    width: 75%;
+    height: 75%;
+    max-width: 250px;
+    max-height: 250px;
     border-radius: 50%;
     object-fit: cover;
-}
-
-.thumbnail {
-    width: 75%;
 }
 
 .container {
@@ -219,13 +217,39 @@ async function loadProfilePicture() {
 
 #videos {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+
     width: 80%;
-    margin-right: 10%;
-    margin-left: 14%;
+    margin: 0 auto;
 }
 
 #thumbnails {
     width: 100%;
+}
+
+@media (max-width: 600px) {
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin-top: 50px;
+        margin-bottom: 50px;
+        margin-left: 7em;
+    }
+
+    .user {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        width: 900px;
+        height: 250px;
+        background-color: #98c1d9;
+        padding: 20px 30px;
+        border-radius: 10px;
+        gap: 20px;
+    }
 }
 </style>
