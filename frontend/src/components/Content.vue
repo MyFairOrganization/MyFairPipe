@@ -107,7 +107,7 @@ export async function GetIMGs(limit = 0, offset = 0, userID = undefined) {
  * @constructor
  */
 export function CreateVID(path: string, subtitles: string, subtitleLanguage: string, subtitleCode: string) {
-    var type = path.split('.').pop()
+    let type = path.split('.').pop()
 
     console.log(type)
 
@@ -159,7 +159,7 @@ export function CreateVIDHLS(
     const showError = ref(false)
 
     hlsPath = videoPath.replace('%PATH', hlsPath)
-    let qualityMenu = [];
+    const qualityMenu = ref<number[]>([])
 
     return h(
         'div',
@@ -189,25 +189,13 @@ export function CreateVIDHLS(
                             startPosition: 0,
                         });
 
-                        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-                          data.levels.forEach((level, index) => {
-                            const option = document.createElement('div');
-                            option.className = 'quality-option';
-                            option.dataset.quality = String(index);
-
-                            // Format display text based on available metadata
-                            if (level.height) {
-                              option.textContent = `${level.height}p`;
-                              if (level.bitrate) {
-                                option.textContent += ` (${Math.round(level.bitrate / 1000)} kbps)`;
-                              }
-                            } else {
-                              option.textContent = `Level ${index + 1}`;
-                            }
-
-                            qualityMenu.push(option);
-                          });
-                        });
+                        hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
+                            qualityMenu.value = data.levels.map((level, index) => {return {
+                                index,
+                                height: level.height,
+                                bitrate: level.bitrate
+                            }});
+                        })
 
                         try {
                             hls.attachMedia(video);
@@ -242,9 +230,18 @@ export function CreateVIDHLS(
                 }),
             ]),
             h('div', { class: 'quality-menu' },
-              qualityMenu.map(q => {
-                h('div', { class: 'quality-option' }, `${q}p`)
-              })
+                qualityMenu.value.map(q =>
+                    {return h(
+                        'div',
+                        {
+                            class: 'quality-option',
+                            'data-quality': q.index
+                        },
+                        q.height
+                            ? `${q.height}p (${Math.round((q.bitrate ?? 0) / 1000)} kbps)`
+                            : `Level ${q.index + 1}`
+                    )}
+                )
             ),
             showError.value ? h('p', 'This video is not available') : null
         ].filter(Boolean),
