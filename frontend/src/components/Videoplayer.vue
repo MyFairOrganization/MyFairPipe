@@ -4,7 +4,7 @@ import { GetIMGs } from '@/components/Content.vue';
 import { nextTick, onMounted, ref } from 'vue';
 import Thumbnail from '@/components/Thumbnail.vue';
 import Loader from '@/components/Loader.vue';
-import type Hls from 'hls.js';
+import Hls from 'hls.js';
 
 const route = useRoute();
 const path = ref('');
