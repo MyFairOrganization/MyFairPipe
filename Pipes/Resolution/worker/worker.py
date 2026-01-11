@@ -117,43 +117,30 @@ def filter_renditions_by_source(
     return filtered
 
 
-def select_audio_stream(src: str):
-    probe = ffmpeg.probe(src)
-    audio_streams = [
-        s for s in probe["streams"]
-        if s.get("codec_type") == "audio"
-    ]
-
-    # Prefer AAC
-    for s in audio_streams:
-        if s.get("codec_name") == "aac":
-            return f"0:{s['index']}"
-
-    # Fallback: first audio stream
-    if audio_streams:
-        return f"0:{audio_streams[0]['index']}"
-
-    return None
-
-
 def generate_mp4_rendition(src: str, dst: str, size: str, bitrate: str) -> None:
-    """Generate one MP4 rendition with H.264/AAC."""
     width, height = map(int, size.split(":"))
 
-    audio_map = select_audio_stream(src)
+    input_stream = ffmpeg.input(src)
 
-    video = ffmpeg.input(src, map="0:v:0").video
+    video = input_stream.video.filter("scale", width, height)
+    audio_streams = [
+        s for s in ffmpeg.probe(src)["streams"]
+        if s["codec_type"] == "audio" and s.get("codec_name") != "none"
+    ]
 
-    if audio_map:
-        audio = ffmpeg.input(src, map=audio_map).audio
+    if audio_streams:
+        audio = input_stream.audio['a:0']
     else:
         audio = None
 
-    if audio:
-        stream = ffmpeg.output(
+    stream = (
+        ffmpeg.output(
             video,
             audio,
             dst,
+            **{
+                'map': ['0:v:0', '0:a:0']
+            },
             vcodec="libx264",
             preset="faster",
             video_bitrate=bitrate,
@@ -163,17 +150,11 @@ def generate_mp4_rendition(src: str, dst: str, size: str, bitrate: str) -> None:
             ac=2,
             movflags="+faststart",
         )
-    else:
-        stream = ffmpeg.output(
-            video,
-            dst,
-            vcodec="libx264",
-            preset="faster",
-            video_bitrate=bitrate,
-            movflags="+faststart",
-        )
+        .overwrite_output()
+    )
 
     logging.info(f"Running ffmpeg MP4 rendition: {dst}")
+    # ffmpeg.run(stream, capture_stdout=True, capture_stderr=True)
     try:
         out, err = ffmpeg.run(stream, capture_stdout=True, capture_stderr=True)
         logging.info(f"FFmpeg stderr (last 500 chars): {err.decode('utf-8')[-500:]}")
@@ -196,7 +177,7 @@ def generate_hls_rendition(
 
     # Split and process video and audio separately
     video = input_stream.video.filter("scale", width, height)
-    audio = input_stream.audio
+    audio = input_stream.audio['a:0']
 
     stream = (
         ffmpeg.output(
