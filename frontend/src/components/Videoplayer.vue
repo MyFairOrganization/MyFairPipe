@@ -25,6 +25,8 @@ const error = ref(false);
 const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
 const videoPath = 'https://cdn.myfairpipe.com%PATH';
 
+const videoRef = ref<HTMLVideoElement | null>(null)
+
 onMounted(async () => {
     await getLiked();
     await getDetails();
@@ -128,32 +130,39 @@ async function dislike() {
 }
 
 function hlsInit() {
-    const video = document.getElementById('video') as HTMLVideoElement
-    // ERROR
+    const video = videoRef.value;
 
-    video.muted = false
-    video.volume = 1.0
+    if (!video) {
+        error.value = true;
+        return;
+    }
+
+    video.muted = false;
+    video.volume = 1.0;
 
     // Add error event listener
     video.addEventListener('error', () => {
         error.value = true;
+        return;
     })
 
     if (Hls.isSupported()) {
         const hls = new Hls({
             startPosition: 0,
-        })
+        });
         try {
-            hls.attachMedia(video)
-            hls.loadSource(path.value)
+            hls.attachMedia(video);
+            hls.loadSource(path.value);
         } catch (e) {
             error.value = true;
+            return;
         }
 
         // HLS Error handling
         hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
                 error.value = true;
+                return;
             }
         })
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
@@ -169,7 +178,7 @@ function hlsInit() {
         <div id="leftSide">
             <div class="player">
                 <div v-if="!error" class="video-block">
-                    <video id="video" class="video" crossorigin="anonymous" controls>
+                    <video ref="videoRef" class="video" crossorigin="anonymous" controls>
                         <track :src="subtitles" kind="subtitles" srclang="cc" lang="en" default>
                     </video>
                 </div>
