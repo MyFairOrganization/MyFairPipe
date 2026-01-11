@@ -122,25 +122,14 @@ def generate_mp4_rendition(src: str, dst: str, size: str, bitrate: str) -> None:
 
     input_stream = ffmpeg.input(src)
 
-    video = input_stream.video.filter("scale", width, height)
-    audio_streams = [
-        s for s in ffmpeg.probe(src)["streams"]
-        if s["codec_type"] == "audio" and s.get("codec_name") != "none"
-    ]
-
-    if audio_streams:
-        audio = input_stream.audio['a:0']
-    else:
-        audio = None
+    video = input_stream['v:0'].filter("scale", width, height)
+    audio = input_stream['a:0']  # CORRECT
 
     stream = (
         ffmpeg.output(
             video,
             audio,
             dst,
-            **{
-                'map': ['0:v:0', '0:a:0']
-            },
             vcodec="libx264",
             preset="faster",
             video_bitrate=bitrate,
@@ -176,8 +165,8 @@ def generate_hls_rendition(
     input_stream = ffmpeg.input(src)
 
     # Split and process video and audio separately
-    video = input_stream.video.filter("scale", width, height)
-    audio = input_stream.audio['a:0']
+    video = input_stream['v:0'].filter("scale", width, height)
+    audio = input_stream['a:0']
 
     stream = (
         ffmpeg.output(
