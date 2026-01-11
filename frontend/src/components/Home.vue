@@ -43,12 +43,14 @@ async function loadMore() {
 }
 
 #more {
+    display: block;
+    border: none;
+    border-radius: 10px;
     width: 80%;
+    margin: 20px auto;
     background-color: #3D5A80;
     color: white;
     padding: 10px;
-    margin-top: 20px;
-    margin: 0 auto;
 }
 
 #more:hover {
