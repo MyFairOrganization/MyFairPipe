@@ -46,8 +46,14 @@ async function loadMore() {
     width: 80%;
     background-color: #3D5A80;
     color: white;
-    align-self: center;
+    padding: 10px;
     margin-top: 20px;
+    margin: 0 auto;
+}
+
+#more:hover {
+    background-color: #98c1d9;
+    color: black;
 }
 
 #feed {
