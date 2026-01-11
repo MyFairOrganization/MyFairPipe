@@ -261,7 +261,6 @@ async function loadMore() {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    flex: 1;
     min-width: 0;
 }
 

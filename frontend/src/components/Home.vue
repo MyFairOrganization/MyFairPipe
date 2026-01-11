@@ -44,12 +44,14 @@ async function loadMore() {
 
 #more {
     width: 80%;
+    align-self: center;
     margin: 0 auto;
 }
 
 #feed {
     margin-top: 50px;
     margin-bottom: 50px;
+    gap: 20px;
     width: 100%;
 }
 </style>
