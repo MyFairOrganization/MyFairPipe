@@ -81,6 +81,7 @@ async function checkLoggedIn() {
                 <div class="footer-nav">
                     <RouterLink class="footer-txt" to="/about">About</RouterLink>
                     <RouterLink class="footer-txt" to="/imprint">Imprint</RouterLink>
+                    <RouterLink class="footer-txt" to="/help">Help</RouterLink>
                 </div>
             </div>
         </nav>
