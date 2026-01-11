@@ -46,7 +46,6 @@
         "typescript": "~5.9.0",
         "video.js": "^8.23.4",
         "vite": "^7.1.11",
-        "vite-plugin-vue-devtools": "^8.0.3",
         "vitest": "^3.2.4",
         "vue-tsc": "^3.1.1"
     }

@@ -6,11 +6,12 @@ import Thumbnail from '@/components/Thumbnail.vue';
 import Loader from '@/components/Loader.vue';
 import Hls from 'hls.js';
 
+// VUE REFS
 const route = useRoute();
 const path = ref('');
 const props = { id: route.query.id as string };
-const title = ref('');
-const description = ref('');
+const title = ref('Video Title');
+const description = ref('Video Description');
 const subtitles = ref('');
 const subtitleLanguage = ref('');
 const liked = ref(false);
@@ -21,16 +22,20 @@ const thumbnails = ref([]);
 const loading = ref(true);
 const views = ref(0);
 const error = ref(false);
+const limit = 10;
 
+// PATHS IN CDN
 const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
 const videoPath = 'https://cdn.myfairpipe.com%PATH';
 
+// VIDEO ELEMENT
 const videoRef = ref<HTMLVideoElement | null>(null);
 
+// ON MOUNTED LOOP
 onMounted(async () => {
     await getLiked();
     await getDetails();
-    thumbnails.value = await GetIMGs(30, 0);
+    thumbnails.value = await GetIMGs(limit, 0);
     loading.value = false;
 
     await nextTick();
@@ -38,6 +43,7 @@ onMounted(async () => {
     await hlsInit();
 });
 
+// GETS INFORMATION ABOUT VIDEO
 async function getDetails() {
     const params = new URLSearchParams();
     params.append('id', props.id);
@@ -60,6 +66,7 @@ async function getDetails() {
     subtitleLanguage.value = subtitleData.languages[0];
 }
 
+// GETS INFORMATION ABOUT LIKES/DISLIKES
 async function getLiked() {
     const body = JSON.stringify({
         videoID: props.id,
@@ -84,6 +91,7 @@ async function getLiked() {
     }
 }
 
+// FUNCTION FOR LIKING VIDEOS
 async function like() {
     const body = JSON.stringify({
         videoID: props.id,
@@ -108,6 +116,7 @@ async function like() {
     getLiked();
 }
 
+// FUNCTION FOR DISLIKING VIDEOS
 async function dislike() {
     const body = JSON.stringify({
         videoID: props.id,
@@ -132,6 +141,7 @@ async function dislike() {
     getLiked();
 }
 
+// INITIALISING HLS FOR VIDEO STREAMING
 function hlsInit() {
     const video = videoRef.value;
 
@@ -169,6 +179,11 @@ function hlsInit() {
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = path.value;
     }
+}
+
+async function loadMore() {
+    const newThumbnails = await GetIMGs(limit, thumbnails.value.length);
+    thumbnails.value.push(...newThumbnails);
 }
 </script>
 
@@ -217,7 +232,10 @@ function hlsInit() {
                 </div>
             </div>
         </div>
-    <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
+        <div id="rightSide">
+            <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
+            <button v-if="thumbnails.length === limit" id="more" @click="loadMore">Load more videos</button>
+        </div>
   </div>
 </template>
 
@@ -239,12 +257,35 @@ function hlsInit() {
     min-width: 0;
 }
 
+#rightSide {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
 #videos {
     flex-shrink: 0;
     width: 300px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+#more {
+    display: block;
+    border: none;
+    border-radius: 10px;
+    width: 80%;
+    margin: 20px auto;
+    background-color: #3D5A80;
+    color: white;
+    padding: 10px;
+}
+
+#more:hover {
+    background-color: #98c1d9;
+    color: black;
 }
 
 .player {
