@@ -28,7 +28,7 @@ async function loadMore() {
 
         <Thumbnail v-if="!loading" :thumbnails="thumbnails"/>
 
-        <p v-if="thumbnails.length === limit" id="more" @click="loadMore">Load more videos</p>
+        <button v-if="thumbnails.length === limit" id="more" @click="loadMore">Load more videos</button>
     </div>
 </template>
 
@@ -44,8 +44,10 @@ async function loadMore() {
 
 #more {
     width: 80%;
+    background-color: #3D5A80;
+    color: white;
     align-self: center;
-    margin: 0 auto;
+    margin-top: 20px;
 }
 
 #feed {
