@@ -183,7 +183,7 @@ function hlsInit() {
 
 async function loadMore() {
     const newThumbnails = await GetIMGs(limit, thumbnails.value.length);
-    thumbnails.value.push(newThumbnails);
+    thumbnails.value.push(...newThumbnails);
 }
 </script>
 

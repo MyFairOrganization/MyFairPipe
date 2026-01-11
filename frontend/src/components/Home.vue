@@ -17,7 +17,7 @@ async function loadMore() {
     loading.value = true;
     const newThumbnails = await GetIMGs(limit, thumbnails.value.length);
     console.log(newThumbnails);
-    thumbnails.value.push(newThumbnails);
+    thumbnails.value.push(...newThumbnails);
     loading.value = false;
 }
 </script>
