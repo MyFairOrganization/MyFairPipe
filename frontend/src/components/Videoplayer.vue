@@ -183,8 +183,9 @@ function hlsInit() {
                         <track :src="subtitles" kind="subtitles" srclang="cc" lang="en" default>
                     </video>
                 </div>
-                <div v-if="error" class="video-block">
-                    <img class="video" src="@/assets/logo.svg">
+                <div v-if="error" class="video-block error-overlay">
+                    <h2 class="error">This video is currently unavailable</h2>
+                    <img class="error-text" src="@/assets/logo.svg">
                 </div>
                 <div>
                     <div id="underVideo">
@@ -258,6 +259,33 @@ function hlsInit() {
   aspect-ratio: 16/9;
   background-color: #3d5a80;
   border-radius: 10px;
+}
+
+.error-overlay {
+    position: relative;
+    width: 100%;
+}
+
+.error-overlay img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.error-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    color: white;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+
+    background: rgba(0, 0, 0, 0.6); /* optional */
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
 }
 
 #underVideo {
