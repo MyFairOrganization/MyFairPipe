@@ -234,7 +234,7 @@ async function loadMore() {
         </div>
         <div id="rightSide">
             <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
-            <p v-if="thumbnails.length === limit" id="more" @click="loadMore">Load more videos</p>
+            <button v-if="thumbnails.length === limit" id="more" @click="loadMore">Load more videos</button>
         </div>
   </div>
 </template>
@@ -270,6 +270,22 @@ async function loadMore() {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+#more {
+    display: block;
+    border: none;
+    border-radius: 10px;
+    width: 80%;
+    margin: 20px auto;
+    background-color: #3D5A80;
+    color: white;
+    padding: 10px;
+}
+
+#more:hover {
+    background-color: #98c1d9;
+    color: black;
 }
 
 .player {
