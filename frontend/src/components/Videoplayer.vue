@@ -6,11 +6,12 @@ import Thumbnail from '@/components/Thumbnail.vue';
 import Loader from '@/components/Loader.vue';
 import Hls from 'hls.js';
 
+// VUE REFS
 const route = useRoute();
 const path = ref('');
 const props = { id: route.query.id as string };
-const title = ref('');
-const description = ref('');
+const title = ref('Video Title');
+const description = ref('Video Description');
 const subtitles = ref('');
 const subtitleLanguage = ref('');
 const liked = ref(false);
@@ -22,11 +23,14 @@ const loading = ref(true);
 const views = ref(0);
 const error = ref(false);
 
+// PATHS IN CDN
 const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
 const videoPath = 'https://cdn.myfairpipe.com%PATH';
 
+// VIDEO ELEMENT
 const videoRef = ref<HTMLVideoElement | null>(null);
 
+// ON MOUNTED LOOP
 onMounted(async () => {
     await getLiked();
     await getDetails();
@@ -38,6 +42,7 @@ onMounted(async () => {
     await hlsInit();
 });
 
+// GETS INFORMATION ABOUT VIDEO
 async function getDetails() {
     const params = new URLSearchParams();
     params.append('id', props.id);
@@ -60,6 +65,7 @@ async function getDetails() {
     subtitleLanguage.value = subtitleData.languages[0];
 }
 
+// GETS INFORMATION ABOUT LIKES/DISLIKES
 async function getLiked() {
     const body = JSON.stringify({
         videoID: props.id,
@@ -84,6 +90,7 @@ async function getLiked() {
     }
 }
 
+// FUNCTION FOR LIKING VIDEOS
 async function like() {
     const body = JSON.stringify({
         videoID: props.id,
@@ -108,6 +115,7 @@ async function like() {
     getLiked();
 }
 
+// FUNCTION FOR DISLIKING VIDEOS
 async function dislike() {
     const body = JSON.stringify({
         videoID: props.id,
@@ -132,6 +140,7 @@ async function dislike() {
     getLiked();
 }
 
+// INITIALISING HLS FOR VIDEO STREAMING
 function hlsInit() {
     const video = videoRef.value;
 

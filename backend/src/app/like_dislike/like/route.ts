@@ -118,8 +118,6 @@ export async function POST(req: NextRequest) {
   try {
     const user = getUser(req);
 
-    console.log(user)
-
     const {videoID} = await req.json();
 
     if (videoID === null) {
