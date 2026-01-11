@@ -256,7 +256,7 @@ async function submitForm() {
             ></textarea
             ><br/>
 
-            <label for="video">Video Upload: *</label><br/>
+            <label for="video">Video Upload (Min. resolution 240p): *</label><br/>
             <input
                 id="video"
                 :disabled="uploading"
