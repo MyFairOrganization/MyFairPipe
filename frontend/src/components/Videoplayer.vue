@@ -133,6 +133,7 @@ function hlsInit() {
     const video = videoRef.value;
 
     if (!video) {
+        window.alert('You must specify a video object!');
         error.value = true;
         return;
     }
@@ -142,6 +143,7 @@ function hlsInit() {
 
     // Add error event listener
     video.addEventListener('error', () => {
+        window.alert('Error accured during video.');
         error.value = true;
         return;
     })
@@ -154,6 +156,7 @@ function hlsInit() {
             hls.attachMedia(video);
             hls.loadSource(path.value);
         } catch (e) {
+            window.alert('hls error');
             error.value = true;
             return;
         }
@@ -161,6 +164,7 @@ function hlsInit() {
         // HLS Error handling
         hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
+                window.alert('fatal hls error');
                 error.value = true;
                 return;
             }
