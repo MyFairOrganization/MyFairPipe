@@ -22,7 +22,7 @@ const thumbnails = ref([]);
 const loading = ref(true);
 const views = ref(0);
 const error = ref(false);
-const limit = 30;
+const limit = 10;
 
 // PATHS IN CDN
 const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';

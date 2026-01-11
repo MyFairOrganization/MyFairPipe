@@ -6,7 +6,7 @@ import Loader from '@/components/Loader.vue'
 
 const thumbnails = ref([]);
 const loading = ref(true);
-const limit = 30;
+const limit = 10;
 
 onMounted(async () => {
     thumbnails.value = await GetIMGs(limit, 0);
@@ -14,7 +14,7 @@ onMounted(async () => {
 });
 
 async function loadMore() {
-    const newThumbnails = await GetIMGs(limit, 30);
+    const newThumbnails = await GetIMGs(limit, thumbnails.value.length);
     thumbnails.value.push(newThumbnails);
 }
 </script>
