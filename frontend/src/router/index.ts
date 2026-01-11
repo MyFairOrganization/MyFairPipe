@@ -21,7 +21,10 @@ const router = createRouter({
         path: '/about', name: 'about', component: () => {return import('@/components/About.vue')}
     }, {
         path: '/imprint', name: 'imprint', component: () => {return import('@/components/Imprint.vue')}
-    },], scrollBehavior(to, from, savedPosition) {
+    }, {
+        path: '/help', name: 'help', component: () => {return import('@/components/Help.vue')}
+    },
+    ], scrollBehavior(to, from, savedPosition) {
         if (savedPosition) {
             return savedPosition;
         }
