@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import {useRoute} from 'vue-router';
-import {  CreateVIDHLS, GetIMGs } from "@/components/Content.vue";
+import { GetIMGs } from "@/components/Content.vue";
 import {onMounted, ref} from 'vue';
 import Thumbnail from '@/components/Thumbnail.vue';
 import Loader from '@/components/Loader.vue';
+import type Hls from "hls.js";
 
 const route = useRoute();
 const path = ref('');
@@ -21,10 +22,14 @@ const loading = ref(true);
 const views = ref(0);
 const error = ref(false);
 
+const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
+const videoPath = 'https://cdn.myfairpipe.com%PATH';
+
 onMounted(async () => {
     await getLiked();
     await getDetails();
     thumbnails.value = await GetIMGs(30, 0);
+    await hlsInit();
     loading.value = false;
 });
 
@@ -45,8 +50,8 @@ async function getDetails() {
     title.value = videoData.title;
     description.value = videoData.description;
     views.value = videoData.views;
-    path.value = videoData.path;
-    subtitles.value = subtitlePath;
+    path.value = videoPath.replace('%PATH', videoData.path);
+    subtitles.value = cdnPath.replace('%PATH', subtitlePath);
     subtitleLanguage.value = subtitleData.languages[0];
 }
 
@@ -121,6 +126,40 @@ async function dislike() {
 
     getLiked();
 }
+
+function hlsInit() {
+    const video = document.getElementById('video') as HTMLVideoElement
+    // ERROR
+
+    video.muted = false
+    video.volume = 1.0
+
+    // Add error event listener
+    video.addEventListener('error', () => {
+        error.value = true;
+    })
+
+    if (Hls.isSupported()) {
+        const hls = new Hls({
+            startPosition: 0,
+        })
+        try {
+            hls.attachMedia(video)
+            hls.loadSource(path.value)
+        } catch (e) {
+            error.value = true;
+        }
+
+        // HLS Error handling
+        hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+                error.value = true;
+            }
+        })
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = path.value;
+    }
+}
 </script>
 
 <template>
@@ -129,160 +168,163 @@ async function dislike() {
     <div v-if="!loading" class="layout">
         <div id="leftSide">
             <div class="player">
-                <component :is="CreateVIDHLS(path, subtitles, subtitleLanguage, subtitleLanguage)"/>
+                <div v-if="!error" class="video-block">
+                    <video id="video" class="video" crossorigin="anonymous" controls>
+                        <track :src="subtitles" kind="subtitles" srclang="cc" lang="en" default>
+                    </video>
+                </div>
+                <div v-if="error" class="video-block">
+                    <p>ERRORRRRRR</p>
+                </div>
                 <div>
                     <div id="underVideo">
                         <h2>{{ title }}</h2>
                         <div class="interactivePanel">
                             <div class="rating">
-                                <p class="information">views: {{ views }}</p>
+                                <input
+                                    id="like"
+                                    :src="liked ? '/liked.svg' : '/like.svg'"
+                                    class="interactive"
+                                    type="image"
+                                    v-on:click="like()"
+                                />
+                                <p class="information">{{ likes }}</p>
                             </div>
-                                <div class="rating">
-                                    <input
-                                        id="like"
-                                        :src="liked ? '/liked.svg' : '/like.svg'"
-                                        class="interactive"
-                                        type="image"
-                                        v-on:click="like()"
-                                    />
-                                    <p class="information">{{ likes }}</p>
-                                </div>
-                                <div class="rating">
-                                    <input
-                                        id="dislike"
-                                        :src="disliked ? '/disliked.svg' : '/dislike.svg'"
-                                        class="interactive"
-                                        type="image"
-                                        v-on:click="dislike()"
-                                    />
-                                    <p class="information">{{ dislikes }}</p>
-                                </div>
+                            <div class="rating">
+                                <input
+                                    id="dislike"
+                                    :src="disliked ? '/disliked.svg' : '/dislike.svg'"
+                                    class="interactive"
+                                    type="image"
+                                    v-on:click="dislike()"
+                                />
+                                <p class="information">{{ dislikes }}</p>
+                            </div>
                         </div>
                     </div>
                     <p>{{ description }}</p>
                 </div>
             </div>
         </div>
-
-        <Thumbnail v-if="!loading" :thumbnails="thumbnails"/>
+    <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
     </div>
 </template>
 
 <style scoped>
 .layout {
-    display: flex;
-    gap: 2rem;
-    width: 100%;
-    max-width: 1400px;
-    margin: 50px auto;
-    padding: 0 1rem;
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 50px auto;
+  padding: 0 1rem;
 }
 
 #leftSide {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    flex: 1;
-    min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
 }
 
 #videos {
-    flex-shrink: 0;
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  flex-shrink: 0;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .player {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
 .player video {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 16/9;
-    background-color: #3D5A80;
-    border-radius: 10px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  background-color: #3d5a80;
+  border-radius: 10px;
 }
 
 #underVideo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
 }
 
 #underVideo h2 {
-    margin: 0;
-    flex: 1;
+  margin: 0;
+  flex: 1;
 }
 
 .interactivePanel {
-    display: flex;
-    gap: 10px;
-    padding: 6px;
-    border-radius: 10px;
-    background: #c6f0ff;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  display: flex;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 10px;
+  background: #c6f0ff;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
 }
 
 .interactive {
-    width: 32px;
-    height: 32px;
-    padding: 6px;
-    border-radius: 50%;
-    border: 1px solid #d0d0d0;
-    background: #fff;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  border-radius: 50%;
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .rating {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
 }
 
 .information {
-    display: flex;
-    padding: 0 10px;
-    background-color: #e0fbfc;
-    border-radius: 10px;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  padding: 0 10px;
+  background-color: #e0fbfc;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
 }
 
 .player p {
-    margin-top: 1rem;
-    line-height: 1.5;
+  margin-top: 1rem;
+  line-height: 1.5;
 }
 
 @media (max-width: 600px) {
+  .layout {
+    flex-direction: column;
+    gap: 1rem;
+  }
 
-    .layout {
-        flex-direction: column;
-        gap: 1rem;
-    }
+  #videos {
+    width: 100%;
+    margin-top: 1rem;
+    margin: 0 auto;
+  }
 
-    #videos {
-        width: 100%;
-        margin-top: 1rem;
-        margin: 0 auto;
-    }
+  #underVideo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 
-    #underVideo {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-
-    .interactivePanel {
-        align-self: flex-end;
-    }
+  .interactivePanel {
+    align-self: flex-end;
+  }
 }
-
 </style>
