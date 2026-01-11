@@ -136,7 +136,6 @@ function hlsInit() {
     const video = videoRef.value;
 
     if (!video) {
-        window.alert('You must specify a video object!');
         error.value = true;
         return;
     }
@@ -144,9 +143,7 @@ function hlsInit() {
     video.muted = false;
     video.volume = 1.0;
 
-    // Add error event listener
     video.addEventListener('error', () => {
-        window.alert('Error accured during video.');
         error.value = true;
         return;
     })
@@ -159,15 +156,12 @@ function hlsInit() {
             hls.attachMedia(video);
             hls.loadSource(path.value);
         } catch (e) {
-            window.alert('hls error');
             error.value = true;
             return;
         }
 
-        // HLS Error handling
         hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
-                window.alert('fatal hls error');
                 error.value = true;
                 return;
             }
@@ -190,7 +184,7 @@ function hlsInit() {
                     </video>
                 </div>
                 <div v-if="error" class="video-block">
-                    <p>ERRORRRRRR</p>
+                    <img class="video" src="@/assets/logo.svg">
                 </div>
                 <div>
                     <div id="underVideo">
@@ -258,7 +252,7 @@ function hlsInit() {
   width: 100%;
 }
 
-.player video {
+.video {
   width: 100%;
   height: auto;
   aspect-ratio: 16/9;
