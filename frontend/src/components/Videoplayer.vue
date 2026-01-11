@@ -183,9 +183,9 @@ function hlsInit() {
                         <track :src="subtitles" kind="subtitles" srclang="cc" lang="en" default>
                     </video>
                 </div>
-                <div v-if="error" class="video-block error-overlay">
-                    <h2 class="error">This video is currently unavailable</h2>
-                    <img class="error-text" src="@/assets/logo.svg">
+                <div v-if="error" class="error-overlay">
+                    <h2 class="error-text">This video is currently unavailable</h2>
+                    <img class="video" src="@/assets/logo.svg">
                 </div>
                 <div>
                     <div id="underVideo">
@@ -223,53 +223,48 @@ function hlsInit() {
 
 <style scoped>
 .layout {
-  display: flex;
-  gap: 2rem;
-  width: 100%;
-  max-width: 1400px;
-  margin: 50px auto;
-  padding: 0 1rem;
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1400px;
+    margin: 50px auto;
+    padding: 0 1rem;
 }
 
 #leftSide {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  flex: 1;
-  min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
 }
 
 #videos {
-  flex-shrink: 0;
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    flex-shrink: 0;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .player {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
 .video {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16/9;
-  background-color: #3d5a80;
-  border-radius: 10px;
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+    background-color: #3d5a80;
+    border-radius: 10px;
 }
 
 .error-overlay {
     position: relative;
     width: 100%;
-}
-
-.error-overlay img {
-    width: 100%;
-    height: auto;
-    display: block;
 }
 
 .error-text {
@@ -289,80 +284,80 @@ function hlsInit() {
 }
 
 #underVideo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
 }
 
 #underVideo h2 {
-  margin: 0;
-  flex: 1;
+    margin: 0;
+    flex: 1;
 }
 
 .interactivePanel {
-  display: flex;
-  gap: 10px;
-  padding: 6px;
-  border-radius: 10px;
-  background: #c6f0ff;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+    display: flex;
+    gap: 10px;
+    padding: 6px;
+    border-radius: 10px;
+    background: #c6f0ff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
 }
 
 .interactive {
-  width: 32px;
-  height: 32px;
-  padding: 6px;
-  border-radius: 50%;
-  border: 1px solid #d0d0d0;
-  background: #fff;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+    border-radius: 50%;
+    border: 1px solid #d0d0d0;
+    background: #fff;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
 }
 
 .rating {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
 }
 
 .information {
-  display: flex;
-  padding: 0 10px;
-  background-color: #e0fbfc;
-  border-radius: 10px;
-  justify-content: center;
-  align-items: center;
+    display: flex;
+    padding: 0 10px;
+    background-color: #e0fbfc;
+    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
 }
 
 .player p {
-  margin-top: 1rem;
-  line-height: 1.5;
+    margin-top: 1rem;
+    line-height: 1.5;
 }
 
 @media (max-width: 600px) {
-  .layout {
-    flex-direction: column;
-    gap: 1rem;
-  }
+    .layout {
+        flex-direction: column;
+        gap: 1rem;
+    }
 
-  #videos {
-    width: 100%;
-    margin-top: 1rem;
-    margin: 0 auto;
-  }
+    #videos {
+        width: 100%;
+        margin-top: 1rem;
+        margin: 0 auto;
+    }
 
-  #underVideo {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
+    #underVideo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
 
-  .interactivePanel {
-    align-self: flex-end;
-  }
+    .interactivePanel {
+        align-self: flex-end;
+    }
 }
 </style>
