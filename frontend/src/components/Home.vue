@@ -4,13 +4,19 @@ import Thumbnail from './Thumbnail.vue'
 import {GetIMGs} from './Content.vue'
 import Loader from '@/components/Loader.vue'
 
-const thumbnails = ref([])
-const loading = ref(true)
+const thumbnails = ref([]);
+const loading = ref(true);
+const limit = 30;
 
 onMounted(async () => {
-    thumbnails.value = await GetIMGs(30, 0)
-    loading.value = false
-})
+    thumbnails.value = await GetIMGs(limit, 0);
+    loading.value = false;
+});
+
+async function loadMore() {
+    const newThumbnails = await GetIMGs(limit, 30);
+    thumbnails.value.push(newThumbnails);
+}
 </script>
 
 <template>
@@ -18,6 +24,8 @@ onMounted(async () => {
         <Loader :loading="loading" :nothing="thumbnails.length === 0" msg="Loading Videos"/>
 
         <Thumbnail v-if="!loading" :thumbnails="thumbnails"/>
+
+        <p v-if="thumbnails.length === limit" id="more" @click="loadMore">Load more videos</p>
     </div>
 </template>
 
@@ -27,6 +35,11 @@ onMounted(async () => {
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
 
+    width: 80%;
+    margin: 0 auto;
+}
+
+#more {
     width: 80%;
     margin: 0 auto;
 }

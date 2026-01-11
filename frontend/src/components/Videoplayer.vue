@@ -22,6 +22,7 @@ const thumbnails = ref([]);
 const loading = ref(true);
 const views = ref(0);
 const error = ref(false);
+const limit = 30;
 
 // PATHS IN CDN
 const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
@@ -34,7 +35,7 @@ const videoRef = ref<HTMLVideoElement | null>(null);
 onMounted(async () => {
     await getLiked();
     await getDetails();
-    thumbnails.value = await GetIMGs(30, 0);
+    thumbnails.value = await GetIMGs(limit, 0);
     loading.value = false;
 
     await nextTick();
@@ -179,6 +180,11 @@ function hlsInit() {
         video.src = path.value;
     }
 }
+
+async function loadMore() {
+    const newThumbnails = await GetIMGs(limit, thumbnails.value.length);
+    thumbnails.value.push(newThumbnails);
+}
 </script>
 
 <template>
@@ -226,7 +232,10 @@ function hlsInit() {
                 </div>
             </div>
         </div>
-    <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
+        <div id="rightSide">
+            <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
+            <p v-if="thumbnails.length === limit" id="more" @click="loadMore">Load more videos</p>
+        </div>
   </div>
 </template>
 
@@ -241,6 +250,14 @@ function hlsInit() {
 }
 
 #leftSide {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1;
+    min-width: 0;
+}
+
+#rightSide {
     display: flex;
     flex-direction: column;
     gap: 1rem;
