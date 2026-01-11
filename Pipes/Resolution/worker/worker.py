@@ -117,17 +117,40 @@ def filter_renditions_by_source(
     return filtered
 
 
+def select_audio_stream(src: str):
+    probe = ffmpeg.probe(src)
+    audio_streams = [
+        s for s in probe["streams"]
+        if s.get("codec_type") == "audio"
+    ]
+
+    # Prefer AAC
+    for s in audio_streams:
+        if s.get("codec_name") == "aac":
+            return f"0:{s['index']}"
+
+    # Fallback: first audio stream
+    if audio_streams:
+        return f"0:{audio_streams[0]['index']}"
+
+    return None
+
+
 def generate_mp4_rendition(src: str, dst: str, size: str, bitrate: str) -> None:
     """Generate one MP4 rendition with H.264/AAC."""
     width, height = map(int, size.split(":"))
 
-    # Explicitly handle video and audio streams separately
-    input_stream = ffmpeg.input(src)
-    video = input_stream.video.filter("scale", width, height)
-    audio = input_stream.audio
+    audio_map = select_audio_stream(src)
 
-    stream = (
-        ffmpeg.output(
+    video = ffmpeg.input(src, map="0:v:0").video
+
+    if audio_map:
+        audio = ffmpeg.input(src, map=audio_map).audio
+    else:
+        audio = None
+
+    if audio:
+        stream = ffmpeg.output(
             video,
             audio,
             dst,
@@ -136,12 +159,19 @@ def generate_mp4_rendition(src: str, dst: str, size: str, bitrate: str) -> None:
             video_bitrate=bitrate,
             acodec="aac",
             audio_bitrate="128k",
-            ar=48000,  # Audio sample rate
-            ac=2,  # Stereo audio
+            ar=48000,
+            ac=2,
             movflags="+faststart",
         )
-        .overwrite_output()
-    )
+    else:
+        stream = ffmpeg.output(
+            video,
+            dst,
+            vcodec="libx264",
+            preset="faster",
+            video_bitrate=bitrate,
+            movflags="+faststart",
+        )
 
     logging.info(f"Running ffmpeg MP4 rendition: {dst}")
     try:
