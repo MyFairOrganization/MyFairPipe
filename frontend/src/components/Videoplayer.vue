@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import {useRoute} from 'vue-router';
-import { GetIMGs } from "@/components/Content.vue";
-import {onMounted, ref} from 'vue';
+import { useRoute } from 'vue-router';
+import { GetIMGs } from '@/components/Content.vue';
+import { nextTick, onMounted, ref } from 'vue';
 import Thumbnail from '@/components/Thumbnail.vue';
 import Loader from '@/components/Loader.vue';
-import type Hls from "hls.js";
+import type Hls from 'hls.js';
 
 const route = useRoute();
 const path = ref('');
-const props = {id: route.query.id as string};
+const props = { id: route.query.id as string };
 const title = ref('');
 const description = ref('');
 const subtitles = ref('');
@@ -25,14 +25,17 @@ const error = ref(false);
 const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
 const videoPath = 'https://cdn.myfairpipe.com%PATH';
 
-const videoRef = ref<HTMLVideoElement | null>(null)
+const videoRef = ref<HTMLVideoElement | null>(null);
 
 onMounted(async () => {
     await getLiked();
     await getDetails();
     thumbnails.value = await GetIMGs(30, 0);
-    await hlsInit();
     loading.value = false;
+
+    await nextTick();
+
+    await hlsInit();
 });
 
 async function getDetails() {
@@ -220,7 +223,7 @@ function hlsInit() {
             </div>
         </div>
     <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
-    </div>
+  </div>
 </template>
 
 <style scoped>
