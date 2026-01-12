@@ -71,7 +71,7 @@ def start_transcriber(job_id: str, object_key: str):
 			network="internal-network",
 			name=container_name,
 			detach=True,
-			remove=False,
+			remove=True,
 		)
 		logging.info(
 			f"Started transcriber container {container.id[:12]} "
