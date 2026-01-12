@@ -64,25 +64,25 @@ def start_transcriber(job_id: str, object_key: str):
 
     container_name = f"worker-transcription-{job_id}"
 
-	try:
-		container = docker_client.containers.run(
-			image="transcription-worker:latest",
-			environment=env,
-			network="internal-network",
-			name=container_name,
-			detach=True,
-			remove=True,
-		)
-		logging.info(
-			f"Started transcriber container {container.id[:12]} "
-			f"for job {job_id}"
-		)
-	except docker.errors.APIError as e:
-		logging.error(f"Docker error for job {job_id}: {e.explanation}")
-		raise
-	except Exception as e:
-		logging.exception(f"Unexpected error starting container for job {job_id}")
-		raise
+    try:
+        container = docker_client.containers.run(
+            image="transcription-worker:latest",
+            environment=env,
+            network="internal-network",
+            name=container_name,
+            detach=True,
+            remove=True,
+        )
+        logging.info(
+            f"Started transcriber container {container.id[:12]} "
+            f"for job {job_id}"
+        )
+    except docker.errors.APIError as e:
+        logging.error(f"Docker error for job {job_id}: {e.explanation}")
+        raise
+    except Exception as e:
+        logging.exception(f"Unexpected error starting container for job {job_id}")
+        raise
 
 
 def main():
