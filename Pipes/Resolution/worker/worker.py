@@ -117,33 +117,46 @@ def filter_renditions_by_source(
     return filtered
 
 
-def generate_mp4_rendition(src: str, dst: str, size: str, bitrate: str) -> None:
+def generate_mp4_rendition(src: str, dst: str, size: str, bitrate: str, has_audio: bool) -> None:
     width, height = map(int, size.split(":"))
 
     input_stream = ffmpeg.input(src)
-
     video = input_stream['v:0'].filter("scale", width, height)
-    audio = input_stream['a:0']  # CORRECT
 
-    stream = (
-        ffmpeg.output(
-            video,
-            audio,
-            dst,
-            vcodec="libx264",
-            preset="faster",
-            video_bitrate=bitrate,
-            acodec="aac",
-            audio_bitrate="128k",
-            ar=48000,
-            ac=2,
-            movflags="+faststart",
+    # Only add audio if it exists
+    if has_audio:
+        audio = input_stream['a:0']
+        stream = (
+            ffmpeg.output(
+                video,
+                audio,
+                dst,
+                vcodec="libx264",
+                preset="faster",
+                video_bitrate=bitrate,
+                acodec="aac",
+                audio_bitrate="128k",
+                ar=48000,
+                ac=2,
+                movflags="+faststart",
+            )
+            .overwrite_output()
         )
-        .overwrite_output()
-    )
+    else:
+        logging.info(f"Creating video-only MP4 (no audio): {dst}")
+        stream = (
+            ffmpeg.output(
+                video,
+                dst,
+                vcodec="libx264",
+                preset="faster",
+                video_bitrate=bitrate,
+                movflags="+faststart",
+            )
+            .overwrite_output()
+        )
 
     logging.info(f"Running ffmpeg MP4 rendition: {dst}")
-    # ffmpeg.run(stream, capture_stdout=True, capture_stderr=True)
     try:
         out, err = ffmpeg.run(stream, capture_stdout=True, capture_stderr=True)
         logging.info(f"FFmpeg stderr (last 500 chars): {err.decode('utf-8')[-500:]}")
@@ -153,7 +166,7 @@ def generate_mp4_rendition(src: str, dst: str, size: str, bitrate: str) -> None:
 
 
 def generate_hls_rendition(
-        src: str, output_dir: str, label: str, size: str, bitrate: str
+        src: str, output_dir: str, label: str, size: str, bitrate: str, has_audio: bool
 ) -> Tuple[str, str]:
     """Generate HLS rendition with .m3u8 playlist and .ts segments."""
     width, height = map(int, size.split(":"))
@@ -161,33 +174,49 @@ def generate_hls_rendition(
     playlist_file = os.path.join(output_dir, f"{label}.m3u8")
     segment_pattern = os.path.join(output_dir, f"{label}_%03d.ts")
 
-    # Build the command with explicit audio handling
     input_stream = ffmpeg.input(src)
-
-    # Split and process video and audio separately
     video = input_stream['v:0'].filter("scale", width, height)
-    audio = input_stream['a:0']
 
-    stream = (
-        ffmpeg.output(
-            video,
-            audio,
-            playlist_file,
-            vcodec="libx264",
-            preset="faster",
-            video_bitrate=bitrate,
-            acodec="aac",
-            audio_bitrate="128k",
-            ar=48000,  # Audio sample rate
-            ac=2,  # Stereo audio
-            format="hls",
-            hls_time=HLS_SEGMENT_TIME,
-            hls_playlist_type=HLS_PLAYLIST_TYPE,
-            hls_segment_filename=segment_pattern,
-            start_number=0,
+    # Only add audio if it exists
+    if has_audio:
+        audio = input_stream['a:0']
+        stream = (
+            ffmpeg.output(
+                video,
+                audio,
+                playlist_file,
+                vcodec="libx264",
+                preset="faster",
+                video_bitrate=bitrate,
+                acodec="aac",
+                audio_bitrate="128k",
+                ar=48000,
+                ac=2,
+                format="hls",
+                hls_time=HLS_SEGMENT_TIME,
+                hls_playlist_type=HLS_PLAYLIST_TYPE,
+                hls_segment_filename=segment_pattern,
+                start_number=0,
+            )
+            .overwrite_output()
         )
-        .overwrite_output()
-    )
+    else:
+        logging.info(f"Creating video-only HLS (no audio): {label}")
+        stream = (
+            ffmpeg.output(
+                video,
+                playlist_file,
+                vcodec="libx264",
+                preset="faster",
+                video_bitrate=bitrate,
+                format="hls",
+                hls_time=HLS_SEGMENT_TIME,
+                hls_playlist_type=HLS_PLAYLIST_TYPE,
+                hls_segment_filename=segment_pattern,
+                start_number=0,
+            )
+            .overwrite_output()
+        )
 
     logging.info(f"Running ffmpeg HLS rendition: {label}")
     try:
@@ -287,7 +316,7 @@ def main():
         video_info = get_video_info(original_file)
         logging.info(
             f"Source video: {video_info['width']}x{video_info['height']}, "
-            f"duration: {video_info['duration']}s"
+            f"duration: {video_info['duration']}s, has_audio: {video_info['has_audio']}"
         )
 
         renditions = filter_renditions_by_source(video_info["height"], renditions)
@@ -304,7 +333,7 @@ def main():
         for label, cfg in renditions.items():
             out_file = os.path.join(tmp_root, f"{base_name}_{label}.mp4")
             logging.info(f"Creating {label} MP4 rendition...")
-            generate_mp4_rendition(original_file, out_file, cfg["size"], cfg["bitrate"])
+            generate_mp4_rendition(original_file, out_file, cfg["size"], cfg["bitrate"], video_info["has_audio"])
             mp4_paths.append((label, out_file))
             logging.info(f"{label} MP4 rendition saved to {out_file}")
 
@@ -324,7 +353,7 @@ def main():
             logging.info("Generating HLS renditions...")
             for label, cfg in renditions.items():
                 generate_hls_rendition(
-                    original_file, hls_dir, label, cfg["size"], cfg["bitrate"]
+                    original_file, hls_dir, label, cfg["size"], cfg["bitrate"], video_info["has_audio"]
                 )
 
             # Create master playlist
