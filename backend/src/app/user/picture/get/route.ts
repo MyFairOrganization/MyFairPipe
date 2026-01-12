@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectionPool } from "@/lib/services/postgres";
 import { getUser } from "@/lib/auth/getUser";
 
-const PHOTO_CDN = "https://cdn.myfairpipe.com/photo";
+const PHOTO_CDN = "http://cdn.demomyfairpipe.com/photo";
 
 export async function OPTIONS() {
 	return new NextResponse(null, {
 		status: 204,
 		headers: {
-			"Access-Control-Allow-Origin": "https://myfairpipe.com",
+			"Access-Control-Allow-Origin": "http://demomyfairpipe.com",
 			"Access-Control-Allow-Credentials": "true",
 			"Access-Control-Allow-Methods": "GET, OPTIONS",
 			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",

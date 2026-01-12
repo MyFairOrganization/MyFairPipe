@@ -11,7 +11,7 @@ const jwtSecret = process.env.JWT_SECRET;
 export async function OPTIONS() {
     return new NextResponse(null, {
         status: 204, headers: {
-            "Access-Control-Allow-Origin": "https://myfairpipe.com",
+            "Access-Control-Allow-Origin": "http://demomyfairpipe.com",
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
 
         response.cookies.set("session", token, {
             httpOnly: true, secure: false, sameSite: "lax",      // Cross-Site erlaubt
-            domain: ".myfairpipe.com", path: "/", maxAge: 60 * 60 * 24 * 7,
+            domain: ".demomyfairpipe.com", path: "/", maxAge: 60 * 60 * 24 * 7,
         });
 
         return response;

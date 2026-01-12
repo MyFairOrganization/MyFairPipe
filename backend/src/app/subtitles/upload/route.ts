@@ -15,7 +15,7 @@ import {QueryResult} from "pg";
 export async function OPTIONS() {
 	return new NextResponse(null, {
 		status: 204, headers: {
-			"Access-Control-Allow-Origin": "https://myfairpipe.com",
+			"Access-Control-Allow-Origin": "http://demomyfairpipe.com",
 			"Access-Control-Allow-Credentials": "true",
 			"Access-Control-Allow-Methods": "POST, OPTIONS",
 			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",

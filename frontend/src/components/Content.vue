@@ -7,7 +7,7 @@ import {num} from "video.js";
  * CDN PATH
  * @type {string}
  */
-export const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
+export const cdnPath = 'http://cdn.demomyfairpipe.com/video/%PATH';
 
 /**
  * Function to get all Videos uploaded from User: userID
@@ -20,7 +20,7 @@ async function GetVideosForUser(userID: string) {
   params.append('id', userID);
 
   try {
-    const res = await fetch(`https://api.myfairpipe.com/video/get_for?${params}`);
+    const res = await fetch(`http://api.demomyfairpipe.com/video/get_for?${params}`);
 
     if (res.ok) {
       return await res.json();
@@ -43,7 +43,7 @@ async function GetVideos(limit: number, offset: number) {
   params.append('offset', String(offset));
 
   try {
-    const res = await fetch(`https://api.myfairpipe.com/sorting/get?${params}`);
+    const res = await fetch(`http://api.demomyfairpipe.com/sorting/get?${params}`);
 
     if (res.ok) {
       const data = await res.json();
@@ -80,7 +80,7 @@ export async function GetIMGs(limit = 0, offset = 0, userID = undefined) {
       const params = new URLSearchParams();
       params.append('id', id);
 
-      const datails = await fetch(`https://api.myfairpipe.com/video/get?${params}`);
+      const datails = await fetch(`http://api.demomyfairpipe.com/video/get?${params}`);
       const data = await datails.json();
 
       const thumbnailPath = data.thumbnail_path;
