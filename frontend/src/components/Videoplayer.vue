@@ -1,15 +1,17 @@
 <script lang="ts" setup>
-import {useRoute} from 'vue-router';
-import {  CreateVIDHLS, GetIMGs } from "@/components/Content.vue";
-import {onMounted, ref} from 'vue';
+import { useRoute } from 'vue-router';
+import { GetIMGs } from '@/components/Content.vue';
+import { nextTick, onMounted, ref } from 'vue';
 import Thumbnail from '@/components/Thumbnail.vue';
 import Loader from '@/components/Loader.vue';
+import Hls from 'hls.js';
 
+// VUE REFS
 const route = useRoute();
 const path = ref('');
-const props = {id: route.query.id as string};
-const title = ref('');
-const description = ref('');
+const props = { id: route.query.id as string };
+const title = ref('Video Title');
+const description = ref('Video Description');
 const subtitles = ref('');
 const subtitleLanguage = ref('');
 const liked = ref(false);
@@ -18,15 +20,30 @@ const disliked = ref(false);
 const dislikes = ref('0');
 const thumbnails = ref([]);
 const loading = ref(true);
-const error = ref(false)
+const views = ref(0);
+const error = ref(false);
+const limit = 10;
 
+// PATHS IN CDN
+const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
+const videoPath = 'https://cdn.myfairpipe.com%PATH';
+
+// VIDEO ELEMENT
+const videoRef = ref<HTMLVideoElement | null>(null);
+
+// ON MOUNTED LOOP
 onMounted(async () => {
     await getLiked();
     await getDetails();
-    thumbnails.value = await GetIMGs(30, 0);
+    thumbnails.value = await GetIMGs(limit, 0);
     loading.value = false;
+
+    await nextTick();
+
+    await hlsInit();
 });
 
+// GETS INFORMATION ABOUT VIDEO
 async function getDetails() {
     const params = new URLSearchParams();
     params.append('id', props.id);
@@ -37,17 +54,19 @@ async function getDetails() {
     const subtitleData = await subtitleReq.json();
 
     let subtitlePath = subtitleData.files;
-    subtitlePath = subtitlePath.filter((subtitles: string) => {
+    subtitlePath = String(subtitlePath.filter((subtitles: string) => {
         return subtitles.endsWith('.vtt');
-    })
+    }));
 
     title.value = videoData.title;
     description.value = videoData.description;
-    path.value = videoData.path;
-    subtitles.value = subtitlePath;
+    views.value = videoData.views;
+    path.value = videoPath.replace('%PATH', videoData.path);
+    subtitles.value = cdnPath.replace('%PATH', subtitlePath);
     subtitleLanguage.value = subtitleData.languages[0];
 }
 
+// GETS INFORMATION ABOUT LIKES/DISLIKES
 async function getLiked() {
     const body = JSON.stringify({
         videoID: props.id,
@@ -72,6 +91,7 @@ async function getLiked() {
     }
 }
 
+// FUNCTION FOR LIKING VIDEOS
 async function like() {
     const body = JSON.stringify({
         videoID: props.id,
@@ -96,6 +116,7 @@ async function like() {
     getLiked();
 }
 
+// FUNCTION FOR DISLIKING VIDEOS
 async function dislike() {
     const body = JSON.stringify({
         videoID: props.id,
@@ -119,6 +140,51 @@ async function dislike() {
 
     getLiked();
 }
+
+// INITIALISING HLS FOR VIDEO STREAMING
+function hlsInit() {
+    const video = videoRef.value;
+
+    if (!video) {
+        error.value = true;
+        return;
+    }
+
+    video.muted = false;
+    video.volume = 1.0;
+
+    video.addEventListener('error', () => {
+        error.value = true;
+        return;
+    })
+
+    if (Hls.isSupported()) {
+        const hls = new Hls({
+            startPosition: 0,
+        });
+        try {
+            hls.attachMedia(video);
+            hls.loadSource(path.value);
+        } catch (e) {
+            error.value = true;
+            return;
+        }
+
+        hls.on(Hls.Events.ERROR, (event, data) => {
+            if (data.fatal) {
+                error.value = true;
+                return;
+            }
+        })
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = path.value;
+    }
+}
+
+async function loadMore() {
+    const newThumbnails = await GetIMGs(limit, thumbnails.value.length);
+    thumbnails.value.push(...newThumbnails);
+}
 </script>
 
 <template>
@@ -127,7 +193,15 @@ async function dislike() {
     <div v-if="!loading" class="layout">
         <div id="leftSide">
             <div class="player">
-                <component :is="CreateVIDHLS(path, subtitles, subtitleLanguage, subtitleLanguage)"/>
+                <div v-if="!error" class="video-block">
+                    <video ref="videoRef" class="video" crossorigin="anonymous" controls>
+                        <track :src="subtitles" kind="subtitles" srclang="cc" lang="en" default>
+                    </video>
+                </div>
+                <div v-if="error" class="error-overlay">
+                    <h2 class="error-text">This video is currently unavailable</h2>
+                    <img class="video" src="@/assets/logo.svg">
+                </div>
                 <div>
                     <div id="underVideo">
                         <h2>{{ title }}</h2>
@@ -158,9 +232,11 @@ async function dislike() {
                 </div>
             </div>
         </div>
-
-        <Thumbnail v-if="!loading" :thumbnails="thumbnails"/>
-    </div>
+        <div id="rightSide">
+            <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
+            <button v-if="thumbnails.length === limit" id="more" @click="loadMore">Load more videos</button>
+        </div>
+  </div>
 </template>
 
 <style scoped>
@@ -181,6 +257,13 @@ async function dislike() {
     min-width: 0;
 }
 
+#rightSide {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
 #videos {
     flex-shrink: 0;
     width: 300px;
@@ -189,17 +272,56 @@ async function dislike() {
     gap: 10px;
 }
 
+#more {
+    display: block;
+    border: none;
+    border-radius: 10px;
+    width: 80%;
+    margin: 20px auto;
+    background-color: #3D5A80;
+    color: white;
+    padding: 10px;
+}
+
+#more:hover {
+    background-color: #98c1d9;
+    color: black;
+}
+
 .player {
     display: flex;
     flex-direction: column;
     width: 100%;
 }
 
-.player video {
+.video {
+    display: block;
     width: 100%;
     height: auto;
     aspect-ratio: 16/9;
+    background-color: #3d5a80;
     border-radius: 10px;
+}
+
+.error-overlay {
+    position: relative;
+    width: 100%;
+}
+
+.error-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    color: white;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+
+    background: rgba(0, 0, 0, 0.6); /* optional */
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
 }
 
 #underVideo {
@@ -231,7 +353,9 @@ async function dislike() {
     border-radius: 50%;
     border: 1px solid #d0d0d0;
     background: #fff;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
 }
 
 .rating {
@@ -256,7 +380,6 @@ async function dislike() {
 }
 
 @media (max-width: 600px) {
-
     .layout {
         flex-direction: column;
         gap: 1rem;
@@ -278,5 +401,4 @@ async function dislike() {
         align-self: flex-end;
     }
 }
-
 </style>

@@ -4,7 +4,7 @@
             <h1>Imprint (Impressum)</h1>
         </section>
 
-        <section class="content">
+        <section class="imprint-content">
             <h2>Website Operator</h2>
             <p>
                 MyFairPipe<br/>
@@ -73,14 +73,14 @@
     margin-bottom: 0.5rem;
 }
 
-.content h2 {
+.imprint-content h2 {
     margin-top: 2rem;
     margin-bottom: 0.5rem;
     font-weight: bold;
     font-size: 1.5rem;
 }
 
-.content p {
+.imprint-content p {
     margin-bottom: 1rem;
     font-size: 1rem;
     color: #333;

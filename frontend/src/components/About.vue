@@ -7,7 +7,7 @@
             </p>
         </section>
 
-        <section class="content">
+        <section class="about-content">
             <h2>What is MyFairPipe?</h2>
             <p>
                 MyFairPipe is a web-streaming platform created as a school project.
@@ -68,14 +68,14 @@
     color: #666;
 }
 
-.content h2 {
+.about-content h2 {
     margin-top: 2rem;
     margin-bottom: 0.5rem;
     font-weight: bold;
     font-size: 1.5rem;
 }
 
-.content p {
+.about-content p {
     margin-bottom: 1rem;
     font-size: 1rem;
     color: #333;

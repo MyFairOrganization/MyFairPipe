@@ -81,6 +81,7 @@ async function checkLoggedIn() {
                 <div class="footer-nav">
                     <RouterLink class="footer-txt" to="/about">About</RouterLink>
                     <RouterLink class="footer-txt" to="/imprint">Imprint</RouterLink>
+                    <RouterLink class="footer-txt" to="/help">Help</RouterLink>
                 </div>
             </div>
         </nav>
@@ -98,7 +99,9 @@ template {
 }
 
 .full {
-    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .navtxt {
@@ -162,6 +165,7 @@ nav a:first-of-type {
 }
 
 .content {
+    flex: 1;
     margin-top: 100px;
     align-content: space-around;
 }
@@ -171,8 +175,6 @@ nav a:first-of-type {
     background: white;
     color: black;
     padding: 2.5rem 2rem;
-    left: 0;
-    bottom: 0;
 }
 
 .footer {
