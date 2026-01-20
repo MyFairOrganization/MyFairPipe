@@ -85,10 +85,10 @@ export async function POST(req: NextRequest) {
 		// -------------------------------
 		// Check if video exists
 		// -------------------------------
-		const videoExists = await objectExists(videoBucket, `${videoId}/${videoId}.*`);
-		if (!videoExists) {
-			return NextError.Error("Video isn't uploaded yet.", HttpError.BadRequest);
-		}
+		//const videoExists = await objectExists(videoBucket, `${videoId}/${videoId}.*`);
+		//if (!videoExists) {
+		//	return NextError.Error("Video isn't uploaded yet.", HttpError.BadRequest);
+		//}
 
 		// -------------------------------
 		// List existing subtitles for this video
