@@ -6,6 +6,10 @@ import Thumbnail from './Thumbnail.vue'
 import Upload from './Upload.vue'
 import Loader from '@/components/Loader.vue'
 
+const props = defineProps({
+    id: Number || null
+});
+
 const userPage = ref(true)
 const uploadPage = ref(false)
 const editPage = ref(false)
@@ -25,30 +29,48 @@ watch(
 )
 
 function upload() {
-    router.push('/upload')
+    if (props.id === null) {
+        router.push('/upload');
+    }
 }
 
 function edit() {
-    router.push('/edituser')
+    if (props.id === null) {
+        router.push('/edituser');
+    }
 }
 
 async function logout() {
-    await fetch(`https://api.myfairpipe.com/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-    })
+    if (props.id === null) {
+        await fetch(`https://api.myfairpipe.com/auth/logout`, {
+            method: 'POST',
+            credentials: 'include',
+        })
 
-    router.push('/home')
+        router.push('/home')
+    }
 }
 
 const thumbnails = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
-    const req = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
-        credentials: 'include',
-        cache: 'no-store',
-    })
+    var req;
+
+    if (props.id !== null) {
+        const params = new URLSearchParams();
+        params.append('id', `${props.id}`);
+        req = await fetch(`https://api.myfairpipe.com/user/get?${params}`, {
+            credentials: 'include',
+            cache: 'no-store',
+        });
+    } else {
+        req = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+            credentials: 'include',
+            cache: 'no-store',
+        });
+    }
+
     const user = await req.json()
     if (user.user.anonym) {
         router.push('/home')
@@ -73,11 +95,23 @@ onMounted(async () => {
 
 async function loadProfile() {
     try {
-        const res = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
-            method: 'GET',
-            credentials: 'include',
-            cache: 'no-store',
-        })
+        var res;
+
+        if (props.id !== null) {
+            const params = new URLSearchParams();
+            params.append('id', `${props.id}`);
+            res = await fetch(`https://api.myfairpipe.com/user/get?${params}`, {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store',
+            });
+        } else {
+            res = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store',
+            });
+        }
 
         if (!res.ok) {
             console.error('Failed to load profile:', res.status)
@@ -94,11 +128,23 @@ async function loadProfile() {
 
 async function loadProfilePicture() {
     try {
-        const res = await fetch('https://api.myfairpipe.com/user/picture/get', {
-            method: 'GET',
-            credentials: 'include',
-            cache: 'no-store',
-        })
+        var res;
+
+        if (props.id !== null) {
+            const params = new URLSearchParams();
+            params.append('id', `${props.id}`);
+            res = await fetch(`https://api.myfairpipe.com/user/picture/get?${params}`, {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store',
+            });
+        } else {
+            res = await fetch('https://api.myfairpipe.com/user/picture/get', {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store',
+            });
+        }
 
         if (!res.ok) {
             console.error('Failed to load profile picture:', res.status)
@@ -133,9 +179,9 @@ async function loadProfilePicture() {
             </div>
 
             <div class="right">
-                <button v-if="!uploadPage" class="btn" @click="upload">Upload Video</button>
-                <button class="btn" @click="edit">Edit Account</button>
-                <button class="btn" @click="logout()">Logout</button>
+                <button v-if="!uploadPage && props.id === null" class="btn" @click="upload">Upload Video</button>
+                <button class="btn" v-if="props.id === null" @click="edit">Edit Account</button>
+                <button class="btn" v-if="props.id === null" @click="logout()">Logout</button>
             </div>
         </div>
     </div>

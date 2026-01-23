@@ -14,7 +14,7 @@ const router = createRouter({
     }, {
         path: '/upload', name: 'upload', component: () => {return import('@/components/User.vue')}
     }, {
-        path: '/user', name: 'user', component: () => {return import('@/components/User.vue')}
+        path: '/user', name: 'user', props: true, component: () => {return import('@/components/User.vue')}
     }, {
         path: '/edituser', name: 'edituser', component: () => {return import('@/components/EditUser.vue')}
     }, {

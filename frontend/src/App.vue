@@ -45,7 +45,7 @@ async function checkLoggedIn() {
             anonym.value = true
             return false
         }
-        username.value = data.user.displayName
+        username.value = data.user.displayname
     }
     anonym.value = false
 

@@ -5,6 +5,7 @@ import { nextTick, onMounted, ref } from 'vue';
 import Thumbnail from '@/components/Thumbnail.vue';
 import Loader from '@/components/Loader.vue';
 import Hls from 'hls.js';
+import router from "@/router";
 
 // VUE REFS
 const route = useRoute();
@@ -76,7 +77,7 @@ async function getDetails() {
     const userData = await userReq.json();
     const pfpData = await userPFPReq.json();
 
-    creatorName.value = userData.user.displayName;
+    creatorName.value = userData.user.displayname;
     creatorPicture.value = `${pfpData.photo_url}?v=${Date.now()}`;
 }
 
@@ -199,6 +200,10 @@ async function loadMore() {
     const newThumbnails = await GetIMGs(limit, thumbnails.value.length);
     thumbnails.value.push(...newThumbnails);
 }
+
+function goToUser() {
+    router.push({name: 'user', params: {id: uploader.value}});
+}
 </script>
 
 <template>
@@ -242,17 +247,17 @@ async function loadMore() {
                             </div>
                         </div>
                     </div>
-                    <p>{{ description }}</p>
-                    <div id="creator-info">
+                    <div id="creator-info" @click="goToUser()">
                         <img :src="creatorPicture" alt="Profile Picture" class="pfp"/>
                         <p>{{ creatorName }}</p>
                     </div>
+                    <p>{{ description }}</p>
                 </div>
             </div>
         </div>
         <div id="rightSide">
             <Thumbnail v-if="!loading" :thumbnails="thumbnails" />
-            <button v-if="thumbnails.length === limit" id="more" @click="loadMore">Load more videos</button>
+            <button v-if="thumbnails.length % limit === 0" id="more" @click="loadMore">Load more videos</button>
         </div>
   </div>
 </template>
@@ -279,6 +284,7 @@ async function loadMore() {
     display: flex;
     flex-direction: row;
     gap: 10px;
+    width: 10%;
 }
 
 #leftSide {
