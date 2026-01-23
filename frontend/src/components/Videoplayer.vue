@@ -12,6 +12,9 @@ const path = ref('');
 const props = { id: route.query.id as string };
 const title = ref('Video Title');
 const description = ref('Video Description');
+const uploader = ref(0);
+const creatorName = ref('');
+const creatorPicture = ref('');
 const subtitles = ref('');
 const subtitleLanguage = ref('');
 const liked = ref(false);
@@ -64,6 +67,17 @@ async function getDetails() {
     path.value = videoPath.replace('%PATH', videoData.path);
     subtitles.value = cdnPath.replace('%PATH', subtitlePath);
     subtitleLanguage.value = subtitleData.languages[0];
+
+    uploader.value = videoData.uploader_id;
+    params.set('id', `${uploader.value}`);
+
+    const userReq = await fetch(`https://api.myfairpipe.com/user/get?${params}`);
+    const userPFPReq = await fetch(`https://api.myfairpipe.com/user/picture/get?${params}`)
+    const userData = await userReq.json();
+    const pfpData = await userPFPReq.json();
+
+    creatorName.value = userData.user.displayName;
+    creatorPicture.value = `${pfpData.photo_url}?v=${Date.now()}`;
 }
 
 // GETS INFORMATION ABOUT LIKES/DISLIKES
@@ -229,6 +243,10 @@ async function loadMore() {
                         </div>
                     </div>
                     <p>{{ description }}</p>
+                    <div id="creator-info">
+                        <img :src="creatorPicture" alt="Profile Picture" class="pfp"/>
+                        <p>{{ creatorName }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -247,6 +265,20 @@ async function loadMore() {
     max-width: 1400px;
     margin: 50px auto;
     padding: 0 1rem;
+}
+
+.pfp {
+    width: 50px;
+    height: 50px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#creator-info {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
 }
 
 #leftSide {
