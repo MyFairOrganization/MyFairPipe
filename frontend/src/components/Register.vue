@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue';
 import {useRouter} from 'vue-router';
+import {ENV} from "@/config/env.ts";
 
 const email = ref('');
 const username = ref('');
@@ -22,7 +23,7 @@ const register = () => {
     errorMessage.value = '';
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://api.myfairpipe.com/auth/register', true);
+    xhr.open('POST', `${ENV.API_DOMAIN}/auth/register`, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('Accept', 'application/json');
 

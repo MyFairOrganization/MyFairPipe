@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
+import {ENV} from "@/config/env.ts";
 
 const username = ref('')
 const title = ref('')
@@ -21,7 +22,7 @@ const router = useRouter()
 const maxFileSize = 4 * 1024 * 1024 * 1024
 
 onMounted(async () => {
-    const req = await fetch(`https://api.myfairpipe.com/user/get`, {
+    const req = await fetch(`${ENV.API_DOMAIN}/user/get`, {
         credentials: 'include',
     })
     const user = await req.json()
@@ -104,7 +105,7 @@ async function uploadVideo() {
         xhr.addEventListener('error', () => {return reject(new Error('Upload failed'))})
         xhr.addEventListener('abort', () => {return reject(new Error('Upload cancelled'))})
 
-        xhr.open('POST', 'https://api.myfairpipe.com/video/upload')
+        xhr.open('POST', `${ENV.API_DOMAIN}/video/upload`)
         xhr.withCredentials = true
         xhr.send(formData)
         xhr.DONE
@@ -145,7 +146,7 @@ async function uploadThumbnail(id: number) {
         xhr.addEventListener('error', () => {return reject(new Error('Thumbnail upload failed'))})
         xhr.addEventListener('abort', () => {return reject(new Error('Thumbnail upload cancelled'))})
 
-        xhr.open('POST', 'https://api.myfairpipe.com/thumbnail/upload')
+        xhr.open('POST', `${ENV.API_DOMAIN}/thumbnail/upload`)
         xhr.withCredentials = true
         xhr.send(formData)
         xhr.DONE
@@ -162,7 +163,7 @@ async function uploadSubtitle(id: number) {
     formData.append('language', language.value)
     formData.append('language_short', languageShort.value)
 
-    const res = await fetch('https://api.myfairpipe.com/subtitles/upload', {
+    const res = await fetch(`${ENV.API_DOMAIN}/subtitles/upload`, {
         method: 'POST',
         body: formData,
         credentials: 'include',

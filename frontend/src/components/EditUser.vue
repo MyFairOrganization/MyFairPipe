@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
+import {ENV} from "@/config/env.ts";
 
 /**
  * Vue router.
@@ -19,7 +20,7 @@ const pfpFile = ref<File | null>(null);
  * Executed after site loaded.
  */
 onMounted(async () => {
-    const req = await fetch(`https://api.myfairpipe.com/user/get`, {
+    const req = await fetch(`${ENV.API_DOMAIN}/user/get`, {
         credentials: 'include',
     });
     const user = await req.json();
@@ -36,7 +37,7 @@ onMounted(async () => {
  */
 function loadProfile() {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://api.myfairpipe.com/user/get', true);
+    xhr.open('GET', `${ENV.API_DOMAIN}/user/get`, true);
     xhr.withCredentials = true;
 
     xhr.onload = () => {
@@ -55,7 +56,7 @@ function loadProfile() {
  */
 function loadProfilePicture() {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://api.myfairpipe.com/user/picture/get', true);
+    xhr.open('GET', `${ENV.API_DOMAIN}/user/picture/get`, true);
     xhr.withCredentials = true;
 
     xhr.onload = () => {
@@ -79,7 +80,7 @@ function loadProfilePicture() {
 function applyChanges() {
     uploadPfp();
     const xhr = new XMLHttpRequest();
-    xhr.open('PATCH', 'https://api.myfairpipe.com/user/update', true);
+    xhr.open('PATCH', `${ENV.API_DOMAIN}/user/update`, true);
     xhr.withCredentials = true;
 
     const formData = new FormData();
@@ -114,7 +115,7 @@ function handleFileUpload(event: Event) {
  */
 async function uploadPfp() {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://api.myfairpipe.com/user/picture/upload', true);
+    xhr.open('POST', `${ENV.API_DOMAIN}/user/picture/upload`, true);
     xhr.withCredentials = true;
 
     const formData = new FormData();

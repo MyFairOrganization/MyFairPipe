@@ -5,6 +5,7 @@ import {useRoute, useRouter} from 'vue-router'
 import Thumbnail from './Thumbnail.vue'
 import Upload from './Upload.vue'
 import Loader from '@/components/Loader.vue'
+import {ENV} from "@/config/env.ts";
 
 const props = defineProps({
     id: Number || null
@@ -42,7 +43,7 @@ function edit() {
 
 async function logout() {
     if (props.id === null) {
-        await fetch(`https://api.myfairpipe.com/auth/logout`, {
+        await fetch(`${ENV.API_DOMAIN}/auth/logout`, {
             method: 'POST',
             credentials: 'include',
         })
@@ -60,12 +61,12 @@ onMounted(async () => {
     if (props.id !== null) {
         const params = new URLSearchParams();
         params.append('id', `${props.id}`);
-        req = await fetch(`https://api.myfairpipe.com/user/get?${params}`, {
+        req = await fetch(`${ENV.API_DOMAIN}/user/get?${params}`, {
             credentials: 'include',
             cache: 'no-store',
         });
     } else {
-        req = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+        req = await fetch(`${ENV.API_DOMAIN}/user/get?_=${Date.now()}`, {
             credentials: 'include',
             cache: 'no-store',
         });
@@ -100,13 +101,13 @@ async function loadProfile() {
         if (props.id !== null) {
             const params = new URLSearchParams();
             params.append('id', `${props.id}`);
-            res = await fetch(`https://api.myfairpipe.com/user/get?${params}`, {
+            res = await fetch(`${ENV.API_DOMAIN}/user/get?${params}`, {
                 method: 'GET',
                 credentials: 'include',
                 cache: 'no-store',
             });
         } else {
-            res = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+            res = await fetch(`${ENV.API_DOMAIN}/user/get?_=${Date.now()}`, {
                 method: 'GET',
                 credentials: 'include',
                 cache: 'no-store',
@@ -133,13 +134,13 @@ async function loadProfilePicture() {
         if (props.id !== null) {
             const params = new URLSearchParams();
             params.append('id', `${props.id}`);
-            res = await fetch(`https://api.myfairpipe.com/user/picture/get?${params}`, {
+            res = await fetch(`${ENV.API_DOMAIN}/user/picture/get?${params}`, {
                 method: 'GET',
                 credentials: 'include',
                 cache: 'no-store',
             });
         } else {
-            res = await fetch('https://api.myfairpipe.com/user/picture/get', {
+            res = await fetch(`${ENV.API_DOMAIN}/user/picture/get`, {
                 method: 'GET',
                 credentials: 'include',
                 cache: 'no-store',

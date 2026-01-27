@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
+import {ENV} from "@/config/env.ts";
 
 const router = useRouter()
 
@@ -21,7 +22,8 @@ const login = () => {
     errorMessage.value = ''
 
     const xhr = new XMLHttpRequest()
-    xhr.open('POST', 'https://api.myfairpipe.com/auth/login', true)
+
+    xhr.open("POST", `${ENV.API_DOMAIN}/auth/login`, true);
 
     xhr.setRequestHeader('Content-Type', 'application/json')
     xhr.setRequestHeader('Accept', 'application/json')

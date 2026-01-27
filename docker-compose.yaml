@@ -50,23 +50,24 @@ services:
       context: ./configuration/nginx
       target: dev
     container_name: nginx_dev
+    env_file:
+      - .env
     ports:
       - "80:80"
-      - "443:443"
     depends_on:
       - vuejs-dev
       - nextjs-dev
     profiles: [ "dev" ]
     networks:
       - external-network
-    volumes:
-      - /ssl:/ssl
 
   vuejs-dev:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       target: dev
+    env_file:
+      - .env
     container_name: vuejs_dev
     ports:
       - "5173:5173"
@@ -84,6 +85,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: dev
+    env_file:
+      - .env
     container_name: nextjs_dev
     ports:
       - "3000:3000"

@@ -6,6 +6,7 @@ import Thumbnail from '@/components/Thumbnail.vue';
 import Loader from '@/components/Loader.vue';
 import Hls from 'hls.js';
 import router from "@/router";
+import {ENV} from "@/config/env.ts";
 
 // VUE REFS
 const route = useRoute();
@@ -29,8 +30,8 @@ const error = ref(false);
 const limit = 10;
 
 // PATHS IN CDN
-const cdnPath = 'https://cdn.myfairpipe.com/video/%PATH';
-const videoPath = 'https://cdn.myfairpipe.com%PATH';
+const cdnPath = `${ENV.CDN_DOMAIN}/video/%PATH`;
+const videoPath = `${ENV.CDN_DOMAIN}%PATH`;
 
 // VIDEO ELEMENT
 const videoRef = ref<HTMLVideoElement | null>(null);
@@ -52,8 +53,8 @@ async function getDetails() {
     const params = new URLSearchParams();
     params.append('id', props.id);
 
-    const videoReq = await fetch(`https://api.myfairpipe.com/video/get?${params}`);
-    const subtitleReq = await fetch(`https://api.myfairpipe.com/subtitles/get?${params}`);
+    const videoReq = await fetch(`${ENV.API_DOMAIN}/video/get?${params}`);
+    const subtitleReq = await fetch(`${ENV.API_DOMAIN}/subtitles/get?${params}`);
     const videoData = await videoReq.json();
     const subtitleData = await subtitleReq.json();
 
@@ -72,8 +73,8 @@ async function getDetails() {
     uploader.value = videoData.uploader_id;
     params.set('id', `${uploader.value}`);
 
-    const userReq = await fetch(`https://api.myfairpipe.com/user/get?${params}`);
-    const userPFPReq = await fetch(`https://api.myfairpipe.com/user/picture/get?${params}`)
+    const userReq = await fetch(`${ENV.API_DOMAIN}/user/get?${params}`);
+    const userPFPReq = await fetch(`${ENV.API_DOMAIN}/user/picture/get?${params}`)
     const userData = await userReq.json();
     const pfpData = await userPFPReq.json();
 
@@ -88,7 +89,7 @@ async function getLiked() {
     });
 
     try {
-        const res = await fetch(`https://api.myfairpipe.com/like_dislike/get`, {
+        const res = await fetch(`${ENV.API_DOMAIN}/like_dislike/get`, {
             method: 'POST',
             body: body,
             credentials: 'include',
@@ -113,7 +114,7 @@ async function like() {
     });
 
     try {
-        const res = await fetch(`https://api.myfairpipe.com/like_dislike/like`, {
+        const res = await fetch(`${ENV.API_DOMAIN}/like_dislike/like`, {
             method: 'POST',
             body: body,
             credentials: 'include',
@@ -138,7 +139,7 @@ async function dislike() {
     });
 
     try {
-        const res = await fetch(`https://api.myfairpipe.com/like_dislike/dislike`, {
+        const res = await fetch(`${ENV.API_DOMAIN}/like_dislike/dislike`, {
             method: 'POST',
             body: body,
             credentials: 'include',

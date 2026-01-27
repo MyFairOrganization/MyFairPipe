@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectionPool } from "@/lib/services/postgres";
 import { getUser } from "@/lib/auth/getUser";
 
-const PHOTO_CDN = "https://cdn.myfairpipe.com/photo";
+const PHOTO_CDN = `${process.env.CDN_DOMAIN}/photo`;
+console.log(PHOTO_CDN);
 
 export async function OPTIONS() {
+	const domain = process.env.DOMAIN ?? "";
 	return new NextResponse(null, {
-		status: 204,
-		headers: {
-			"Access-Control-Allow-Origin": "https://myfairpipe.com",
+		status: 204, headers: {
+			"Access-Control-Allow-Origin": domain,
 			"Access-Control-Allow-Credentials": "true",
 			"Access-Control-Allow-Methods": "GET, OPTIONS",
 			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",

@@ -9,10 +9,10 @@ export const config = {
 
 export default async function proxy(req: NextRequest) {
 	if (req.method === 'OPTIONS') {
+		const domain = process.env.DOMAIN ?? "";
 		return new NextResponse(null, {
-			status: 204,
-			headers: {
-				'Access-Control-Allow-Origin': 'https://myfairpipe.com',
+			status: 204, headers: {
+				'Access-Control-Allow-Origin': domain,
 				'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
 				'Access-Control-Allow-Headers': 'Content-Type,Authorization,Cookie',
 				'Access-Control-Allow-Credentials': 'true',

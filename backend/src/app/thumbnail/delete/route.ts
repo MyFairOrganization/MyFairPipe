@@ -6,9 +6,10 @@ import {getUser} from "@/lib/auth/getUser";
 import {QueryResult} from "pg";
 
 export async function OPTIONS() {
+	const domain = process.env.DOMAIN ?? "";
 	return new NextResponse(null, {
 		status: 204, headers: {
-			"Access-Control-Allow-Origin": "https://myfairpipe.com",
+			"Access-Control-Allow-Origin": domain,
 			"Access-Control-Allow-Credentials": "true",
 			"Access-Control-Allow-Methods": "DELETE, OPTIONS",
 			"Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",

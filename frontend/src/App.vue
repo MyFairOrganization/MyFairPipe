@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {RouterLink, RouterView, useRoute} from 'vue-router'
 import {ref, watch} from 'vue'
+import {ENV} from "@/config/env.ts";
 
 const route = useRoute()
 const loggedIn = ref(false)
@@ -13,7 +14,7 @@ watch(
         loggedIn.value = await checkLoggedIn()
 
         if (!loggedIn.value && !anonym.value) {
-            const register = await fetch('https://api.myfairpipe.com/auth/anonymLogin', {
+            const register = await fetch(`${ENV.API_DOMAIN}/auth/anonymLogin`, {
                 method: 'POST',
                 credentials: 'include',
             })
@@ -25,7 +26,7 @@ watch(
                 password: data.password,
             })
 
-            await fetch('https://api.myfairpipe.com/auth/login', {
+            await fetch(`${ENV.API_DOMAIN}/auth/login`, {
                 method: 'POST',
                 body: body,
                 credentials: 'include',
@@ -35,7 +36,7 @@ watch(
 )
 
 async function checkLoggedIn() {
-    const req = await fetch('https://api.myfairpipe.com/user/get', {
+    const req = await fetch(`${ENV.API_DOMAIN}/user/get`, {
         credentials: 'include',
     })
 

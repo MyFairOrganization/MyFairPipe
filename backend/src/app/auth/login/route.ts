@@ -9,9 +9,10 @@ if (!process.env.JWT_SECRET) {
 const jwtSecret = process.env.JWT_SECRET;
 
 export async function OPTIONS() {
+    const domain = process.env.DOMAIN ?? "";
     return new NextResponse(null, {
         status: 204, headers: {
-            "Access-Control-Allow-Origin": "https://myfairpipe.com",
+            "Access-Control-Allow-Origin": domain,
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
@@ -50,9 +51,12 @@ export async function POST(req: Request) {
             user: { user_id: user.user_id, email: user.user_email }
         }, { status: 200 });
 
+        const domain = process.env.DOMAIN_HOST ?? "ERROR";
+        console.log("HOST ->", domain);
+
         response.cookies.set("session", token, {
             httpOnly: true, secure: false, sameSite: "lax",      // Cross-Site erlaubt
-            domain: ".myfairpipe.com", path: "/", maxAge: 60 * 60 * 24 * 7,
+            domain: domain, path: "/", maxAge: 60 * 60 * 24 * 7,
         });
 
         return response;
