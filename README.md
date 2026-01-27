@@ -35,14 +35,22 @@ ELASTICSEARCH_URL=http://elasticsearch:9200
 JWT_SECRET=changeme
 
 # Domain
-DOMAIN=https://myfairpipe.com
-API_DOMAIN=https://api.myfairpipe.com
-CDN_DOMAIN=https://cdn.myfairpipe.com
+DOMAIN=http://demomyfairpipe.com
+API_DOMAIN=http://api.demomyfairpipe.com
+CDN_DOMAIN=http://cdn.demomyfairpipe.com
+
+# Frontend
+VITE_DOMAIN=http://demomyfairpipe.com
+VITE_API_DOMAIN=http://api.demomyfairpipe.com
+VITE_CDN_DOMAIN=http://cdn.demomyfairpipe.com
 
 # Nginx
-DOMAIN_HOST=myfairpipe.com
-API_DOMAIN_HOST=api.myfairpipe.com
-CDN_DOMAIN_HOST=cdn.myfairpipe.com
+DOMAIN_HOST=demomyfairpipe.com
+API_DOMAIN_HOST=api.demomyfairpipe.com
+CDN_DOMAIN_HOST=cdn.demomyfairpipe.com
+
+# SCHEME
+SCHEME=http
 ```
 
 ### 2. Build
@@ -58,9 +66,9 @@ docker compose build
 
 ```bash
 cd ./frontend
-npm install
+npm ci
 cd ./../backend
-npm install
+npm ci
 cd ./..
 ```
 
