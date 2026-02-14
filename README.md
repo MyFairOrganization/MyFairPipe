@@ -8,7 +8,7 @@
 ## Features
 
 - Video-Upload for registrierte Users
-- Video-Streaming without requiered Login
+- Video-Streaming without required Login
 - Like / Dislike System
 - Like-based Feed-Sort
 - Automatic subtitle-generation
