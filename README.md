@@ -43,7 +43,6 @@
 
 - PostgreSQL
 - Redis
-- Elasticsearch
 - MinIO
 - Nginx
 - Docker & Docker Compose
