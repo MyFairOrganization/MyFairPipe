@@ -1,57 +1,77 @@
-# ITP_Project_1sem
+# MyFairPipe
 
-## MyFairPipe
+---
+<p align="center"> <strong>Privacy-First Modular Video Streaming Platform</strong><br/> Built for fairness, transparency, and scalable media processing. </p>
 
-# Setup
+---
 
-How to work with the docker compose?
-<br>
-`(everything in root dir)`
+## Features
 
-### 1. Make a .env file:
+- Video-Upload for registrierte Users
+- Video-Streaming without requiered Login
+- Like / Dislike System
+- Like-based Feed-Sort
+- Automatic subtitle-generation
+- Adaptive bitrate streaming
+- Secure Authentification
 
-```env
-# Minio
-MINIO_USER=minioadmin
-MINIO_PASSWORD=minioadmin
+---
 
-# RabbitMQ
-RABBIT_HOST=rabbitmq
-RABBIT_PORT=5672
-RABBIT_USER=admin
-RABBIT_PASS=admin
+## Tech Stack
 
-# PostGreSQL
-POSTGRES_USER=PostGresUser
-POSTGRES_PASS=PostGresPass
-POSTGRES_DB=app
+### Frontend
 
-# Database URLs
-POSTGRES="postgres://${POSTGRES_USER}:${POSTGRES_PASS}@postgres:5432/${POSTGRES_DB}"
-REDIS=redis://redis:6379/0
-ELASTICSEARCH_URL=http://elasticsearch:9200
+- Vue 3
+- TypeScript
+- Vite
 
-# JWT
-JWT_SECRET=changeme
+### Backend
 
-# Domain
-DOMAIN=http://demomyfairpipe.com
-API_DOMAIN=http://api.demomyfairpipe.com
-CDN_DOMAIN=http://cdn.demomyfairpipe.com
+- Node.js (Next.js API Routes)
+- TypeScript
+- JWT Auth
 
-# Frontend
-VITE_DOMAIN=http://demomyfairpipe.com
-VITE_API_DOMAIN=http://api.demomyfairpipe.com
-VITE_CDN_DOMAIN=http://cdn.demomyfairpipe.com
+### Processing / Pipelines
 
-# Nginx
-DOMAIN_HOST=demomyfairpipe.com
-API_DOMAIN_HOST=api.demomyfairpipe.com
-CDN_DOMAIN_HOST=cdn.demomyfairpipe.com
+- Python Worker
+- RabbitMQ (Job Queue)
+- Manager/Worker Pattern
+- Video Resolution Pipeline
+- Subtitle Transcription Pipeline
 
-# SCHEME
-SCHEME=http
+### Storage & Infrastruktur
+
+- PostgreSQL
+- Redis
+- Elasticsearch
+- MinIO
+- Nginx
+- Docker & Docker Compose
+
+---
+
+## Projektstruktur
+
 ```
+├── frontend/ # Vue Frontend
+├── backend/ # API & Business Logic
+├── Pipes/ # Video & Subtitle Worker Pipelines
+├── configuration/ # Nginx + SQL Setup
+├── docker/ # Dockerfiles & Service Config
+├── docker-compose.yaml
+└── README.md
+```
+
+---
+
+## Lokales Setup (Docker)
+
+> Run all commands in the root directory.
+
+### 1. Create the `.env` file
+
+Create a `.env` file in the root directory.
+(Example see `.env.example`)
 
 ### 2. Build
 
@@ -60,20 +80,12 @@ docker compose build python-base-image
 docker compose build
 ```
 
-### 3. Install backend & frontend locally
-
-#### In the corresponding folders
-
 ```bash
-cd ./frontend
-npm ci
-cd ./../backend
-npm ci
-cd ./..
+cd frontend && npm ci
+cd ../backend && npm ci
+cd ..
 ```
 
-### 4. Start
-
 ```bash
- docker compose --profile dev up -d
+docker compose --profile dev up -d
 ```
