@@ -5,6 +5,7 @@ import {useRoute, useRouter} from 'vue-router'
 import Thumbnail from './Thumbnail.vue'
 import Upload from './Upload.vue'
 import Loader from '@/components/Loader.vue'
+import {ENV} from "@/config/env.ts";
 
 const userPage = ref(true)
 const uploadPage = ref(false)
@@ -15,6 +16,10 @@ const userDescription = ref('This is a brief user description.')
 const userImage = ref('')
 const router = useRouter()
 const route = useRoute()
+
+const props = defineProps({
+    id: String
+});
 
 watch(
     () => {return route.fullPath},
@@ -33,7 +38,7 @@ function edit() {
 }
 
 async function logout() {
-    await fetch(`https://api.myfairpipe.com/auth/logout`, {
+    await fetch(`${ENV.API_DOMAIN}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
     })
@@ -45,12 +50,12 @@ const thumbnails = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
-    const req = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+    const req = await fetch(`${ENV.API_DOMAIN}/user/get?_=${Date.now()}` + (props.id === "" || props.id === undefined ? "" : `&id=${props.id}`), {
         credentials: 'include',
         cache: 'no-store',
     })
     const user = await req.json()
-    if (user.user.anonym) {
+    if (user.user.anonym && props.id === "") {
         router.push('/home')
     } else {
         const path = router.currentRoute._value.fullPath
@@ -73,7 +78,7 @@ onMounted(async () => {
 
 async function loadProfile() {
     try {
-        const res = await fetch(`https://api.myfairpipe.com/user/get?_=${Date.now()}`, {
+        const res = await fetch(`${ENV.API_DOMAIN}/user/get?_=${Date.now()}` + (props.id === "" || props.id === undefined ? "" : `&id=${props.id}`), {
             method: 'GET',
             credentials: 'include',
             cache: 'no-store',
@@ -94,7 +99,7 @@ async function loadProfile() {
 
 async function loadProfilePicture() {
     try {
-        const res = await fetch('https://api.myfairpipe.com/user/picture/get', {
+        const res = await fetch(`${ENV.API_DOMAIN}/user/picture/get` + (props.id === "" || props.id === undefined ? "" : `?id=${props.id}`), {
             method: 'GET',
             credentials: 'include',
             cache: 'no-store',
@@ -133,9 +138,9 @@ async function loadProfilePicture() {
             </div>
 
             <div class="right">
-                <button v-if="!uploadPage" class="btn" @click="upload">Upload Video</button>
-                <button class="btn" @click="edit">Edit Account</button>
-                <button class="btn" @click="logout()">Logout</button>
+                <button v-if="!uploadPage && (props.id === '' || props.id === undefined)" class="btn" @click="upload">Upload Video</button>
+                <button class="btn" v-if="(props.id === '' || props.id === undefined)" @click="edit">Edit Account</button>
+                <button class="btn" v-if="(props.id === '' || props.id === undefined)" @click="logout()">Logout</button>
             </div>
         </div>
     </div>

@@ -244,7 +244,7 @@ async function loadMore() {
                             </div>
                         </div>
                     </div>
-                    <div id="creator-info">
+                    <div id="creator-info" @click="router.push(`user/${uploader}`)">
                         <img :src="creatorPicture" alt="Profile Picture" class="pfp"/>
                         <p>{{ creatorName }}</p>
                     </div>
@@ -281,7 +281,6 @@ async function loadMore() {
     display: flex;
     flex-direction: row;
     gap: 10px;
-    width: 10%;
 }
 
 #leftSide {
