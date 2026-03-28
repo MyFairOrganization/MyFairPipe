@@ -7,7 +7,7 @@
 
 ## Features
 
-- Video-Upload for registrierte Users
+- Video-Upload for registered Users
 - Video-Streaming without required Login
 - Like / Dislike System
 - Like-based Feed-Sort
@@ -39,7 +39,7 @@
 - Video Resolution Pipeline
 - Subtitle Transcription Pipeline
 
-### Storage & Infrastruktur
+### Storage & Infrastructure
 
 - PostgreSQL
 - Redis
@@ -49,21 +49,21 @@
 
 ---
 
-## Projektstruktur
+## Project structure
 
 ```
-├── frontend/ # Vue Frontend
-├── backend/ # API & Business Logic
-├── Pipes/ # Video & Subtitle Worker Pipelines
-├── configuration/ # Nginx + SQL Setup
-├── docker/ # Dockerfiles & Service Config
+├── frontend/               # Vue Frontend
+├── backend/                # API & Business Logic
+├── Pipes/                  # Video & Subtitle Worker Pipelines
+├── configuration/          # Nginx + SQL Setup
+├── docker/                 # Dockerfiles & Service Config
 ├── docker-compose.yaml
 └── README.md
 ```
 
 ---
 
-## Lokales Setup (Docker)
+## Local Setup (Docker)
 
 > Run all commands in the root directory.
 

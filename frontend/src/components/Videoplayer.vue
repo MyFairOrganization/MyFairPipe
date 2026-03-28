@@ -201,10 +201,6 @@ async function loadMore() {
     const newThumbnails = await GetIMGs(limit, thumbnails.value.length);
     thumbnails.value.push(...newThumbnails);
 }
-
-function goToUser() {
-    router.push({name: 'user', params: {id: uploader.value}});
-}
 </script>
 
 <template>
@@ -248,7 +244,7 @@ function goToUser() {
                             </div>
                         </div>
                     </div>
-                    <div id="creator-info" @click="goToUser()">
+                    <div id="creator-info">
                         <img :src="creatorPicture" alt="Profile Picture" class="pfp"/>
                         <p>{{ creatorName }}</p>
                     </div>
@@ -422,12 +418,6 @@ function goToUser() {
     .layout {
         flex-direction: column;
         gap: 1rem;
-    }
-
-    #videos {
-        width: 100%;
-        margin-top: 1rem;
-        margin: 0 auto;
     }
 
     #underVideo {
