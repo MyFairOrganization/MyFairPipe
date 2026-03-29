@@ -26,6 +26,7 @@ const dislikes = ref('0');
 const thumbnails = ref([]);
 const loading = ref(true);
 const views = ref(0);
+const subscribers = ref(0);
 const error = ref(false);
 const limit = 10;
 
@@ -46,6 +47,12 @@ onMounted(async () => {
     await nextTick();
 
     await hlsInit();
+
+    const params = new URLSearchParams();
+    params.append('id', props.id);
+    await fetch(`${ENV.API_DOMAIN}/video/view?${params}`, {
+        method: 'GET'
+    });
 });
 
 // GETS INFORMATION ABOUT VIDEO
@@ -80,6 +87,8 @@ async function getDetails() {
 
     creatorName.value = userData.user.displayname;
     creatorPicture.value = `${pfpData.photo_url}?v=${Date.now()}`;
+    subscribers.value = userData.subscribers;
+    console.log(subscribers.value);
 }
 
 // GETS INFORMATION ABOUT LIKES/DISLIKES
@@ -245,10 +254,16 @@ async function loadMore() {
                         </div>
                     </div>
                     <div id="creator-info" @click="router.push(`user/${uploader}`)">
-                        <img :src="creatorPicture" alt="Profile Picture" class="pfp"/>
-                        <p>{{ creatorName }}</p>
+                        <img :src="creatorPicture" alt="Profile Picture" class="edit-pfp"/>
+                        <div>
+                            <p id="creator-name">{{ creatorName }}</p>
+                            <p id="subscribers">{{ subscribers }} Subscribers</p>
+                        </div>
                     </div>
-                    <p>{{ description }}</p>
+                    <div id="description">
+                        <p id="views">{{ views }} views</p>
+                        <p>{{ description }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -269,18 +284,34 @@ async function loadMore() {
     padding: 0 1rem;
 }
 
-.pfp {
-    width: 50px;
-    height: 50px;
+.edit-pfp {
+    width: 3em;
+    height: 3em;
     aspect-ratio: 1/1;
     border-radius: 50%;
     object-fit: cover;
 }
 
+#creator-name {
+    padding: 0;
+    margin: 0;
+    font-size: 1.25em;
+    font-weight: bold;
+}
+
 #creator-info {
     display: flex;
     flex-direction: row;
+    align-items: center;
+    padding: .5em 2em .5em 0;
+    border-radius: 2em;
+    width: max-content;
     gap: 10px;
+}
+
+#creator-info:hover {
+    cursor: pointer;
+    color: var(--color-dark);
 }
 
 #leftSide {
@@ -289,6 +320,28 @@ async function loadMore() {
     gap: 1rem;
     flex: 1;
     min-width: 0;
+}
+
+#description {
+    background-color: var(--color-medium);
+    padding: 2rem;
+    border-radius: 2em;
+    gap: 0.1em;
+}
+
+#description p {
+    margin: 0;
+    padding: 0;
+}
+
+#views {
+    font-weight: bold;
+}
+
+#subscribers {
+    padding: 0;
+    margin: 0;
+    font-size: 1em;
 }
 
 #rightSide {
@@ -312,13 +365,13 @@ async function loadMore() {
     border-radius: 10px;
     width: 80%;
     margin: 20px auto;
-    background-color: #3D5A80;
+    background-color: var(--color-dark);
     color: white;
     padding: 10px;
 }
 
 #more:hover {
-    background-color: #98c1d9;
+    background-color: var(--color-medium);
     color: black;
 }
 
@@ -333,7 +386,7 @@ async function loadMore() {
     width: 100%;
     height: auto;
     aspect-ratio: 16/9;
-    background-color: #3d5a80;
+    background-color: var(--color-dark);
     border-radius: 10px;
 }
 
@@ -402,7 +455,7 @@ async function loadMore() {
 .information {
     display: flex;
     padding: 0 10px;
-    background-color: #e0fbfc;
+    background-color: var(--color-light);
     border-radius: 10px;
     justify-content: center;
     align-items: center;

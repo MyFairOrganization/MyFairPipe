@@ -35,12 +35,12 @@ function goToPlayer(id) {
     height: auto;
     aspect-ratio: 16 / 9;
     object-fit: contain;
-    background-color: #3D5A80;
+    background-color: var(--color-dark);
     border-radius: 15px;
 }
 
 .image-block:hover {
-    color: #98c1d9;
+    color: var(--color-medium);
 }
 
 .image-block p {

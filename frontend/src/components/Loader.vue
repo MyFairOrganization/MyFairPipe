@@ -29,8 +29,8 @@ const props = defineProps({
 }
 
 .loader {
-    border: 16px solid #e0fbfc;
-    border-top: 16px solid #3d5a80;
+    border: 16px solid var(--color-light);
+    border-top: 16px solid var(--color-dark);
     border-radius: 50%;
     width: 120px;
     height: 120px;

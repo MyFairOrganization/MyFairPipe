@@ -52,43 +52,43 @@ const register = () => {
 </script>
 
 <template>
-    <div class="page">
-        <div class="card">
-            <h1 class="title">Create New Account</h1>
+    <div class="login-page">
+        <div class="login-card">
+            <h1 class="login-title">Create New Account</h1>
 
             <form class="form" @submit.prevent="register">
-                <label class="label" for="username">Username:</label>
+                <label class="login-label" for="username">Username:</label>
                 <input
                     id="username"
                     v-model="username"
-                    class="input"
+                    class="login-input"
                     placeholder="Username"
                     type="text"
                 />
 
-                <label class="label" for="email">E-Mail:</label>
+                <label class="login-label" for="email">E-Mail:</label>
                 <input
                     id="email"
                     v-model="email"
-                    class="input"
+                    class="login-input"
                     placeholder="E-Mail"
                     type="email"
                 />
 
-                <label class="label" for="password">Password:</label>
+                <label class="login-label" for="password">Password:</label>
                 <input
                     id="password"
                     v-model="password"
-                    class="input"
+                    class="login-input"
                     placeholder="Password"
                     type="password"
                 />
 
-                <label class="label" for="confirmPassword">Repeat Password:</label>
+                <label class="login-label" for="confirmPassword">Repeat Password:</label>
                 <input
                     id="confirmPassword"
                     v-model="confirmPassword"
-                    class="input"
+                    class="login-input"
                     placeholder="Repeat Password"
                     type="password"
                 />
@@ -105,8 +105,8 @@ const register = () => {
 
 <style scoped>
 
-.page {
-    background-color: #e0fbfc;
+.login-page {
+    background-color: var(--color-light);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -114,7 +114,7 @@ const register = () => {
     padding-top: 3rem;
 }
 
-.card {
+.login-card {
     max-width: 400px;
     width: 100%;
     margin: 2rem auto;
@@ -124,7 +124,7 @@ const register = () => {
     background-color: white;
 }
 
-.title {
+.login-title {
     font-size: 28px;
     line-height: 1.2;
     margin-bottom: 1.5rem;
@@ -132,7 +132,7 @@ const register = () => {
     color: #111827;
 }
 
-.label {
+.login-label {
     display: block;
     margin-bottom: 0.5rem;
     font-size: 15px;
@@ -140,7 +140,7 @@ const register = () => {
     color: #374151;
 }
 
-.input {
+.login-input {
     width: 100%;
     padding: 0.5rem;
     box-sizing: border-box;
@@ -150,14 +150,14 @@ const register = () => {
     font-size: 14px;
 }
 
-.input::placeholder {
+.login-input::placeholder {
     color: #9aa4b2;
 }
 
 .btn {
     padding: 0.5rem 1rem;
     margin-top: 0.5rem;
-    background-color: #293241;
+    background-color: var(--color-grey);
     color: white;
     border: none;
     border-radius: 4px;
@@ -170,11 +170,11 @@ const register = () => {
 }
 
 @media (max-width: 520px) {
-    .page {
+    .login-page {
         padding-top: 2rem;
     }
 
-    .card {
+    .login-card {
         padding: 1.5rem;
     }
 }

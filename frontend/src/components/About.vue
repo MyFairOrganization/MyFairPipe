@@ -1,8 +1,8 @@
 <template>
     <div class="about-page">
-        <section class="hero">
+        <section class="header">
             <h1>About MyFairPipe</h1>
-            <p class="tagline">
+            <p class="about-tagline">
                 A fair, privacy-focused video streaming platform.
             </p>
         </section>
@@ -52,18 +52,18 @@
     line-height: 1.6;
 }
 
-.hero {
+.header {
     text-align: center;
     margin-bottom: 2.5rem;
 }
 
-.hero h1 {
+.header h1 {
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
 }
 
-.tagline {
+.about-tagline {
     font-size: 2rem;
     color: #666;
 }

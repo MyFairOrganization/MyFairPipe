@@ -70,7 +70,7 @@ async function checkLoggedIn() {
             </div>
         </nav>
 
-        <main class="content">
+        <main class="help-content">
             <RouterView :key="$route.fullPath"/>
         </main>
 
@@ -165,7 +165,7 @@ nav a:first-of-type {
     gap: 20px;
 }
 
-.content {
+.help-content {
     flex: 1;
     margin-top: 100px;
     align-content: space-around;

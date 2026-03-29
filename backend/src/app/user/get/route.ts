@@ -51,7 +51,17 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        return NextResponse.json({ user: result.rows[0] }, { status: 200 });
+        const subscriberQuery = await connectionPool.query(`SELECT COUNT(*) as subscribers FROM Subscriber WHERE user_id = $1`, [userId]);
+
+        var subscribers = 0;
+
+        if (subscriberQuery.rowCount === 0) {
+            subscribers = 0;
+        } else {
+            subscribers = subscriberQuery.rows[0].subscribers;
+        }
+
+        return NextResponse.json({ user: result.rows[0], subscribers: subscribers }, { status: 200 });
     } catch (err) {
         console.error(err);
         return NextResponse.json({ error: "Server error" }, { status: 500 });

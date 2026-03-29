@@ -142,19 +142,19 @@ function back() {
 </script>
 
 <template>
-    <div class="container">
-        <div class="pfp-container">
-            <img :src="userImage" alt="Profile Picture" class="pfp"/>
+    <div class="edit-container">
+        <div class="edit-pfp-container">
+            <img :src="userImage" alt="Profile Picture" class="edit-pfp"/>
             <input accept="image/*" type="file" @change="handleFileUpload"/>
         </div>
 
-        <div class="user">
-            <div class="left">
+        <div class="edit-user">
+            <div class="edit-left">
                 <input v-model="userName" class="name-input" type="text"/>
                 <textarea v-model="userDescription" class="descr-input"></textarea>
             </div>
 
-            <div class="right">
+            <div class="edit-right">
                 <button class="btn" @click="applyChanges">Apply</button>
                 <button class="btn" @click="back">Back</button>
             </div>
@@ -163,7 +163,7 @@ function back() {
 </template>
 
 <style scoped>
-.container {
+.edit-container {
     display: flex;
     align-items: flex-start;
     gap: 20px;
@@ -172,31 +172,31 @@ function back() {
     padding: 0 1rem;
 }
 
-.pfp-container {
+.edit-pfp-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
     align-items: center;
 }
 
-.pfp {
+.edit-pfp {
     width: 250px;
     height: 250px;
     border-radius: 50%;
     object-fit: cover;
 }
 
-.user {
+.edit-user {
     display: flex;
     align-items: flex-start;
-    background-color: #98c1d9;
+    background-color: var(--color-medium);
     padding: 20px 30px;
     border-radius: 10px;
     gap: 80px;
     width: 100%;
 }
 
-.left {
+.edit-left {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -217,7 +217,7 @@ function back() {
     resize: vertical;
 }
 
-.right {
+.edit-right {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -225,7 +225,7 @@ function back() {
 
 .btn {
     padding: 10px 20px;
-    background-color: #3d5a80;
+    background-color: var(--color-dark);
     color: white;
     border: none;
     border-radius: 10px;
@@ -234,7 +234,7 @@ function back() {
 }
 
 @media (max-width: 600px) {
-    .container {
+    .edit-container {
         flex-direction: column;
         align-items: center;
         text-align: center;
@@ -243,7 +243,7 @@ function back() {
         padding: 0 1rem;
     }
 
-    .user {
+    .edit-user {
         flex-direction: column;
         gap: 20px;
         width: 100%;
@@ -251,11 +251,11 @@ function back() {
         padding: 20px;
     }
 
-    .left {
+    .edit-left {
         align-items: center;
     }
 
-    .right {
+    .edit-right {
         width: 100%;
         align-items: center;
     }
@@ -265,7 +265,7 @@ function back() {
         max-width: 250px;
     }
 
-    .pfp {
+    .edit-pfp {
         width: 180px;
         height: 180px;
     }

@@ -13,6 +13,7 @@ const editPage = ref(false)
 
 const userName = ref('User Name')
 const userDescription = ref('This is a brief user description.')
+const subscribers = ref(0)
 const userImage = ref('')
 const router = useRouter()
 const route = useRoute()
@@ -35,6 +36,21 @@ function upload() {
 
 function edit() {
     router.push('/edituser')
+}
+
+function subscribe() {
+    if (props.id !== undefined && props.id !== "") {
+        const params = new URLSearchParams();
+        params.append('id', props.id);
+
+        console.log(params);
+
+        fetch(`${ENV.API_DOMAIN}/user/subscribe?${params}`, {
+            method: 'GET',
+            credentials: 'include',
+            cache: 'no-store',
+        })
+    }
 }
 
 async function logout() {
@@ -92,6 +108,7 @@ async function loadProfile() {
         const data = await res.json()
         userName.value = data.user.displayname
         userDescription.value = data.user.bio
+        subscribers.value = data.subscribers
     } catch (err) {
         console.error('Network error while loading profile:', err)
     }
@@ -127,20 +144,24 @@ async function loadProfilePicture() {
 </script>
 
 <template>
-    <div class="container">
-        <img :src="userImage" alt="Profile Picture" class="pfp"/>
-        <div class="user">
-            <div class="left">
+    <div class="edit-container">
+        <img :src="userImage" alt="Profile Picture" class="edit-pfp"/>
+        <div class="edit-user">
+            <div class="edit-left">
                 <h1>{{ userName }}</h1>
                 <p id="descr">
                     {{ userDescription }}
                 </p>
+                <p id="subscribers">
+                    {{ subscribers }} Subscribers
+                </p>
             </div>
 
-            <div class="right">
+            <div class="edit-right">
                 <button v-if="!uploadPage && (props.id === '' || props.id === undefined)" class="btn" @click="upload">Upload Video</button>
                 <button class="btn" v-if="(props.id === '' || props.id === undefined)" @click="edit">Edit Account</button>
                 <button class="btn" v-if="(props.id === '' || props.id === undefined)" @click="logout()">Logout</button>
+                <button class="btn" v-if="props.id !== '' && props.id !== undefined" @click="subscribe()">Subscribe</button>
             </div>
         </div>
     </div>
@@ -156,7 +177,7 @@ async function loadProfilePicture() {
 </template>
 
 <style scoped>
-.pfp {
+.edit-pfp {
     width: 250px;
     height: 250px;
     aspect-ratio: 1/1;
@@ -164,7 +185,7 @@ async function loadProfilePicture() {
     object-fit: cover;
 }
 
-.container {
+.edit-container {
     display: flex;
     align-items: center;
     gap: 20px;
@@ -173,17 +194,23 @@ async function loadProfilePicture() {
     padding: 0 1rem;
 }
 
-.user {
+.edit-user {
     display: flex;
     align-items: center;
-    background-color: #98c1d9;
+    background-color: var(--color-medium);
     padding: 20px 30px;
     border-radius: 10px;
     gap: 80px;
 }
 
+#subscribers {
+    padding: 0;
+    margin: 0;
+    font-size: 1em;
+    font-weight: bold;
+}
 
-.left h1 {
+.edit-left h1 {
     font-weight: bold;
     font-size: clamp(2rem, 4vw, 4rem);
     margin: 0;
@@ -194,7 +221,7 @@ async function loadProfilePicture() {
     margin: 10px 0;
 }
 
-.right {
+.edit-right {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -202,7 +229,7 @@ async function loadProfilePicture() {
 
 .btn {
     padding: 10px 20px;
-    background-color: #3d5a80;
+    background-color: var(--color-dark);
     color: white;
     border: none;
     border-radius: 10px;
@@ -231,7 +258,7 @@ async function loadProfilePicture() {
 }
 
 @media (max-width: 600px) {
-    .container {
+    .edit-container {
         flex-direction: column;
         align-items: center;
         text-align: center;
@@ -240,7 +267,7 @@ async function loadProfilePicture() {
         padding: 0 1rem;
     }
 
-    .user {
+    .edit-user {
         flex-direction: column;
         gap: 20px;
         width: 100%;
@@ -248,13 +275,13 @@ async function loadProfilePicture() {
         padding: 20px;
     }
 
-    .left {
+    .edit-left {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
-    .right {
+    .edit-right {
         width: 100%;
         align-items: center;
     }
@@ -264,7 +291,7 @@ async function loadProfilePicture() {
         max-width: 250px;
     }
 
-    .pfp {
+    .edit-pfp {
         width: 180px;
         height: 180px;
     }

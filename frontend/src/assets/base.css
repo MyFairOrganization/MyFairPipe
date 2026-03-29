@@ -27,6 +27,12 @@
     --color-background-soft: #e0fbfc;
     --color-background-mute: #e0fbfc;
 
+    --color-light: #e0fbfc;
+    --color-orange: #ee6c4d;
+    --color-medium: #98c1d9;
+    --color-dark: #3d5a80;
+    --color-grey: #293241;
+
     --color-border: var(--vt-c-divider-light-2);
     --color-border-hover: var(--vt-c-divider-light-1);
 

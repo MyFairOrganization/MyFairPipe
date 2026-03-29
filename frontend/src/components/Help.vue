@@ -1,10 +1,10 @@
 <template>
     <div class="help-page">
-        <section class="hero">
+        <section class="header">
             <h1>MyFairPipe Help-Center</h1>
         </section>
 
-        <section class="content">
+        <section class="help-content">
             <h2>Common issues</h2>
             <p>
                 After uploading a video, the video might not appear on the Homepage at first.
@@ -31,34 +31,27 @@
     line-height: 1.6;
 }
 
-.hero {
+.header {
     text-align: center;
     margin-bottom: 2.5rem;
 }
 
-.hero h1 {
+.header h1 {
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
 }
 
-.tagline {
-    font-size: 2rem;
-    color: #666;
-}
-
-.content h2 {
+.help-content h2 {
     margin-top: 2rem;
     margin-bottom: 0.5rem;
     font-weight: bold;
     font-size: 1.5rem;
 }
 
-.content p {
+.help-content p {
     margin-bottom: 1rem;
     font-size: 1rem;
     color: #333;
 }
 </style>
-<script setup lang="ts">
-</script>

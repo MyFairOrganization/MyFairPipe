@@ -48,13 +48,13 @@ async function loadMore() {
     border-radius: 10px;
     width: 80%;
     margin: 20px auto;
-    background-color: #3D5A80;
+    background-color: var(--color-dark);
     color: white;
     padding: 10px;
 }
 
 #more:hover {
-    background-color: #98c1d9;
+    background-color: var(--color-medium);
     color: black;
 }
 

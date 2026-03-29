@@ -58,31 +58,31 @@ const login = () => {
 </script>
 
 <template>
-    <div class="page">
-        <div class="card">
-            <h1 class="title">Sign in</h1>
-            <form class="form" @submit.prevent="login">
-                <label class="label" for="email">E-Mail:</label>
+    <div class="login-page">
+        <div class="login-card">
+            <h1 class="login-title">Sign in</h1>
+            <form class="login-form" @submit.prevent="login">
+                <label class="login-label" for="email">E-Mail:</label>
                 <input
                     id="email"
                     v-model.trim="email"
                     autocomplete="email"
-                    class="input"
+                    class="login-input"
                     placeholder="E-Mail"
                     type="email"
                 />
 
-                <label class="label" for="password">Password:</label>
+                <label class="login-label" for="password">Password:</label>
                 <input
                     id="password"
                     v-model="password"
                     autocomplete="current-password"
-                    class="input"
+                    class="login-input"
                     placeholder="Password"
                     type="password"
                 />
 
-                <p @click="goToRegister">Don't have an account? Register here</p>
+                <p class="register-link" @click="goToRegister">Don't have an account? Register here</p>
 
                 <button class="btn" type="submit">Sign in</button>
                 <div v-if="errorMessage" style="color: red; margin-top: 10px">
@@ -94,8 +94,8 @@ const login = () => {
 </template>
 
 <style scoped>
-.page {
-    background-color: #e0fbfc;
+.login-page {
+    background-color: var(--color-light);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -103,7 +103,7 @@ const login = () => {
     padding-top: 3rem;
 }
 
-.card {
+.login-card {
     max-width: 400px;
     width: 100%;
     margin: 2rem auto;
@@ -113,7 +113,7 @@ const login = () => {
     background-color: white;
 }
 
-.title {
+.login-title {
     font-size: 28px;
     line-height: 1.2;
     margin-bottom: 1.5rem;
@@ -121,7 +121,7 @@ const login = () => {
     color: #111827;
 }
 
-.label {
+.login-label {
     display: block;
     margin-bottom: 0.5rem;
     font-size: 15px;
@@ -129,7 +129,7 @@ const login = () => {
     color: #374151;
 }
 
-.input {
+.login-input {
     width: 100%;
     padding: 0.5rem;
     box-sizing: border-box;
@@ -139,14 +139,14 @@ const login = () => {
     font-size: 14px;
 }
 
-.input::placeholder {
+.login-input::placeholder {
     color: #9aa4b2;
 }
 
 .btn {
     padding: 0.5rem 1rem;
     margin-top: 0.5rem;
-    background-color: #293241;
+    background-color: var(--color-grey);
     color: white;
     border: none;
     border-radius: 4px;
@@ -158,7 +158,7 @@ const login = () => {
     background-color: #1f2833;
 }
 
-p {
+.register-link {
     margin-top: 0.5rem;
     color: #1f2833;
     font-size: 14px;
@@ -167,11 +167,11 @@ p {
 }
 
 @media (max-width: 520px) {
-    .page {
+    .login-page {
         padding-top: 2rem;
     }
 
-    .card {
+    .login-card {
         padding: 1.5rem;
     }
 }

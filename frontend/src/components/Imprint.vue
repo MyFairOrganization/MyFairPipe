@@ -1,6 +1,6 @@
 <template>
     <div class="imprint-page">
-        <section class="hero">
+        <section class="header">
             <h1>Imprint (Impressum)</h1>
         </section>
 
@@ -62,12 +62,12 @@
     line-height: 1.6;
 }
 
-.hero {
+.header {
     text-align: center;
     margin-bottom: 2.5rem;
 }
 
-.hero h1 {
+.header h1 {
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 0.5rem;

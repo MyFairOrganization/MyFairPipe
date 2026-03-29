@@ -305,7 +305,7 @@ async function submitForm() {
 </template>
 
 <style scoped>
-.pfp {
+.edit-pfp {
     width: 250px;
     height: 250px;
     border-radius: 50%;
@@ -319,19 +319,19 @@ async function submitForm() {
     padding-left: 10%;
 }
 
-.user {
+.edit-user {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 900px;
     height: 250px;
-    background-color: #98c1d9;
+    background-color: var(--color-medium);
     padding: 20px 30px;
     border-radius: 10px;
     gap: 20px;
 }
 
-.left h1 {
+.edit-left h1 {
     font-weight: bold;
     font-size: 4em;
     margin: 0;
@@ -346,13 +346,13 @@ async function submitForm() {
     margin-top: 5px;
     padding: 10px 20px;
     background-color: transparent;
-    color: #293241;
-    border: 1px solid #293241;
+    color: var(--color-grey);
+    border: 1px solid var(--color-grey);
     border-radius: 20px;
     cursor: pointer;
 }
 
-.right {
+.edit-right {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -360,7 +360,7 @@ async function submitForm() {
 
 .btn {
     padding: 10px 20px;
-    background-color: #3d5a80;
+    background-color: var(--color-dark);
     color: white;
     border: none;
     border-radius: 10px;
@@ -391,7 +391,7 @@ async function submitForm() {
 
 .upload {
     padding: 10px 20px;
-    background-color: #3d5a80;
+    background-color: var(--color-dark);
     color: white;
     border: none;
     border-radius: 5px;
@@ -410,13 +410,13 @@ async function submitForm() {
 
 .video-preview video {
     aspect-ratio: 16 / 9;
-    background-color: #3D5A80;
+    background-color: var(--color-dark);
     border-radius: 10px;
 }
 
 .video-preview img {
     aspect-ratio: 16 / 9;
-    background-color: #3D5A80;
+    background-color: var(--color-dark);
     object-fit: contain;
     border-radius: 10px;
 }
@@ -451,7 +451,7 @@ async function submitForm() {
 
 .progress-fill {
     height: 100%;
-    background-color: #3d5a80;
+    background-color: var(--color-dark);
     transition: width 0.3s ease;
 }
 </style>
